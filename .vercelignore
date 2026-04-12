@@ -1,0 +1,10 @@
+*.rar
+*.zip
+*.7z
+carros_temp/
+logos carros/
+.netlify/
+node_modules/
+*.sql
+*.tmp
+*.bak

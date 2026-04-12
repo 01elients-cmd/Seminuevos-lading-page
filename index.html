@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="theme-color" content="#ffffff">
+    <title>SemiNuevos | Concesionario Premium de Vehículos</title>
+    <meta name="description"
+        content="SemiNuevos - Tu concesionario premium de confianza. Compra, consigue y accede a los mejores vehículos seminuevos e importados de marcas líderes.">
+    <meta name="keywords"
+        content="concesionario, autos seminuevos, vehículos importados, compra de autos, importación vehicular, dealer premium">
+    <meta property="og:title" content="SemiNuevos | Concesionario Premium de Vehículos">
+    <meta property="og:description"
+        content="Tu concesionario de confianza. La mejor experiencia de compra y venta de vehículos premium.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;700&family=Mina:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#inicio" class="nav-logo">
+                <img src="images/logo-white.png" alt="SemiNuevos Logo"
+                    style="height: 96px; width: auto; max-height: 96px;">
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#inicio" class="nav-link active">INICIO</a></li>
+                <li><a href="#catalogo" class="nav-link">CATÁLOGO</a></li>
+                <li><a href="#beneficios" class="nav-link">BENEFICIOS</a></li>
+                <li><a href="#nosotros" class="nav-link">NOSOTROS</a></li>
+                <li><a href="#contacto" class="nav-link">CONTACTO</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="#contacto" class="nav-cta">
+                    <i class="fab fa-whatsapp"></i> Contacto
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== SOCIAL SIDEBAR ===== -->
+    <div class="social-sidebar">
+        <a href="#" class="social-icon" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-icon" title="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="https://www.instagram.com/seminuevosagency/" target="_blank" class="social-icon" title="Instagram"><i
+                class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon" title="YouTube"><i class="fab fa-youtube"></i></a>
+    </div>
+
+    <!-- ===== FLOATING WHATSAPP ===== -->
+    <a href="https://wa.me/584147977832?text=Hola,%20quiero%20información%20sobre%20un%20vehículo"
+        class="whatsapp-float" target="_blank" title="Contáctanos por WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero" id="inicio">
+        <div class="hero-slider" id="heroSlider">
+            <div class="hero-slide active" style="background-image: url('images/hero1.png')">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <span class="hero-tag">CONCESIONARIO PREMIUM</span>
+                    <h1 class="hero-title">TU PRÓXIMO DESTINO<br><span class="text-accent">LO DECIDES TÚ</span></h1>
+                    <p class="hero-subtitle">Nosotros garantizamos el camino.</p>
+                    <div class="hero-buttons">
+                        <a href="#catalogo" class="btn btn-primary">
+                            <i class="fas fa-car"></i> Ver Catálogo
+                        </a>
+                        <a href="#contacto" class="btn btn-outline">
+                            <i class="fab fa-whatsapp"></i> Contáctanos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-slide" style="background-image: url('images/hero2.png')">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <span class="hero-tag">ATENCIÓN PERSONALIZADA</span>
+                    <h1 class="hero-title">EXPLORA NUEVOS<br><span class="text-accent">HORIZONTES</span></h1>
+                    <p class="hero-subtitle">Con la seguridad de un respaldo total.</p>
+                    <div class="hero-buttons">
+                        <a href="#catalogo" class="btn btn-primary">
+                            <i class="fas fa-car"></i> Explorar
+                        </a>
+                        <a href="#contacto" class="btn btn-outline">
+                            <i class="fas fa-search"></i> Consultar Modelo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-slide" style="background-image: url('images/hero3.png')">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <span class="hero-tag">COMPRA, CONSIGUE, ACCEDE</span>
+                    <h1 class="hero-title">TECNOLOGÍA DE<br><span class="text-accent">VANGUARDIA</span></h1>
+                    <p class="hero-subtitle">Para una conducción sin límites.</p>
+                    <div class="hero-buttons">
+                        <a href="#catalogo" class="btn btn-primary">
+                            <i class="fas fa-car-side"></i> Ver Opciones
+                        </a>
+                        <a href="#nosotros" class="btn btn-outline">
+                            <i class="fas fa-info-circle"></i> Conócenos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-controls">
+            <button class="hero-arrow hero-prev" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
+            <div class="hero-dots" id="heroDots"></div>
+            <button class="hero-arrow hero-next" id="heroNext"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="hero-scroll-indicator">
+            <span>Desliza</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- ===== NUESTRA HISTORIA (Intro after Hero) ===== -->
+    <section class="about-section about-intro" id="nosotros">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-images">
+                    <div class="about-monogram-hero">
+                        <img src="images/monograma-final-3d.png?v=1.1" alt="SemiNuevos 3D" class="brand-monogram-3d">
+                    </div>
+                </div>
+                <div class="about-content">
+                    <div class="about-header-flow">
+                        <span class="section-tag">NUESTRA HISTORIA</span>
+                        <div class="experience-pill">
+                            <span class="pill-number">6</span>
+                            <span class="pill-text">AÑOS DE EXPERIENCIA</span>
+                        </div>
+                    </div>
+                    <h2 class="section-title">¿POR QUÉ NACE <span class="text-accent">SEMINUEVOS</span>?</h2>
+                    <p class="about-text">SemiNuevos Agency nace de una necesidad real: ofrecer opciones de compra
+                        de
+                        vehículos con un soporte genuino de pre-venta y post-venta en un país con un parque
+                        automotor
+                        antiguo y detenido. Queríamos que cada cliente sepa exactamente qué carro compra, qué
+                        esperar de
+                        él, y que tenga precios y opciones reales para acceder a su vehículo.</p>
+                    <p class="about-text">Nuestra alianza con <strong>MT GROUP</strong> nos permite brindar un
+                        ecosistema integral que incluye soporte especializado de <strong>MasterTech</strong>,
+                        acceso directo a repuestos con <strong>MT Parts</strong> y servicio estético premium en
+                        <strong>MT Wash</strong>. A diferencia de un 0KM sin respaldo de marca, con SemiNuevos tu
+                        vehículo tiene
+                        soporte técnico real, acompañamiento aduanal y legal — proceso 100% completo con llaves y
+                        documentación en mano.
+                    </p>
+                    <div class="about-values">
+                        <div class="value-item">
+                            <i class="fas fa-brain"></i>
+                            <div>
+                                <strong>Asesoría Experta</strong>
+                                <p>Infraestructura de compras y logística integral</p>
+                            </div>
+                        </div>
+                        <div class="value-item">
+                            <i class="fas fa-wrench"></i>
+                            <div>
+                                <strong>Alianza MT GROUP</strong>
+                                <p>Ecosistema de servicio integral</p>
+                            </div>
+                        </div>
+                        <div class="value-item">
+                            <i class="fas fa-file-shield"></i>
+                            <div>
+                                <strong>Proceso Completo</strong>
+                                <p>Técnico, aduanal y legal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BRAND LOGOS MARQUEE ===== -->
+    <section class="brands-section">
+        <div class="brands-marquee">
+            <div class="brands-track" id="brandsTrack">
+                <div class="brand-item"><img src="images/brands/Toyota_logo_(Red).svg.png" alt="Toyota"></div>
+                <div class="brand-item"><img src="images/brands/Honda.svg.png" alt="Honda"></div>
+                <div class="brand-item"><img src="images/brands/Nissan_2020_logo.svg" alt="Nissan"></div>
+                <div class="brand-item"><img src="images/brands/jeep-logo-1.png" alt="Jeep"></div>
+                <div class="brand-item"><img src="images/brands/dodge-logo-png-transparent.png" alt="Dodge"></div>
+                <div class="brand-item"><img src="images/brands/INFINITI_Logo_Primary_Black.png" alt="Infiniti"></div>
+                <div class="brand-item"><img src="images/brands/logo-Hyundai.png" alt="Hyundai"></div>
+                <div class="brand-item"><img src="images/brands/Kia-logo.png" alt="Kia"></div>
+                <!-- Duplicated for infinite scroll -->
+                <div class="brand-item"><img src="images/brands/Toyota_logo_(Red).svg.png" alt="Toyota"></div>
+                <div class="brand-item"><img src="images/brands/Honda.svg.png" alt="Honda"></div>
+                <div class="brand-item"><img src="images/brands/Nissan_2020_logo.svg" alt="Nissan"></div>
+                <div class="brand-item"><img src="images/brands/jeep-logo-1.png" alt="Jeep"></div>
+                <div class="brand-item"><img src="images/brands/dodge-logo-png-transparent.png" alt="Dodge"></div>
+                <div class="brand-item"><img src="images/brands/INFINITI_Logo_Primary_Black.png" alt="Infiniti"></div>
+                <div class="brand-item"><img src="images/brands/logo-Hyundai.png" alt="Hyundai"></div>
+                <div class="brand-item"><img src="images/brands/Kia-logo.png" alt="Kia"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== STATS BAR ===== -->
+    <section class="stats-bar">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="100">0</span><span class="stat-suffix">+</span>
+                    <span class="stat-label">Vehículos Vendidos</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="98">0</span><span class="stat-suffix">%</span>
+                    <span class="stat-label">Clientes Satisfechos</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="6">0</span><span class="stat-suffix"></span>
+                    <span class="stat-label">Años de Experiencia</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="46">0</span><span class="stat-suffix">+</span>
+                    <span class="stat-label">Vehículos en Stock</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CATALOG NAV TABS ===== -->
+    <section class="catalog-nav-section" id="catalogo">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">NUESTRO INVENTARIO</span>
+                <h2 class="section-title">COMPRA, CONSIGUE, <span class="text-accent">ACCEDE</span></h2>
+                <p class="section-subtitle">Descubre nuestra selección de vehículos premium cuidadosamente
+                    inspeccionados</p>
+            </div>
+            <div class="catalog-main-tabs" id="catalogMainTabs">
+                <button class="catalog-main-tab active" data-section="seminuevos">
+                    <i class="fas fa-bolt"></i>
+                    <span>Semi Nuevo: Stock Local</span>
+                    <small>Entrega Inmediata</small>
+                </button>
+                <button class="catalog-main-tab" data-section="porpedido">
+                    <i class="fas fa-ship"></i>
+                    <span>Semi Nuevo: Por Pedido</span>
+                    <small>Importación</small>
+                </button>
+                <button class="catalog-main-tab" data-section="0km">
+                    <i class="fas fa-star"></i>
+                    <span>0KM</span>
+                    <small>Stock y/o Pedido</small>
+                </button>
+            </div>
+            <!-- Sort dropdown -->
+            <div class="catalog-sort-bar">
+                <select id="catalogSort" class="sort-select">
+                    <option value="default">Ordenar por...</option>
+                    <option value="price_asc">Precio: Menor a Mayor</option>
+                    <option value="price_desc">Precio: Mayor a Menor</option>
+                    <option value="year_desc">Año: Más reciente</option>
+                    <option value="year_asc">Año: Más antiguo</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SEMINUEVOS SECTION ===== -->
+    <section class="catalog-section catalog-panel active" id="seminuevos-panel">
+        <div class="container">
+            <div class="catalog-section-header">
+                <div class="catalog-section-info">
+                    <h3 class="catalog-section-title"><i class="fas fa-bolt"></i> Semi Nuevo: Stock Local</h3>
+                    <span class="availability-badge available"><i class="fas fa-bolt"></i> Entrega Inmediata</span>
+                </div>
+                <p class="catalog-section-desc">Vehículos inspeccionados y certificados, listos para entrega inmediata.
+                </p>
+            </div>
+            <div class="catalog-filters-container">
+                <div class="catalog-filters" id="seminuevosFilters">
+                    <button class="filter-btn active" data-filter="todos">Todos</button>
+                    <button class="filter-btn" data-filter="sedan">Sedán</button>
+                    <button class="filter-btn" data-filter="suv">SUV</button>
+                    <button class="filter-btn" data-filter="pickup">Pickup</button>
+                </div>
+                <select id="seminuevosBrandFilter" class="brand-filter-select">
+                    <option value="todos">Marca (Todas)</option>
+                    <option value="toyota">Toyota</option>
+                    <option value="lexus">Lexus</option>
+                    <option value="honda">Honda</option>
+                    <option value="acura">Acura</option>
+                    <option value="nissan">Nissan</option>
+                    <option value="infiniti">Infiniti</option>
+                    <option value="jeep">Jeep</option>
+                    <option value="dodge">Dodge</option>
+                    <option value="ram">RAM</option>
+                    <option value="chrysler">Chrysler</option>
+                    <option value="hyundai">Hyundai</option>
+                    <option value="kia">Kia</option>
+                </select>
+            </div>
+            <div class="vehicle-grid" id="seminuevosGrid"></div>
+        </div>
+    </section>
+
+    <!-- ===== POR PEDIDO SECTION ===== -->
+    <section class="catalog-section catalog-panel" id="porpedido-panel">
+        <div class="container">
+            <div class="catalog-section-header">
+                <div class="catalog-section-info">
+                    <h3 class="catalog-section-title"><i class="fas fa-ship"></i> Semi Nuevo: Por Pedido</h3>
+                    <span class="availability-badge order"><i class="fas fa-clock"></i> Importación</span>
+                </div>
+                <p class="catalog-section-desc">Vehículos seminuevos importados desde USA con logística integral y
+                    soporte MasterTech.</p>
+            </div>
+            <div class="catalog-filters-container">
+                <div class="catalog-filters" id="porpedidoFilters">
+                    <button class="filter-btn active" data-filter="todos">Todos</button>
+                    <button class="filter-btn" data-filter="sedan">Sedán</button>
+                    <button class="filter-btn" data-filter="suv">SUV</button>
+                    <button class="filter-btn" data-filter="pickup">Pickup</button>
+                </div>
+                <select id="porpedidoBrandFilter" class="brand-filter-select">
+                    <option value="todos">Marca (Todas)</option>
+                    <option value="toyota">Toyota</option>
+                    <option value="lexus">Lexus</option>
+                    <option value="honda">Honda</option>
+                    <option value="acura">Acura</option>
+                    <option value="nissan">Nissan</option>
+                    <option value="infiniti">Infiniti</option>
+                    <option value="jeep">Jeep</option>
+                    <option value="dodge">Dodge</option>
+                    <option value="ram">RAM</option>
+                    <option value="chrysler">Chrysler</option>
+                    <option value="hyundai">Hyundai</option>
+                    <option value="kia">Kia</option>
+                </select>
+            </div>
+            <div class="vehicle-grid" id="porpedidoGrid"></div>
+            <div class="import-notice">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>¿Cómo funciona la importación?</strong>
+                    <p>Contamos con infraestructura de compras y logística integral en USA. Adquirimos vehículos a
+                        través de dealers, redes de distribución y, como una de nuestras opciones, subastas
+                        certificadas. El precio incluye costo base + movilización, flete, aduana, impuestos y
+                        documentación. Recibes tu vehículo con llaves y papeles en mano, con soporte técnico de
+                        MasterTech.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 0KM SECTION ===== -->
+    <section class="catalog-section catalog-panel" id="zerokm-panel">
+        <div class="container">
+            <div class="catalog-section-header">
+                <div class="catalog-section-info">
+                    <h3 class="catalog-section-title"><i class="fas fa-star"></i> 0KM: Stock y/o Pedido</h3>
+                    <span class="availability-badge order"><i class="fas fa-star"></i> Importación</span>
+                </div>
+                <p class="catalog-section-desc">Vehículos cero kilómetros disponibles en stock o por pedido directo.</p>
+            </div>
+            <div class="catalog-filters-container">
+                <div class="catalog-filters" id="zerokmFilters">
+                    <button class="filter-btn active" data-filter="todos">Todos</button>
+                    <button class="filter-btn" data-filter="sedan">Sedán</button>
+                    <button class="filter-btn" data-filter="suv">SUV</button>
+                    <button class="filter-btn" data-filter="pickup">Pickup</button>
+                </div>
+                <select id="zerokmBrandFilter" class="brand-filter-select">
+                    <option value="todos">Marca (Todas)</option>
+                    <option value="toyota">Toyota</option>
+                    <option value="lexus">Lexus</option>
+                    <option value="honda">Honda</option>
+                    <option value="acura">Acura</option>
+                    <option value="nissan">Nissan</option>
+                    <option value="infiniti">Infiniti</option>
+                    <option value="jeep">Jeep</option>
+                    <option value="dodge">Dodge</option>
+                    <option value="ram">RAM</option>
+                    <option value="chrysler">Chrysler</option>
+                    <option value="hyundai">Hyundai</option>
+                    <option value="kia">Kia</option>
+                </select>
+            </div>
+            <div class="vehicle-grid" id="zerokmGrid"></div>
+        </div>
+    </section>
+
+
+    <!-- Catalog CTA -->
+    <section class="catalog-cta-section">
+        <div class="container">
+            <div class="catalog-cta">
+                <a href="#contacto" class="btn btn-primary btn-lg">
+                    <i class="fab fa-whatsapp"></i> ¿No encuentras lo que buscas? Escríbenos
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== LEGAL TRANSPARENCY SECTION ===== -->
+    <section class="legal-transparency-section">
+        <div class="container">
+            <div class="legal-transparency-box">
+                <div class="legal-transparency-header">
+                    <i class="fas fa-scale-balanced"></i> Transparencia Legal: Estatus del Vehículo
+                </div>
+                <div class="legal-transparency-grid">
+                    <div class="legal-item">
+                        <h4>Puerto Libre</h4>
+                        <p>Vehículo para circular únicamente en la Isla de Margarita. Se puede usar en tierra firme con
+                            un permiso temporal (solicitado en el ente responsable). Opción a nacionalizar a los 3 años
+                            pagando una fracción del precio.</p>
+                    </div>
+                    <div class="legal-item national">
+                        <h4>Nacional</h4>
+                        <p>Vehículo que entra directamente al mercado nacional. Puede circular por el territorio
+                            nacional sin restricciones adicionales.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== COST CALCULATOR SECTION ===== -->
+    <section class="calculator-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">ESTIMADOR DE COSTOS</span>
+                <h2 class="section-title">CALCULADORA <span class="text-accent">POR PEDIDO</span></h2>
+                <p class="section-subtitle">Transparencia total. Calcula el costo aproximado de traer tu vehículo desde
+                    USA.</p>
+            </div>
+
+            <div class="calculator-wrapper">
+                <div class="calculator-inputs">
+                    <div class="form-group">
+                        <label for="calcStatus">Estatus del vehículo</label>
+                        <select id="calcStatus" class="calc-select">
+                            <option value="puerto_libre">Puerto Libre</option>
+                            <option value="nacional">Nacional</option>
+                        </select>
+                    </div>
+                    <div id="calcNacionalNotice" class="calc-nacional-notice" style="display:none;">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Para vehículos de estatus Nacional, favor <strong>consultar directamente</strong> con un
+                            asesor para una cotización personalizada.</span>
+                    </div>
+                    <div id="calcFieldsPL">
+                        <div class="form-group">
+                            <label for="calcBaseCost">Costo de compra del vehículo ($)</label>
+                            <input type="number" id="calcBaseCost" placeholder="Ej. 15000">
+                        </div>
+                        <div class="form-group">
+                            <label for="calcState">Ubicación del vehículo (USA)</label>
+                            <select id="calcState" class="calc-select">
+                                <option value="0">Florida (Local)</option>
+                                <option value="450">Georgia / South Carolina</option>
+                                <option value="700">North Carolina / Alabama</option>
+                                <option value="1100">Texas / Illinois / Louisiana</option>
+                                <option value="1250">New York / New Jersey / Penn</option>
+                                <option value="2500">California / Washington / Oregon</option>
+                                <option value="1500">Otros Estados (Medio Oeste)</option>
+                            </select>
+                            <p style="font-size: 0.7rem; color: var(--outline); margin-top: 4px;">Selecciona el estado
+                                de origen. El sistema calcula $1 por milla aproximada hasta Florida.</p>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="calcRepairs">
+                            <label for="calcRepairs">Incluir repuestos adicionales requeribles</label>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="calcMaintenanceKit">
+                            <label for="calcMaintenanceKit">Add-on: Kit de servicio de mantenimientos (+$300)</label>
+                        </div>
+                        <button class="btn btn-primary" id="btnCalculateCost">Calcular Total <i
+                                class="fas fa-calculator"></i></button>
+                    </div>
+                </div>
+                <div class="calculator-results" id="calcResults">
+                    <div class="calc-row"><span>Costo de Compra</span><span id="resBase">$0</span></div>
+                    <div class="calc-row"><span>Tarifa de Compra</span><span id="resBuyFee">$500</span></div>
+                    <div class="calc-row"><span>Oferta Internet</span><span id="resInternetFee">$100</span></div>
+                    <div class="calc-row"><span>Ambientales</span><span id="resEnvFee">$25</span></div>
+                    <div class="calc-row"><span>Título</span><span id="resTitleFee">$25</span></div>
+                    <div class="calc-row"><span>Flete a Venezuela</span><span id="resFlete">$3,500</span></div>
+                    <div class="calc-row"><span>Gastos Aduanales</span><span id="resAduana">$3,500</span></div>
+                    <div class="calc-row"><span>Documentación legal en Vzla</span><span id="resDocVzla">$1,000</span>
+                    </div>
+                    <div class="calc-row"><span>Traslado Interno (USA)</span><span id="resTraslado">$0</span></div>
+                    <div class="calc-row"><span>Repuestos adicionales requeribles</span><span id="resRepuesto">$0</span>
+                    </div>
+                    <div class="calc-row"><span>Kit de mantenimiento</span><span id="resKit">$0</span></div>
+                    <div class="calc-divider"></div>
+                    <div class="calc-row total"><span>PRECIO TOTAL APROX.</span><span id="resTotal"
+                            class="text-accent">$0</span></div>
+                </div>
+            </div>
+            <p class="calculator-legal-notice">
+                <i class="fas fa-exclamation-triangle"></i>
+                Los números son aproximados y varían en múltiples factores como tipo de vehículo, año, modelo,
+                motorización, ubicación exacta, condiciones del vehículo, entre otros.
+            </p>
+        </div>
+    </section>
+
+    <!-- ===== SERVICES SECTION ===== -->
+    <section class="services-section" id="beneficios">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">ECOSISTEMA INTEGRAL</span>
+                <h2 class="section-title">NUESTROS <span class="text-accent">BENEFICIOS POSTVENTA</span></h2>
+                <p class="section-subtitle">Asesoría experta, soporte técnico y acompañamiento completo de la mano de
+                    MasterTech</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card featured">
+                    <div class="service-badge">NUEVO</div>
+                    <div class="service-icon">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <h3 class="service-title">2 Años de Garantía Electrónica</h3>
+                    <p class="service-desc">Disfruta de <strong>2 años de revisiones y chequeos electrónicos
+                            gratis</strong> en nuestro centro de servicio MasterTech. Total tranquilidad para tu
+                        inversión
+                        tecnológica.</p>
+                    <a href="#contacto" class="service-link">Consultar <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-badge">NUEVO</div>
+                    <div class="service-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="service-title">Trade In (Programa de Retoma)</h3>
+                    <p class="service-desc">Recibimos tu vehículo Seminuevo como parte de pago para adquirir un 0KM u
+                        otro Seminuevo superior.</p>
+                    <p style="font-size: 0.75rem; color: var(--outline); margin-top: 5px;">*Ciertas condiciones aplican
+                        (Tasado previo e historial de mantenimiento impecable en MasterTech).</p>
+                    <a href="#contacto" class="service-link">Tasá tu auto <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <h3 class="service-title">Soporte Técnico MasterTech</h3>
+                    <p class="service-desc">Disponible para atenciones de mantenimientos, reparaciones y servicios
+                        completos a toda la gama de vehículos importados.</p>
+                    <button class="service-link open-info-modal" data-info="mastertech"
+                        style="background:none; border:none; cursor:pointer;">Conocer más <i
+                            class="fas fa-arrow-right"></i></button>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                    <h3 class="service-title">MT Part Store</h3>
+                    <p class="service-desc">Acceso inmediato y amplio stock de repuestos originales y lubricantes de la
+                        mejor calidad para los vehículos importados. También con servicio de contra pedido.</p>
+                    <a href="#contacto" class="service-link">Ver Catálogo / IG <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-droplet"></i>
+                    </div>
+                    <h3 class="service-title">MT Wash</h3>
+                    <p class="service-desc">Servicio de lavado y estética profesional para mantener tu vehículo
+                        impecable por tiempos prolongados. Tratamiento premium.</p>
+                    <button class="service-link open-info-modal" data-info="mtwash"
+                        style="background:none; border:none; cursor:pointer;">Más info <i
+                            class="fas fa-arrow-right"></i></button>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="service-title">Programa de Lealtad</h3>
+                    <p class="service-desc">Genera puntos en MasterTech y obtén un porcentaje (%) de <strong>descuento
+                            directo</strong> en repuestos, mano de obra y accesorios.</p>
+                    <a href="#contacto" class="service-link">Únete <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== LIVE AUCTION PORTAL ===== -->
+    <section class="auction-portal-section" id="subastas">
+        <div class="container">
+            <div class="auction-portal-card">
+                <div class="auction-portal-info">
+                    <span class="section-tag" style="color: #ff5252;"><i class="fas fa-gavel"></i> ACCESO A SUBASTAS EN
+                        VIVO</span>
+                    <h2 class="section-title" style="margin-bottom: 10px;">Puja <span
+                            class="text-accent">Directamente</span></h2>
+                    <p class="section-subtitle" style="margin-bottom: 20px; font-size: 1rem; text-align: left;">¿Viste
+                        un lote interesante en Copart, IAAI o Manheim? Pega el enlace de la subasta o el VIN y dinos
+                        cuánto estás dispuesto a pagar. Nuestro equipo especializado pujará por ti en tiempo real
+                        protegiendo tu capital.</p>
+                    <ul style="list-style: none; padding: 0; color: var(--on-surface-variant); margin-bottom: 30px;">
+                        <li style="margin-bottom: 15px;"><i class="fas fa-check"
+                                style="color: var(--primary); margin-right: 10px;"></i> Pujas automatizadas exactas
+                            hasta tu límite</li>
+                        <li style="margin-bottom: 15px;"><i class="fas fa-check"
+                                style="color: var(--primary); margin-right: 10px;"></i> Informe de viabilidad/Carfax
+                            previo</li>
+                        <li><i class="fas fa-check" style="color: var(--primary); margin-right: 10px;"></i> Pagos
+                            claros, sin márgenes ocultos</li>
+                    </ul>
+                </div>
+
+                <div class="auction-portal-form">
+                    <div class="form-group">
+                        <label for="auctionLink">Enlace del Lote (Copart/IAAI) o VIN</label>
+                        <input type="text" id="auctionLink" placeholder="ej. https://www.copart.com/lot/12345678">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <label for="auctionMaxBid">Tu Puja Máxima Estimada (USD)</label>
+                        <input type="number" id="auctionMaxBid" placeholder="$10,000">
+                    </div>
+                    <button id="btnSubmitBid" class="btn btn-primary"
+                        style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 16px;">
+                        <i class="fab fa-whatsapp" style="font-size: 1.3rem;"></i> Enviar Puja a un Asesor
+                    </button>
+                    <p style="font-size: 0.75rem; color: var(--outline); margin-top: 15px; text-align: center;">Para
+                        confirmar y habilitar la puja en la subasta en vivo se requerirá un depósito de seguridad del
+                        10% del valor de tu oferta.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PROCESO DE COMPRA (HOW IT WORKS) ===== -->
+    <section class="purchase-process-section" id="como-funciona"
+        style="background: var(--surface-dim); padding: var(--space-16) 0;">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">CÓMO FUNCIONA</span>
+                <h2 class="section-title">NUESTRO <span class="text-accent">PROCESO DE COMPRA</span></h2>
+                <p class="section-subtitle">Términos, pasos y condiciones respaldados legalmente con total
+                    transparencia. Compra o participa en subastas directamente.</p>
+            </div>
+
+            <div class="process-grid">
+                <div class="process-card" style="animation-delay: 0.1s;">
+                    <div class="process-number">01</div>
+                    <div class="process-icon"><i class="fas fa-search"></i></div>
+                    <h3>Búsqueda y Elección</h3>
+                    <p>Explora nuestro catálogo o dinos qué auto sueñas. Evaluamos subastas (Copart, IAAI, Manheim) y
+                        pujamos bajo tu presupuesto.</p>
+                </div>
+                <div class="process-card" style="animation-delay: 0.2s;">
+                    <div class="process-number">02</div>
+                    <div class="process-icon"><i class="fas fa-file-circle-check"></i></div>
+                    <h3>Verificación Técnica</h3>
+                    <p>Revisamos historiales (CarFax) y el respaldo técnico de <strong>MasterTech</strong> asegura que
+                        no existan sorpresas mecánicas.</p>
+                </div>
+                <div class="process-card" style="animation-delay: 0.3s;">
+                    <div class="process-number">03</div>
+                    <div class="process-icon"><i class="fas fa-ship"></i></div>
+                    <h3>Logística y Aduana</h3>
+                    <p>Nos encargamos del flete marítimo, trámites arancelarios y liberación aduanal en el puerto de
+                        llegada.</p>
+                </div>
+                <div class="process-card" style="animation-delay: 0.4s;">
+                    <div class="process-number">04</div>
+                    <div class="process-icon"><i class="fas fa-key"></i></div>
+                    <h3>Entrega Garantizada</h3>
+                    <p>Recibe tu vehículo listo para circular. Incluimos <strong>2 años de garantía electrónica</strong>
+                        para tu total tranquilidad.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS CAROUSEL ===== -->
+    <section class="testimonials-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">TESTIMONIOS</span>
+                <h2 class="section-title">LO QUE DICEN NUESTROS <span class="text-accent">CLIENTES</span></h2>
+            </div>
+            <div class="testimonials-carousel" id="testimonialsCarousel">
+                <button class="carousel-arrow carousel-prev" id="testimonialPrev"><i
+                        class="fas fa-chevron-left"></i></button>
+                <div class="carousel-track-wrapper">
+                    <div class="carousel-track" id="testimonialTrack">
+                        <div class="testimonial-card carousel-slide">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"Excelente experiencia de compra. El equipo de SemiNuevo me
+                                ayudó a encontrar exactamente lo que buscaba y el proceso fue muy rápido."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">CM</div>
+                                <div><strong>Carlos Martínez</strong><span>Toyota Hilux 2023</span></div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card carousel-slide">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"Excelente logística y comunicación. Importé el auto de mis
+                                sueños y me lo entregaron listo sin preocuparme por aduanas ni grúas. 100%
+                                recomendados."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">AR</div>
+                                <div><strong>Ana Rodríguez</strong><span>Mazda CX-5 2024</span></div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card carousel-slide">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"Compré un Jeep Wrangler a través de ellos. Todo transparente y
+                                profesional. El soporte de MasterTech para el mantenimiento es un plus enorme."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">JL</div>
+                                <div><strong>José López</strong><span>Jeep Wrangler 2023</span></div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card carousel-slide">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"Desde la asesoría hasta la entrega, todo fue impecable. Mi
+                                Honda HR-V llegó en perfectas condiciones y con todos los papeles en regla."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">MG</div>
+                                <div><strong>María González</strong><span>Honda HR-V 2025</span></div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card carousel-slide">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"El estimador de costos me dio confianza total. Sabía
+                                exactamente cuánto iba a invertir antes de empezar el proceso. Muy profesionales."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">RP</div>
+                                <div><strong>Roberto Pérez</strong><span>Hyundai Tucson 2023</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-arrow carousel-next" id="testimonialNext"><i
+                        class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="carousel-dots" id="testimonialDots"></div>
+        </div>
+    </section>
+
+    <!-- ===== FAQs SECTION ===== -->
+    <section class="faq-section" id="faqs">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">PREGUNTAS FRECUENTES</span>
+                <h2 class="section-title">RESOLVEMOS TUS <span class="text-accent">DUDAS</span></h2>
+                <p class="section-subtitle">Información clara para que tomes la mejor decisión</p>
+            </div>
+            <div class="faq-list" style="max-width: 800px; margin: 0 auto;">
+                <details class="faq-item" open>
+                    <summary class="faq-question"><i class="fas fa-wrench"></i> ¿Quién hace la reparación?</summary>
+                    <div class="faq-answer">
+                        <p>Todas las reparaciones, mantenimientos y chequeos técnicos se realizan en nuestro
+                            <strong>Centro de Servicio MasterTech</strong>, ubicado en Porlamar. Contamos con
+                            infraestructura profesional especializada en las nuevas tecnologías vehiculares de marcas
+                            importadas. Cada vehículo pasa por una revisión exhaustiva antes de la entrega.
+                        </p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question"><i class="fas fa-clock"></i> ¿Qué tiempo toma el proceso completo?
+                    </summary>
+                    <div class="faq-answer">
+                        <p>El tiempo varía según el tipo de servicio:</p>
+                        <ul>
+                            <li><strong>Stock Local (Entrega Inmediata):</strong> 1-3 días hábiles para la documentación
+                                y entrega.</li>
+                            <li><strong>Por Pedido (Importación):</strong> Entre 4 a 8 semanas aproximadamente,
+                                dependiendo de la ubicación del vehículo en USA, logística marítima y proceso aduanal.
+                            </li>
+                            <li><strong>0KM por Pedido:</strong> Entre 6 a 10 semanas, dependiendo de la disponibilidad
+                                y ubicación del concesionario en USA.</li>
+                        </ul>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question"><i class="fas fa-credit-card"></i> ¿Cuáles son los métodos de pago?
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Aceptamos múltiples métodos de pago para tu comodidad:</p>
+                        <ul>
+                            <li>Transferencias bancarias nacionales e internacionales</li>
+                            <li>Pago en dólares en efectivo</li>
+                            <li>Zelle y Binance (criptomonedas)</li>
+                            <li>Pagos fraccionados coordinados con el equipo de ventas</li>
+                        </ul>
+                        <p>Para pedidos de importación, se requiere un depósito de seguridad inicial. Consulta con un
+                            asesor para los detalles específicos.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question"><i class="fas fa-shield-halved"></i> ¿Qué garantía tienen los
+                        vehículos?</summary>
+                    <div class="faq-answer">
+                        <p>Todos los vehículos adquiridos a través de SemiNuevos incluyen <strong>2 años de garantía
+                                electrónica</strong> con revisiones y chequeos gratuitos en MasterTech. Adicionalmente,
+                            ofrecemos soporte técnico continuo para mantenimientos y reparaciones.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question"><i class="fas fa-truck"></i> ¿Hacen envíos a todo el país?</summary>
+                    <div class="faq-answer">
+                        <p>Nuestra base de operaciones está en Porlamar, Isla de Margarita. Podemos coordinar envíos a
+                            tierra firme. Los vehículos con estatus <strong>Puerto Libre</strong> circulan en Margarita,
+                            mientras que los de estatus <strong>Nacional</strong> pueden circular por el territorio
+                            nacional.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT SECTION ===== -->
+    <section class="contact-section" id="contacto">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <span class="section-tag">CONTÁCTANOS</span>
+                    <h2 class="section-title">ESTAMOS PARA <span class="text-accent">AYUDARTE</span></h2>
+                    <p class="contact-desc">¿Tienes alguna pregunta? ¿Quieres agendar una visita? Nuestro equipo está
+                        listo para atenderte.</p>
+
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <div>
+                                <strong>Dirección</strong>
+                                <p>Porlamar, Isla de Margarita, Venezuela</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                            <div>
+                                <strong>Teléfono / WhatsApp</strong>
+                                <p>+58 414-797-7832</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <strong>Email</strong>
+                                <p>info@seminuevosagency.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <strong>Horario</strong>
+                                <p>Lun - Sáb: 9:00 AM - 7:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="https://wa.me/584147977832?text=Hola,%20quiero%20información"
+                        class="btn btn-whatsapp btn-lg" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Escríbenos por WhatsApp
+                    </a>
+                </div>
+                <div class="contact-form-wrapper">
+                    <form class="contact-form" id="contactForm">
+                        <h3 class="form-title">Envíanos un mensaje</h3>
+                        <div class="form-group">
+                            <input type="text" id="formName" placeholder="Tu nombre completo" required>
+                            <label for="formName">Nombre</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="formPhone" placeholder="Tu número de teléfono" required>
+                            <label for="formPhone">Teléfono</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="formEmail" placeholder="tu@email.com" required>
+                            <label for="formEmail">Email</label>
+                        </div>
+                        <div class="form-group">
+                            <select id="formService" required>
+                                <option value="">Selecciona un servicio</option>
+                                <option value="comprar">Quiero comprar un vehículo</option>
+                                <option value="vender">Quiero hacer retoma o vender</option>
+                                <option value="tramites">Trámites y gestión</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <label for="formService">Servicio</label>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="formMessage" placeholder="Cuéntanos en qué podemos ayudarte..."
+                                rows="4"></textarea>
+                            <label for="formMessage">Mensaje</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-paper-plane"></i> Enviar Mensaje
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#inicio" class="nav-logo">
+                        <img src="images/logo-white.png" alt="SemiNuevos Logo" style="height: 80px; width: auto;">
+                    </a>
+                    <p class="footer-desc">Tu concesionario de confianza. Los mejores vehículos seminuevos y nuevos con
+                        garantía y transparencia total.</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/seminuevosagency/" target="_blank" title="Instagram"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Links Rápidos</h4>
+                    <a href="#inicio">Inicio</a>
+                    <a href="#catalogo">Catálogo</a>
+                    <a href="#beneficios">Beneficios</a>
+                    <a href="#nosotros">Nosotros</a>
+                    <a href="#contacto">Contacto</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ecosistema</h4>
+                    <a href="#beneficios">Soporte MasterTech</a>
+                    <a href="#beneficios">MT Part Store</a>
+                    <a href="#beneficios">Garantía Electrónica</a>
+                    <a href="#beneficios">Programa de Retoma</a>
+                    <a href="#beneficios">Programa de Lealtad</a>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contacto</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Porlamar, Isla de Margarita, Venezuela</p>
+                    <p><i class="fas fa-phone"></i> +58 414-797-7832</p>
+                    <p><i class="fas fa-envelope"></i> info@seminuevosagency.com</p>
+                    <p><i class="fas fa-clock"></i> Lun - Sáb: 9AM - 7PM</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 SemiNuevo. Todos los derechos reservados.</p>
+                <div class="footer-legal">
+                    <a href="#">Política de Privacidad</a>
+                    <a href="#">Términos y Condiciones</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== VEHICLE DETAIL MODAL ===== -->
+    <div class="modal-overlay" id="vehicleModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <div class="modal-slider" id="modalSlider">
+                        <!-- Images injected dynamically -->
+                    </div>
+                    <button class="modal-gallery-arrow modal-gallery-prev" id="modalPrev"><i
+                            class="fas fa-chevron-left"></i></button>
+                    <button class="modal-gallery-arrow modal-gallery-next" id="modalNext"><i
+                            class="fas fa-chevron-right"></i></button>
+                    <div class="modal-gallery-counter" id="modalCounter">1 / 1</div>
+                    <div class="modal-gallery-dots" id="modalDots"></div>
+                </div>
+                <div class="modal-info">
+                    <span class="modal-tag" id="modalCategory"></span>
+                    <h2 id="modalTitle"></h2>
+                    <p class="modal-price" id="modalPrice"></p>
+                    <div class="modal-specs" id="modalSpecs"></div>
+                    <p class="modal-description" id="modalDescription"></p>
+                    <a id="modalWhatsapp" href="#" class="btn btn-whatsapp btn-lg btn-block" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Cotiza tu vehículo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== INFO MODAL (For Benefits) ===== -->
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-content" style="max-width: 500px; padding: 40px;">
+            <button class="modal-close" id="infoModalClose"><i class="fas fa-times"></i></button>
+            <div id="infoModalIcon"
+                style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; text-align: center;"></div>
+            <h2 id="infoModalTitle" class="section-title"
+                style="font-size: 1.8rem; margin-bottom: 15px; text-align: center;"></h2>
+            <div id="infoModalBody" class="about-text" style="font-size: 0.95rem; margin-bottom: 30px;"></div>
+            <div class="modal-actions" style="border-top: 1px solid var(--ghost-border); padding-top: 20px;">
+                <a href="#contacto" class="btn btn-primary btn-block" id="infoModalCta">
+                    <i class="fab fa-whatsapp"></i> Consultar Ahora
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

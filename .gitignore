@@ -1,0 +1,13 @@
+.netlify
+.vercel
+node_modules
+carros_temp/
+logos carros/
+*.rar
+*.zip
+*.psd
+*.tmp
+*.mp4
+*.mov
+*.avi
+.env

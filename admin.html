@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SemiNuevos | Panel de Administración</title>
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Mina:wght@400;700&family=Unbounded:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            /* Surface Hierarchy */
+            --bg: #000000;
+            --bg2: #050505;
+            --bg3: #0a0a0a;
+            --text: #ffffff;
+            --text2: #B2B2B2;
+            --text3: #888888;
+            --accent: #275CEA;
+            --accent-light: #4d7aef;
+            --border: rgba(178, 178, 178, 0.1);
+            --border-accent: rgba(39, 92, 234, 0.2);
+            --gradient: linear-gradient(135deg, #275CEA 0%, #1b45b8 100%);
+            --radius: 16px;
+            --radius-md: 12px;
+            --radius-full: 100px;
+            --success: #25D366;
+            --danger: #ffb4ab;
+            --glow: 0 0 30px rgba(39, 92, 234, 0.15);
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Mina', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        /* AUTH SCREEN */
+        .auth-screen {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px
+        }
+
+        .auth-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 48px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center
+        }
+
+        .auth-card h1 {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 8px
+        }
+
+        .auth-card p {
+            color: var(--text2);
+            font-size: .9rem;
+            margin-bottom: 30px
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: 'Mina', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            outline: none;
+            transition: all .2s
+        }
+
+        .auth-input:focus {
+            border-color: var(--accent)
+        }
+
+        .auth-error {
+            color: var(--danger);
+            font-size: .85rem;
+            margin-bottom: 14px;
+            display: none
+        }
+
+        /* LAYOUT */
+        .admin-layout {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            min-height: 100vh
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 28px;
+            min-height: 100vh
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: var(--radius);
+            color: var(--text2);
+            font-weight: 500;
+            font-size: .9rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: left
+        }
+
+        .sidebar-link:hover {
+            background: rgba(255, 255, 255, .04);
+            color: var(--text)
+        }
+
+        .sidebar-link.active {
+            background: rgba(39, 92, 234, .1);
+            color: var(--accent);
+            border: 1px solid var(--border-accent)
+        }
+
+        .sidebar-link i {
+            width: 20px;
+            text-align: center
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 12px 0
+        }
+
+        .sidebar-user {
+            padding: 14px;
+            background: var(--bg3);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .85rem
+        }
+
+        .sidebar-user .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .7rem;
+            color: var(--bg)
+        }
+
+        .sidebar-user .user-info {
+            flex: 1
+        }
+
+        .sidebar-user .user-name {
+            font-weight: 600;
+            color: var(--text)
+        }
+
+        .sidebar-user .user-role {
+            color: var(--text3);
+            font-size: .75rem
+        }
+
+        /* HEADER */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 14px
+        }
+
+        .page-title {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 800;
+            font-size: 1.6rem
+        }
+
+        .page-title span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 600;
+            font-size: .85rem;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--bg)
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(39, 92, 234, .3)
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text2)
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .btn-sm {
+            padding: 7px 14px;
+            font-size: .8rem
+        }
+
+        .btn-block {
+            width: 100%
+        }
+
+        /* STATS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px
+        }
+
+        .stat-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all .3s
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-accent)
+        }
+
+        .stat-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(39, 92, 234, .1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            margin-bottom: 12px
+        }
+
+        .stat-card-value {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin-bottom: 2px
+        }
+
+        .stat-card-label {
+            font-size: .82rem;
+            color: var(--text2)
+        }
+
+        /* TABLE */
+        .table-container {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px
+        }
+
+        .table-header h3 {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .table-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            padding: 8px 16px;
+            width: 220px
+        }
+
+        .table-search input {
+            background: none;
+            border: none;
+            color: var(--text);
+            outline: none;
+            width: 100%;
+            font-size: .85rem
+        }
+
+        .table-search i {
+            color: var(--text3);
+            font-size: .85rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        th {
+            padding: 12px 22px;
+            text-align: left;
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 600;
+            font-size: .78rem;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, .02);
+            border-bottom: 1px solid var(--border)
+        }
+
+        td {
+            padding: 14px 22px;
+            border-bottom: 1px solid var(--border);
+            font-size: .9rem;
+            vertical-align: middle
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .vehicle-row-img {
+            width: 60px;
+            height: 42px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: var(--bg3)
+        }
+
+        .vehicle-row-info {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .vehicle-row-name {
+            font-weight: 600;
+            font-size: .92rem
+        }
+
+        .vehicle-row-cat {
+            font-size: .72rem;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .5px
+        }
+
+        .badge-gold {
+            background: rgba(39, 92, 234, .15);
+            color: var(--accent)
+        }
+
+        .badge-green {
+            background: rgba(39, 174, 96, .15);
+            color: var(--success)
+        }
+
+        .badge-red {
+            background: rgba(231, 76, 60, .15);
+            color: var(--danger)
+        }
+
+        .badge-blue {
+            background: rgba(52, 152, 219, .15);
+            color: #3498db
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--text2);
+            cursor: pointer;
+            transition: all .2s;
+            font-size: .82rem
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(39, 92, 234, .05)
+        }
+
+        .action-btn.delete:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(231, 76, 60, .05)
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text3)
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 14px;
+            display: block
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px
+        }
+
+        .modal-overlay.active {
+            display: flex
+        }
+
+        .modal {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .modal-header h2 {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem
+        }
+
+        .modal-close {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--text2);
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .modal-close:hover {
+            border-color: var(--danger);
+            color: var(--danger)
+        }
+
+        .modal-body {
+            padding: 22px
+        }
+
+        .modal-footer {
+            padding: 18px 22px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .form-group.full {
+            grid-column: 1/-1
+        }
+
+        .form-label {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--text2);
+            letter-spacing: .5px
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 12px 14px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: 'Mina', sans-serif;
+            font-size: .9rem;
+            outline: none;
+            transition: all .2s
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--accent)
+        }
+
+        .form-textarea {
+            min-height: 90px;
+            resize: vertical
+        }
+
+        /* IMAGE UPLOAD */
+        .image-upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .3s;
+            background: rgba(255, 255, 255, .02);
+            position: relative
+        }
+
+        .image-upload-zone:hover,
+        .image-upload-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(39, 92, 234, .05)
+        }
+
+        .image-upload-zone i {
+            font-size: 1.8rem;
+            color: var(--text3);
+            margin-bottom: 8px;
+            display: block
+        }
+
+        .image-upload-zone p {
+            color: var(--text2);
+            font-size: .82rem
+        }
+
+        .image-upload-zone small {
+            color: var(--text3);
+            font-size: .72rem
+        }
+
+        .image-upload-zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer
+        }
+
+        .image-previews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px
+        }
+
+        .image-preview-item {
+            position: relative;
+            width: 85px;
+            height: 64px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .image-preview-item:hover {
+            border-color: var(--accent)
+        }
+
+        .image-preview-item.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(39, 92, 234, .3)
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover
+        }
+
+        .image-preview-item .img-preview-actions {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            left: 2px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .image-preview-item .img-preview-actions button {
+            pointer-events: auto;
+        }
+
+        .image-preview-item .remove-img {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            font-size: .55rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-preview-item .cover-img-btn {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: .55rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .image-preview-item .cover-img-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .image-preview-item .cover-badge {
+            background: var(--accent);
+            color: #000;
+            font-size: 0.5rem;
+            font-weight: 800;
+            padding: 2px 4px;
+            border-radius: 4px;
+            pointer-events: auto;
+        }
+
+        .image-preview-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--accent);
+        }
+
+        /* IMAGE EDITOR */
+        .image-editor-panel {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-top: 12px
+        }
+
+        .editor-canvas-wrap {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            max-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .editor-canvas-wrap canvas {
+            max-width: 100%;
+            max-height: 280px;
+            display: block
+        }
+
+        .editor-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px
+        }
+
+        .editor-slider-row label {
+            min-width: 80px;
+            font-size: .78rem;
+            color: var(--text2);
+            font-weight: 600
+        }
+
+        .editor-slider-row input[type=range] {
+            flex: 1;
+            accent-color: var(--accent)
+        }
+
+        .editor-slider-row span {
+            min-width: 36px;
+            text-align: right;
+            font-size: .78rem;
+            color: var(--accent);
+            font-weight: 600
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .editor-actions .btn {
+            flex: 1
+        }
+
+        /* INQUIRIES */
+        .inquiry-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: all .2s
+        }
+
+        .inquiry-card:hover {
+            border-color: var(--border-accent)
+        }
+
+        .inquiry-card .inquiry-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .inquiry-card .inquiry-name {
+            font-weight: 700;
+            font-size: 1rem
+        }
+
+        .inquiry-card .inquiry-date {
+            color: var(--text3);
+            font-size: .78rem
+        }
+
+        .inquiry-card .inquiry-body {
+            color: var(--text2);
+            font-size: .9rem;
+            line-height: 1.6
+        }
+
+        .inquiry-card .inquiry-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap
+        }
+
+        .inquiry-card .inquiry-meta span {
+            font-size: .78rem;
+            color: var(--text3);
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        /* SETTINGS */
+        .settings-section {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px
+        }
+
+        .settings-section h3 {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.05rem
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: .9rem;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all .3s
+        }
+
+        .toast.active {
+            transform: translateY(0);
+            opacity: 1
+        }
+
+        .toast-success {
+            background: var(--success);
+            color: #fff
+        }
+
+        .toast-error {
+            background: var(--danger);
+            color: #fff
+        }
+
+        /* INFO */
+        .info-banner {
+            background: rgba(39, 92, 234, .06);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px
+        }
+
+        .info-banner i {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-top: 2px
+        }
+
+        .info-banner p {
+            color: var(--text2);
+            font-size: .88rem;
+            line-height: 1.6
+        }
+
+        .info-banner strong {
+            color: var(--text)
+        }
+
+        /* CODE */
+        .code-preview {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .code-header h3 {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            font-size: .95rem
+        }
+
+        .code-body {
+            padding: 18px;
+            font-family: 'Courier New', monospace;
+            font-size: .78rem;
+            color: var(--accent-light);
+            line-height: 1.8;
+            max-height: 350px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all
+        }
+
+        .tab-content {
+            display: none
+        }
+
+        .tab-content.active {
+            display: block
+        }
+
+        @media(max-width:768px) {
+            .sidebar {
+                display: none
+            }
+
+            .main-content {
+                margin-left: 0
+            }
+
+            .form-grid,
+            .settings-grid {
+                grid-template-columns: 1fr
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        /* ANIMATED BACKGROUND ORBS */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(120px);
+            opacity: 0.3;
+        }
+
+        body::before {
+            top: -20%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: rgba(39, 92, 234, 0.06);
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+
+        body::after {
+            bottom: -20%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(191, 205, 255, 0.04);
+            animation: orbFloat 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes orbFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(50px, -30px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-30px, 50px) scale(0.9);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- AUTH SCREEN -->
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-card">
+            <div style="margin-bottom: 24px;">
+                <img src="images/logo-white.png" alt="SemiNuevos Logo" style="height: 120px; width: auto;">
+            </div>
+            <h1>Panel de Administración</h1>
+            <p>Ingresa con tu cuenta para gestionar el inventario</p>
+            <div class="auth-error" id="authError"></div>
+            <input type="email" class="auth-input" id="authEmail" placeholder="Email">
+            <input type="password" class="auth-input" id="authPassword" placeholder="Contraseña">
+            <button class="btn btn-primary btn-block" id="authLogin" style="padding:14px;font-size:1rem">
+                <i class="fas fa-lock"></i> Iniciar Sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-layout" id="adminPanel" style="display:none">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="images/logo-white.png" alt="SemiNuevos Logo" style="height: 64px; width: auto;">
+            </div>
+            <nav class="sidebar-nav">
+                <button class="sidebar-link active" data-tab="vehicles"><i class="fas fa-car"></i> Vehículos</button>
+                <button class="sidebar-link" data-tab="inquiries"><i class="fas fa-envelope"></i> Consultas</button>
+                <button class="sidebar-link" data-tab="settings"><i class="fas fa-cog"></i> Configuración</button>
+                <div class="sidebar-divider"></div>
+                <button class="sidebar-link" data-tab="export"><i class="fas fa-code"></i> Exportar Datos</button>
+                <button class="sidebar-link" data-tab="help"><i class="fas fa-question-circle"></i> Ayuda</button>
+            </nav>
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-user">
+                <div class="avatar">AD</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Admin</div>
+                    <div class="user-role">Administrador</div>
+                </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="logoutBtn" style="margin-top:12px;width:100%"><i
+                    class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            <a href="index.html" class="btn btn-ghost btn-sm"
+                style="margin-top:8px;width:100%;text-decoration:none;text-align:center"><i
+                    class="fas fa-arrow-left"></i> Volver al sitio</a>
+        </aside>
+
+        <main class="main-content">
+            <!-- VEHICLES TAB -->
+            <div class="tab-content active" id="tab-vehicles">
+                <div class="page-header">
+                    <h1 class="page-title">Gestión de <span>Vehículos</span></h1>
+                    <button class="btn btn-primary" id="addVehicleBtn"><i class="fas fa-plus"></i> Agregar
+                        Vehículo</button>
+                </div>
+                <div class="stats-row" id="statsRow"></div>
+
+                <div class="admin-catalog-tabs"
+                    style="display:flex; gap:10px; margin-bottom:20px; overflow-x:auto; padding-bottom:5px;">
+                    <button class="btn btn-primary admin-tab-btn active" data-cat="todos"><i class="fas fa-list"></i>
+                        Todos</button>
+                    <button class="btn btn-ghost admin-tab-btn" data-cat="seminuevos"><i class="fas fa-bolt"></i> Semi
+                        Nuevo: Stock Local</button>
+                    <button class="btn btn-ghost admin-tab-btn" data-cat="importados"><i class="fas fa-ship"></i> Semi
+                        Nuevo: Por Pedido</button>
+                    <button class="btn btn-ghost admin-tab-btn" data-cat="0km"><i class="fas fa-star"></i> 0KM</button>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3 id="adminTableTitle"><i class="fas fa-list"></i> Inventario Completo</h3>
+                        <div class="table-search"><i class="fas fa-search"></i><input type="text"
+                                placeholder="Buscar equipo..." id="searchInput"></div>
+                    </div>
+                    <div id="vehicleTableBody"></div>
+                </div>
+            </div>
+
+            <!-- INQUIRIES TAB -->
+            <div class="tab-content" id="tab-inquiries">
+                <div class="page-header">
+                    <h1 class="page-title">Consultas de <span>Clientes</span></h1>
+                    <button class="btn btn-ghost" id="refreshInquiries"><i class="fas fa-sync-alt"></i>
+                        Actualizar</button>
+                </div>
+                <div id="inquiriesList"></div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div class="tab-content" id="tab-settings">
+                <div class="page-header">
+                    <h1 class="page-title"><span>Configuración</span> del Sitio</h1>
+                </div>
+                <div class="settings-section">
+                    <h3><i class="fas fa-building"></i> Información de la Empresa</h3>
+                    <div class="settings-grid">
+                        <div class="form-group"><label class="form-label">WhatsApp</label><input type="text"
+                                class="form-input" id="sWhatsapp" placeholder="+58..."></div>
+                        <div class="form-group"><label class="form-label">Nombre</label><input type="text"
+                                class="form-input" id="sName"></div>
+                        <div class="form-group"><label class="form-label">Slogan</label><input type="text"
+                                class="form-input" id="sSlogan"></div>
+                        <div class="form-group"><label class="form-label">Dirección</label><input type="text"
+                                class="form-input" id="sAddress"></div>
+                        <div class="form-group"><label class="form-label">Horario</label><input type="text"
+                                class="form-input" id="sHours"></div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3><i class="fas fa-share-alt"></i> Redes Sociales</h3>
+                    <div class="settings-grid">
+                        <div class="form-group"><label class="form-label">Facebook</label><input type="text"
+                                class="form-input" id="sFacebook"></div>
+                        <div class="form-group"><label class="form-label">Instagram</label><input type="text"
+                                class="form-input" id="sInstagram"></div>
+                        <div class="form-group"><label class="form-label">TikTok</label><input type="text"
+                                class="form-input" id="sTiktok"></div>
+                        <div class="form-group"><label class="form-label">YouTube</label><input type="text"
+                                class="form-input" id="sYoutube"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="saveSettingsBtn"><i class="fas fa-save"></i> Guardar
+                    Configuración</button>
+            </div>
+
+            <!-- EXPORT TAB -->
+            <div class="tab-content" id="tab-export">
+                <div class="page-header">
+                    <h1 class="page-title">Exportar <span>Datos</span></h1><button class="btn btn-primary"
+                        id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar Código</button>
+                </div>
+                <div class="info-banner"><i class="fas fa-info-circle"></i>
+                    <p>Este código se genera automáticamente desde la base de datos. Copia y pega en
+                        <strong>data.js</strong> si necesitas un backup estático.
+                    </p>
+                </div>
+                <div class="code-preview">
+                    <div class="code-header">
+                        <h3><i class="fas fa-file-code"></i> data.js</h3>
+                    </div>
+                    <div class="code-body" id="codeOutput"></div>
+                </div>
+            </div>
+
+            <!-- HELP TAB -->
+            <div class="tab-content" id="tab-help">
+                <div class="page-header">
+                    <h1 class="page-title">Centro de <span>Ayuda</span></h1>
+                </div>
+                <div class="info-banner"><i class="fas fa-lightbulb"></i>
+                    <p><strong>Panel conectado a Base de Datos</strong><br>
+                        Este panel está conectado a Supabase. Todos los cambios se reflejan en la página
+                        automáticamente.<br><br>
+                        <strong>Vehículos:</strong> Agrega, edita y elimina vehículos. Las imágenes se suben al
+                        storage.<br>
+                        <strong>Consultas:</strong> Ve los mensajes de clientes que llegan por el formulario de
+                        contacto.<br>
+                        <strong>Configuración:</strong> Cambia WhatsApp, redes sociales y datos de la empresa.<br>
+                        <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
+                        <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
+                        <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
+                        <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VEHICLE FORM MODAL -->
+    <div class="modal-overlay" id="vehicleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar Vehículo</h2>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="vehicleForm">
+                    <div class="form-grid">
+                        <div class="form-group full"><label class="form-label">Nombre del Vehículo *</label><input
+                                type="text" class="form-input" id="vTitle" placeholder="Ej: Toyota Hilux SRV 4x4"
+                                required></div>
+                        <div class="form-group"><label class="form-label">Precio *</label><input type="text"
+                                class="form-input" id="vPrice" placeholder="Ej: $45,000" required></div>
+                        <div class="form-group"><label class="form-label">Año *</label><input type="number"
+                                class="form-input" id="vYear" placeholder="2024" required></div>
+                        <div class="form-group"><label class="form-label">Kilometraje</label><input type="text"
+                                class="form-input" id="vKm" placeholder="12,000 KM"></div>
+                        <div class="form-group"><label class="form-label">Motor</label><input type="text"
+                                class="form-input" id="vEngine" placeholder="2.8L Turbo"></div>
+                        <div class="form-group"><label class="form-label">Transmisión</label><select class="form-select"
+                                id="vTransmission">
+                                <option value="Automático">Automático</option>
+                                <option value="Manual">Manual</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Combustible</label><select class="form-select"
+                                id="vFuel">
+                                <option value="Gasolina">Gasolina</option>
+                                <option value="Diésel">Diésel</option>
+                                <option value="Híbrido">Híbrido</option>
+                                <option value="Eléctrico">Eléctrico</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Tipo de Carrocería</label><select
+                                class="form-select" id="vBodyType">
+                                <option value="suv">SUV</option>
+                                <option value="sedan">Sedán</option>
+                                <option value="pickup">Pickup</option>
+                                <option value="deportivo">Deportivo</option>
+                                <option value="coupe">Coupé</option>
+                                <option value="hatchback">Hatchback</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Catálogo *</label><select class="form-select"
+                                id="vCatalog">
+                                <option value="seminuevos">Stock Local (Seminuevos)</option>
+                                <option value="importados">Por Pedido (Importados)</option>
+                                <option value="0km">0KM</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Disponibilidad</label><select
+                                class="form-select" id="vAvailability">
+                                <option value="entrega_inmediata">Entrega Inmediata</option>
+                                <option value="por_pedido">Por Pedido</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Origen</label><select class="form-select"
+                                id="vOrigin">
+                                <option value="importado">Importado</option>
+                                <option value="nacional">Nacional</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Condición</label><select class="form-select"
+                                id="vCondition">
+                                <option value="seminuevo">Seminuevo</option>
+                                <option value="0km">0KM</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Badge</label><input type="text"
+                                class="form-input" id="vBadge" placeholder="PREMIUM, 🔥 EN OFERTA"></div>
+                        <div class="form-group"><label class="form-label">Estado</label><select class="form-select"
+                                id="vStatus">
+                                <option value="active">Activo</option>
+                                <option value="sold">Vendido</option>
+                                <option value="reserved">Reservado</option>
+                            </select></div>
+                        <div class="form-group full">
+                            <label class="form-label">Imágenes</label>
+                            <div class="image-upload-zone" id="imageUploadZone">
+                                <input type="file" id="vImageFiles" accept="image/*" multiple>
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Arrastra imágenes o <strong>haz clic</strong></p>
+                                <small>JPG, PNG, WebP · Máx 5</small>
+                            </div>
+                            <div class="image-previews" id="imagePreviews"></div>
+                            <div style="margin-top:8px"><label class="form-label"
+                                    style="font-size:.72rem;color:var(--text3)">O rutas manuales (separar con
+                                    coma):</label><input type="text" class="form-input" id="vImage"
+                                    placeholder="images/foto1.jpg, images/foto2.jpg"></div>
+                        </div>
+                        <div class="form-group full" id="imageEditorSection" style="display:none">
+                            <label class="form-label"><i class="fas fa-crop-alt"></i> Recortar Imagen</label>
+                            <div class="image-editor-panel"
+                                style="background:#0a0a0a; border-radius: var(--radius); padding:10px; margin-bottom:15px; text-align:center;">
+                                <div class="editor-canvas-wrap"
+                                    style="max-height: 400px; display: flex; justify-content: center; overflow: hidden;">
+                                    <img id="editorImage" src="" style="max-width:100%; display:block;">
+                                </div>
+                                <div class="editor-actions" style="margin-top:15px">
+                                    <button class="btn btn-ghost btn-sm" id="editorClearCrop" type="button"><i
+                                            class="fas fa-eraser"></i> Quitar Recorte</button>
+                                    <button class="btn btn-ghost btn-sm" id="editorReset" type="button"><i
+                                            class="fas fa-undo"></i> Reiniciar</button>
+                                    <button class="btn btn-primary btn-sm" id="editorApply" type="button"><i
+                                            class="fas fa-check"></i> Aplicar Recorte</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group full"><label class="form-label">Descripción</label><textarea
+                                class="form-textarea" id="vDescription"
+                                placeholder="Describe el vehículo..."></textarea></div>
+                    </div>
+                    <input type="hidden" id="vId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="modalCancel">Cancelar</button>
+                <button class="btn btn-primary" id="modalSave"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // ===== AUTH =====
+        const authScreen = document.getElementById('authScreen');
+        const adminPanel = document.getElementById('adminPanel');
+
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) { showAdmin(session.user); return true; }
+            authScreen.style.display = 'flex';
+            adminPanel.style.display = 'none';
+            return false;
+        }
+
+        function showAdmin(user) {
+            authScreen.style.display = 'none';
+            adminPanel.style.display = 'flex';
+            document.getElementById('userName').textContent = user.email?.split('@')[0] || 'Admin';
+        }
+
+        document.getElementById('authLogin').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const errEl = document.getElementById('authError');
+            if (!email || !password) { errEl.textContent = 'Completa todos los campos'; errEl.style.display = 'block'; return; }
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                console.error("Supabase Login Error:", error);
+                errEl.textContent = 'Credenciales incorrectas: ' + error.message;
+                errEl.style.display = 'block';
+                return;
+            }
+            showAdmin(data.user);
+            loadDashboard();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            authScreen.style.display = 'flex';
+            adminPanel.style.display = 'none';
+        });
+
+        // ===== VEHICLES CRUD =====
+        let vehicles = [];
+        let uploadedImages = [];
+        let currentEditIndex = -1;
+        let originalImageData = null;
+
+        async function loadVehicles() {
+            const { data, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
+            if (error) { showToast('Error cargando vehículos: ' + error.message, 'error'); return; }
+            vehicles = data || [];
+            renderStats();
+            renderTable();
+        }
+
+        function renderStats() {
+            const active = vehicles.filter(v => v.status === 'active').length;
+            const sold = vehicles.filter(v => v.status === 'sold').length;
+            const cats = {};
+            vehicles.forEach(v => { cats[v.catalog] = (cats[v.catalog] || 0) + 1; });
+            document.getElementById('statsRow').innerHTML = `
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-car"></i></div><div class="stat-card-value">${vehicles.length}</div><div class="stat-card-label">Total</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-check-circle"></i></div><div class="stat-card-value">${active}</div><div class="stat-card-label">Activos</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-handshake"></i></div><div class="stat-card-value">${sold}</div><div class="stat-card-label">Vendidos</div></div>
+                <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-globe-americas"></i></div><div class="stat-card-value">${cats['importados'] || 0}</div><div class="stat-card-label">Importados</div></div>
+            `;
+        }
+
+        let currentAdminCatalogFilter = 'todos';
+
+        document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentAdminCatalogFilter = btn.dataset.cat;
+                const titles = {
+                    'todos': '<i class="fas fa-list"></i> Inventario Completo',
+                    'seminuevos': '<i class="fas fa-bolt"></i> Semi Nuevo: Stock Local',
+                    'importados': '<i class="fas fa-ship"></i> Semi Nuevo: Por Pedido',
+                    '0km': '<i class="fas fa-star"></i> 0KM'
+                };
+                document.getElementById('adminTableTitle').innerHTML = titles[currentAdminCatalogFilter];
+                renderTable(document.getElementById('searchInput').value);
+            });
+        });
+
+        function renderTable(search = '') {
+            let filtered = search ? vehicles.filter(v => v.title.toLowerCase().includes(search.toLowerCase())) : vehicles;
+
+            if (currentAdminCatalogFilter !== 'todos') {
+                filtered = filtered.filter(v => v.catalog === currentAdminCatalogFilter);
+            }
+
+            if (!filtered.length) { document.getElementById('vehicleTableBody').innerHTML = `<div class="empty-state"><i class="fas fa-car"></i><p>No hay vehículos en esta categoría</p></div>`; return; }
+            const statusBadge = (s) => s === 'active' ? '<span class="badge badge-green">ACTIVO</span>' : s === 'sold' ? '<span class="badge badge-red">VENDIDO</span>' : '<span class="badge badge-blue">RESERVADO</span>';
+            const imgSrc = (v) => v.images?.length ? v.images[0] : (v.image || '');
+            let html = `<table><thead><tr><th>Vehículo</th><th>Precio</th><th>Catálogo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
+            filtered.forEach(v => {
+                html += `<tr>
+                    <td><div class="vehicle-row-info"><img src="${imgSrc(v)}" class="vehicle-row-img" onerror="this.style.background='var(--bg3)'"><div><div class="vehicle-row-name">${v.title}</div><div class="vehicle-row-cat">${v.year} · ${v.body_type || v.bodyType || ''}</div></div></div></td>
+                    <td style="color:var(--accent);font-weight:600">${v.price}</td>
+                    <td><span class="badge badge-gold">${(v.catalog || '').toUpperCase()}</span></td>
+                    <td>${statusBadge(v.status)}</td>
+                    <td><div class="action-btns"><button class="action-btn" onclick="editVehicle(${v.id})" title="Editar"><i class="fas fa-pen"></i></button><button class="action-btn delete" onclick="deleteVehicle(${v.id})" title="Eliminar"><i class="fas fa-trash"></i></button></div></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('vehicleTableBody').innerHTML = html;
+        }
+
+        // ===== MODAL =====
+        const modal = document.getElementById('vehicleModal');
+        function openModal(vehicle = null) {
+            uploadedImages = []; currentEditIndex = -1;
+            document.getElementById('imageEditorSection').style.display = 'none';
+            document.getElementById('imagePreviews').innerHTML = '';
+            if (vehicle) {
+                document.getElementById('modalTitle').textContent = 'Editar Vehículo';
+                document.getElementById('vId').value = vehicle.id;
+                document.getElementById('vTitle').value = vehicle.title;
+                document.getElementById('vPrice').value = vehicle.price;
+                document.getElementById('vYear').value = vehicle.year;
+                document.getElementById('vKm').value = vehicle.km || '';
+                document.getElementById('vEngine').value = vehicle.engine || '';
+                document.getElementById('vTransmission').value = vehicle.transmission || 'Automático';
+                document.getElementById('vFuel').value = vehicle.fuel || 'Gasolina';
+                document.getElementById('vBodyType').value = vehicle.body_type || vehicle.bodyType || 'suv';
+                document.getElementById('vCatalog').value = vehicle.catalog || 'seminuevos';
+                document.getElementById('vAvailability').value = vehicle.availability || 'entrega_inmediata';
+                document.getElementById('vOrigin').value = vehicle.origin || 'importado';
+                document.getElementById('vCondition').value = vehicle.condition || 'seminuevo';
+                document.getElementById('vBadge').value = vehicle.badge || '';
+                document.getElementById('vStatus').value = vehicle.status || 'active';
+                document.getElementById('vDescription').value = vehicle.description || '';
+
+                // Cargar imágenes existentes como miniaturas
+                document.getElementById('vImage').value = '';
+                (vehicle.images || []).forEach(imgSrc => {
+                    uploadedImages.push({ src: imgSrc, edited: null, isExisting: true });
+                });
+                renderImagePreviews();
+            } else {
+                document.getElementById('modalTitle').textContent = 'Agregar Vehículo';
+                document.getElementById('vehicleForm').reset();
+                document.getElementById('vId').value = '';
+            }
+            modal.classList.add('active');
+        }
+        function closeModal() { modal.classList.remove('active'); }
+
+        async function saveVehicle() {
+            const id = document.getElementById('vId').value;
+            let finalImgs = [];
+
+            // Subir o mantener imágenes
+            for (let i = 0; i < uploadedImages.length; i++) {
+                const data = uploadedImages[i].edited || uploadedImages[i].src;
+                if (data.startsWith('data:')) {
+                    const blob = await (await fetch(data)).blob();
+                    const fname = `vehicle-${Date.now()}-${i}.jpg`;
+                    const { data: upData, error } = await supabaseClient.storage.from('vehicle-images').upload(fname, blob, { contentType: 'image/jpeg' });
+                    if (!error) {
+                        const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
+                        finalImgs.push(urlData.publicUrl);
+                    }
+                } else {
+                    // Es un URL existente
+                    finalImgs.push(data);
+                }
+            }
+            // Add manual URLs too if they typed any
+            const manualImgs = document.getElementById('vImage').value.split(',').map(s => s.trim()).filter(Boolean);
+            manualImgs.forEach(m => {
+                if (!finalImgs.includes(m)) finalImgs.push(m);
+            });
+
+            const vehicleData = {
+                title: document.getElementById('vTitle').value,
+                price: document.getElementById('vPrice').value,
+                year: parseInt(document.getElementById('vYear').value),
+                km: document.getElementById('vKm').value || '0 KM',
+                engine: document.getElementById('vEngine').value,
+                transmission: document.getElementById('vTransmission').value,
+                fuel: document.getElementById('vFuel').value,
+                body_type: document.getElementById('vBodyType').value,
+                catalog: document.getElementById('vCatalog').value,
+                availability: document.getElementById('vAvailability').value,
+                origin: document.getElementById('vOrigin').value,
+                condition: document.getElementById('vCondition').value,
+                badge: document.getElementById('vBadge').value || null,
+                status: document.getElementById('vStatus').value,
+                images: finalImgs,
+                description: document.getElementById('vDescription').value
+            };
+            if (!vehicleData.title || !vehicleData.price || !vehicleData.year) { showToast('Completa los campos obligatorios', 'error'); return; }
+
+            if (id) {
+                const { error } = await supabaseClient.from('vehicles').update(vehicleData).eq('id', parseInt(id));
+                if (error) { showToast('Error: ' + error.message, 'error'); return; }
+                showToast('Vehículo actualizado', 'success');
+            } else {
+                const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
+                if (error) { showToast('Error: ' + error.message, 'error'); return; }
+                showToast('Vehículo agregado', 'success');
+            }
+            await loadVehicles();
+            if (window.parent) window.parent.postMessage("CargaBD", "*"); // trigger frontend refresh if framed
+            closeModal();
+        }
+
+        async function editVehicle(id) { const v = vehicles.find(v => v.id === id); if (v) openModal(v); }
+        async function deleteVehicle(id) {
+            if (!confirm('¿Eliminar este vehículo?')) return;
+            const { error } = await supabaseClient.from('vehicles').delete().eq('id', id);
+            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+            showToast('Vehículo eliminado', 'success');
+            await loadVehicles();
+        }
+
+        // ===== IMAGE UPLOAD & EDITOR =====
+        const uploadZone = document.getElementById('imageUploadZone');
+        const previewsEl = document.getElementById('imagePreviews');
+        uploadZone?.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone?.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone?.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+        document.getElementById('vImageFiles')?.addEventListener('change', e => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            Array.from(files).slice(0, 5 - uploadedImages.length).forEach(file => {
+                const r = new FileReader();
+                r.onload = e => { uploadedImages.push({ src: e.target.result, edited: null }); renderImagePreviews(); };
+                r.readAsDataURL(file);
+            });
+        }
+        function renderImagePreviews() {
+            previewsEl.innerHTML = '';
+            uploadedImages.forEach((img, i) => {
+                const div = document.createElement('div');
+                div.className = `image-preview-item ${i === currentEditIndex ? 'active' : ''}`;
+                div.draggable = true;
+                div.dataset.index = i;
+                div.innerHTML = `
+                    <img src="${img.edited || img.src}">
+                    <div class="img-preview-actions">
+                        ${i > 0 ? `<button class="cover-img-btn" type="button" onclick="setCover(${i})" title="Definir portada"><i class="fas fa-star"></i></button>` : `<div class="cover-badge" title="Portada del vehículo"><i class="fas fa-star"></i></div>`}
+                        <button class="remove-img" type="button" onclick="removeImage(${i})"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                div.addEventListener('click', e => { if (!e.target.closest('.img-preview-actions')) openImageEditor(i); });
+
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragend', handleDragEnd);
+
+                previewsEl.appendChild(div);
+            });
+        }
+
+        let dragStartIndex = -1;
+        function handleDragStart(e) { dragStartIndex = +this.dataset.index; e.dataTransfer.effectAllowed = 'move'; this.classList.add('dragging'); }
+        function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; }
+        function handleDrop(e) {
+            e.stopPropagation();
+            const dragEndIndex = +this.dataset.index;
+            if (dragStartIndex !== dragEndIndex && dragStartIndex >= 0) {
+                const item = uploadedImages.splice(dragStartIndex, 1)[0];
+                uploadedImages.splice(dragEndIndex, 0, item);
+                if (currentEditIndex === dragStartIndex) currentEditIndex = dragEndIndex;
+                else if (currentEditIndex === dragEndIndex) currentEditIndex = dragStartIndex;
+                renderImagePreviews();
+            }
+            return false;
+        }
+        function handleDragEnd(e) { this.classList.remove('dragging'); }
+        function setCover(i) {
+            if (i > 0) {
+                const item = uploadedImages.splice(i, 1)[0];
+                uploadedImages.unshift(item);
+                if (currentEditIndex === i) currentEditIndex = 0;
+                else if (currentEditIndex === 0) currentEditIndex = i;
+                renderImagePreviews();
+            }
+        }
+        function removeImage(i) { uploadedImages.splice(i, 1); if (currentEditIndex === i) { currentEditIndex = -1; document.getElementById('imageEditorSection').style.display = 'none'; } renderImagePreviews(); }
+
+        let currentCropper = null;
+        function openImageEditor(i) {
+            currentEditIndex = i;
+            document.getElementById('imageEditorSection').style.display = 'block';
+            const editorImg = document.getElementById('editorImage');
+            editorImg.src = uploadedImages[i].src;
+
+            if (currentCropper) {
+                currentCropper.destroy();
+            }
+
+            // Allow image to load before cropping
+            editorImg.onload = () => {
+                currentCropper = new Cropper(editorImg, {
+                    viewMode: 2,
+                    dragMode: 'crop',
+                    autoCropArea: 1,
+                    restore: false,
+                    modal: true,
+                    guides: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
+            };
+
+            renderImagePreviews();
+        }
+
+        document.getElementById('editorReset')?.addEventListener('click', () => {
+            if (currentCropper) currentCropper.reset();
+        });
+
+        document.getElementById('editorClearCrop')?.addEventListener('click', () => {
+            if (currentEditIndex < 0) return;
+            uploadedImages[currentEditIndex].edited = null;
+            renderImagePreviews();
+
+            // Si el cropper está abierto y se quita el recorte, también actualizamos el editor actual
+            if (currentCropper) {
+                currentCropper.reset();
+            }
+            showToast('Imagen original restaurada', 'success');
+        });
+
+        document.getElementById('editorApply')?.addEventListener('click', () => {
+            if (currentEditIndex < 0 || !currentCropper) return;
+            const croppedCanvas = currentCropper.getCroppedCanvas({
+                maxWidth: 1920,
+                maxHeight: 1080
+            });
+            if (!croppedCanvas) return;
+            uploadedImages[currentEditIndex].edited = croppedCanvas.toDataURL('image/jpeg', 0.85);
+            renderImagePreviews();
+            showToast('Recorte aplicado', 'success');
+        });
+
+        // ===== INQUIRIES =====
+        async function loadInquiries() {
+            const { data, error } = await supabaseClient.from('inquiries').select('*').order('created_at', { ascending: false });
+            if (error) { document.getElementById('inquiriesList').innerHTML = `<div class="info-banner"><i class="fas fa-info-circle"></i><p>No se pudieron cargar las consultas. La tabla puede no existir aún.</p></div>`; return; }
+            if (!data?.length) { document.getElementById('inquiriesList').innerHTML = `<div class="empty-state"><i class="fas fa-envelope"></i><p>No hay consultas</p></div>`; return; }
+            document.getElementById('inquiriesList').innerHTML = data.map(inq => `
+                <div class="inquiry-card">
+                    <div class="inquiry-top"><span class="inquiry-name">${inq.name}</span><span class="inquiry-date">${new Date(inq.created_at).toLocaleDateString('es')}</span></div>
+                    <div class="inquiry-body">${inq.message || 'Sin mensaje'}</div>
+                    <div class="inquiry-meta">
+                        ${inq.phone ? `<span><i class="fas fa-phone"></i> ${inq.phone}</span>` : ''}
+                        ${inq.email ? `<span><i class="fas fa-envelope"></i> ${inq.email}</span>` : ''}
+                        ${inq.service ? `<span><i class="fas fa-tag"></i> ${inq.service}</span>` : ''}
+                        <span class="badge ${inq.status === 'new' ? 'badge-green' : 'badge-gold'}">${inq.status === 'new' ? 'NUEVA' : 'VISTA'}</span>
+                    </div>
+                </div>`).join('');
+        }
+        document.getElementById('refreshInquiries')?.addEventListener('click', loadInquiries);
+
+        // ===== SETTINGS =====
+        async function loadSettings() {
+            const { data } = await supabaseClient.from('site_settings').select('*');
+            if (!data) return;
+            const map = {};
+            data.forEach(s => map[s.key] = JSON.parse(s.value));
+            document.getElementById('sWhatsapp').value = map.whatsapp_number || '';
+            document.getElementById('sName').value = map.company_name || '';
+            document.getElementById('sSlogan').value = map.company_slogan || '';
+            document.getElementById('sAddress').value = map.company_address || '';
+            document.getElementById('sHours').value = map.company_hours || '';
+            document.getElementById('sFacebook').value = map.social_facebook || '';
+            document.getElementById('sInstagram').value = map.social_instagram || '';
+            document.getElementById('sTiktok').value = map.social_tiktok || '';
+            document.getElementById('sYoutube').value = map.social_youtube || '';
+        }
+        document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
+            const settings = {
+                whatsapp_number: document.getElementById('sWhatsapp').value,
+                company_name: document.getElementById('sName').value,
+                company_slogan: document.getElementById('sSlogan').value,
+                company_address: document.getElementById('sAddress').value,
+                company_hours: document.getElementById('sHours').value,
+                social_facebook: document.getElementById('sFacebook').value,
+                social_instagram: document.getElementById('sInstagram').value,
+                social_tiktok: document.getElementById('sTiktok').value,
+                social_youtube: document.getElementById('sYoutube').value
+            };
+            for (const [key, val] of Object.entries(settings)) {
+                await supabaseClient.from('site_settings').upsert({ key, value: JSON.stringify(val), updated_at: new Date().toISOString() });
+            }
+            showToast('Configuración guardada', 'success');
+        });
+
+        // ===== EXPORT =====
+        function generateExportCode() {
+            const semi = vehicles.filter(v => v.catalog === 'seminuevos' && v.status === 'active');
+            const imp = vehicles.filter(v => v.catalog === 'importados' && v.status === 'active');
+            const okm = vehicles.filter(v => v.catalog === '0km' && v.status === 'active');
+            const fmt = arr => JSON.stringify(arr.map(v => ({ id: v.id, title: v.title, price: v.price, year: v.year, km: v.km, engine: v.engine, transmission: v.transmission, fuel: v.fuel, bodyType: v.body_type, origin: v.origin, condition: v.condition, availability: v.availability, badge: v.badge, images: v.images, description: v.description })), null, 4);
+            document.getElementById('codeOutput').textContent = `const vehiclesSeminuevos = ${fmt(semi)};\n\nconst vehiclesImportados = ${fmt(imp)};\n\nconst vehicles0km = ${fmt(okm)};\n\nconst WHATSAPP_NUMBER = "584147977832";\n`;
+        }
+        document.getElementById('copyCodeBtn')?.addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('codeOutput').textContent).then(() => showToast('Código copiado', 'success'));
+        });
+
+        // ===== TABS =====
+        document.querySelectorAll('.sidebar-link[data-tab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById(`tab-${btn.dataset.tab}`)?.classList.add('active');
+                if (btn.dataset.tab === 'export') generateExportCode();
+                if (btn.dataset.tab === 'inquiries') loadInquiries();
+                if (btn.dataset.tab === 'settings') loadSettings();
+            });
+        });
+
+        // ===== SEARCH =====
+        document.getElementById('searchInput')?.addEventListener('input', e => renderTable(e.target.value));
+
+        // ===== EVENTS =====
+        document.getElementById('addVehicleBtn').addEventListener('click', () => openModal());
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('modalCancel').addEventListener('click', closeModal);
+        document.getElementById('modalSave').addEventListener('click', saveVehicle);
+        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+        // ===== TOAST =====
+        function showToast(msg, type = 'success') { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast toast-${type} active`; setTimeout(() => t.classList.remove('active'), 3000); }
+
+        // ===== INIT =====
+        async function loadDashboard() { await loadVehicles(); }
+        checkAuth().then(ok => { if (ok) loadDashboard(); });
+    </script>
+</body>
+
+</html>
