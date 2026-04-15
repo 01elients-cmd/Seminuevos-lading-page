@@ -1507,7 +1507,9 @@
 
         // ===== MODAL =====
         const modal = document.getElementById('vehicleModal');
+        let isSaving = false;
         function openModal(vehicle = null) {
+            if (isSaving) { showToast('Por favor espera, guardando cambios...', 'info'); return; }
             uploadedImages = []; currentEditIndex = -1;
             document.getElementById('imageEditorSection').style.display = 'none';
             document.getElementById('imagePreviews').innerHTML = '';
@@ -1543,66 +1545,94 @@
             }
             modal.classList.add('active');
         }
-        function closeModal() { modal.classList.remove('active'); }
+        function closeModal() {
+            if (isSaving) return;
+            modal.classList.remove('active');
+        }
 
         async function saveVehicle() {
+            if (isSaving) return;
+            const saveBtn = document.getElementById('modalSave');
+            if (saveBtn.disabled) return;
+
+            isSaving = true;
+
+            // Snapshot all data synchronously to prevent overwriting if user navigates away
             const id = document.getElementById('vId').value;
+            const title = document.getElementById('vTitle').value;
+            const price = document.getElementById('vPrice').value;
+            const year = parseInt(document.getElementById('vYear').value);
+            const km = document.getElementById('vKm').value || '0 KM';
+            const engine = document.getElementById('vEngine').value;
+            const transmission = document.getElementById('vTransmission').value;
+            const fuel = document.getElementById('vFuel').value;
+            const body_type = document.getElementById('vBodyType').value;
+            const catalog = document.getElementById('vCatalog').value;
+            const availability = document.getElementById('vAvailability').value;
+            const origin = document.getElementById('vOrigin').value;
+            const condition = document.getElementById('vCondition').value;
+            const badge = document.getElementById('vBadge').value || null;
+            const status = document.getElementById('vStatus').value;
+            const description = document.getElementById('vDescription').value;
+            const manualImgs = document.getElementById('vImage').value.split(',').map(s => s.trim()).filter(Boolean);
+
+            if (!title || !price || !year) { showToast('Completa los campos obligatorios', 'error'); isSaving = false; return; }
+
+            const snapshotImages = [...uploadedImages];
+            const originalBtnHtml = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
             let finalImgs = [];
 
-            // Subir o mantener imágenes
-            for (let i = 0; i < uploadedImages.length; i++) {
-                const data = uploadedImages[i].edited || uploadedImages[i].src;
-                if (data.startsWith('data:')) {
-                    const blob = await (await fetch(data)).blob();
-                    const fname = `vehicle-${Date.now()}-${i}.jpg`;
-                    const { data: upData, error } = await supabaseClient.storage.from('vehicle-images').upload(fname, blob, { contentType: 'image/jpeg' });
-                    if (!error) {
-                        const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
-                        finalImgs.push(urlData.publicUrl);
+            try {
+                // Subir o mantener imágenes
+                for (let i = 0; i < snapshotImages.length; i++) {
+                    const data = snapshotImages[i].edited || snapshotImages[i].src;
+                    if (data.startsWith('data:')) {
+                        const blob = await (await fetch(data)).blob();
+                        const fname = `vehicle-${Date.now()}-${i}.jpg`;
+                        const { data: upData, error } = await supabaseClient.storage.from('vehicle-images').upload(fname, blob, { contentType: 'image/jpeg' });
+                        if (!error) {
+                            const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
+                            finalImgs.push(urlData.publicUrl);
+                        }
+                    } else {
+                        // Es un URL existente
+                        finalImgs.push(data);
                     }
-                } else {
-                    // Es un URL existente
-                    finalImgs.push(data);
                 }
-            }
-            // Add manual URLs too if they typed any
-            const manualImgs = document.getElementById('vImage').value.split(',').map(s => s.trim()).filter(Boolean);
-            manualImgs.forEach(m => {
-                if (!finalImgs.includes(m)) finalImgs.push(m);
-            });
 
-            const vehicleData = {
-                title: document.getElementById('vTitle').value,
-                price: document.getElementById('vPrice').value,
-                year: parseInt(document.getElementById('vYear').value),
-                km: document.getElementById('vKm').value || '0 KM',
-                engine: document.getElementById('vEngine').value,
-                transmission: document.getElementById('vTransmission').value,
-                fuel: document.getElementById('vFuel').value,
-                body_type: document.getElementById('vBodyType').value,
-                catalog: document.getElementById('vCatalog').value,
-                availability: document.getElementById('vAvailability').value,
-                origin: document.getElementById('vOrigin').value,
-                condition: document.getElementById('vCondition').value,
-                badge: document.getElementById('vBadge').value || null,
-                status: document.getElementById('vStatus').value,
-                images: finalImgs,
-                description: document.getElementById('vDescription').value
-            };
-            if (!vehicleData.title || !vehicleData.price || !vehicleData.year) { showToast('Completa los campos obligatorios', 'error'); return; }
+                // Add manual URLs too if they typed any
+                manualImgs.forEach(m => {
+                    if (!finalImgs.includes(m)) finalImgs.push(m);
+                });
 
-            if (id) {
-                const { error } = await supabaseClient.from('vehicles').update(vehicleData).eq('id', parseInt(id));
-                if (error) { showToast('Error: ' + error.message, 'error'); return; }
-                showToast('Vehículo actualizado', 'success');
-            } else {
-                const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
-                if (error) { showToast('Error: ' + error.message, 'error'); return; }
-                showToast('Vehículo agregado', 'success');
+                const vehicleData = {
+                    title, price, year, km, engine, transmission, fuel, body_type, catalog,
+                    availability, origin, condition, badge, status, description, images: finalImgs
+                };
+
+                if (id) {
+                    const { error } = await supabaseClient.from('vehicles').update(vehicleData).eq('id', parseInt(id));
+                    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+                    showToast('Vehículo actualizado', 'success');
+                } else {
+                    const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
+                    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+                    showToast('Vehículo agregado', 'success');
+                }
+                await loadVehicles();
+                if (window.parent) window.parent.postMessage("CargaBD", "*"); // trigger frontend refresh if framed
+                isSaving = false;
+                closeModal();
+            } catch (err) {
+                showToast('Error de sistema: ' + err.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnHtml;
+                isSaving = false;
             }
-            await loadVehicles();
-            if (window.parent) window.parent.postMessage("CargaBD", "*"); // trigger frontend refresh if framed
-            closeModal();
         }
 
         async function editVehicle(id) { const v = vehicles.find(v => v.id === id); if (v) openModal(v); }
