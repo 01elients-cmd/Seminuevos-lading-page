@@ -309,7 +309,7 @@ body::after {
 .nav-container {
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: 0 var(--space-6) 0 var(--space-2);
+    padding: 0 var(--space-6);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -320,7 +320,6 @@ body::after {
     align-items: center;
     gap: 14px;
     z-index: 1001;
-    margin-left: -30px;
 }
 
 .logo-icon {
