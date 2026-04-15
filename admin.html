@@ -1688,10 +1688,12 @@
             const editorImg = document.getElementById('editorImage');
             if (uploadedImages[i].src.startsWith('http')) {
                 editorImg.crossOrigin = "anonymous";
+                const sep = uploadedImages[i].src.includes('?') ? '&' : '?';
+                editorImg.src = uploadedImages[i].src + sep + 'cors=' + Date.now();
             } else {
                 editorImg.removeAttribute('crossOrigin');
+                editorImg.src = uploadedImages[i].src;
             }
-            editorImg.src = uploadedImages[i].src;
 
             if (currentCropper) {
                 currentCropper.destroy();
@@ -1750,7 +1752,6 @@
                     if (idx === currentEditIndex) return;
 
                     let tempImg = new Image();
-                    if (imgObj.src.startsWith('http')) tempImg.crossOrigin = "anonymous";
                     tempImg.onload = () => {
                         let canvas = document.createElement('canvas');
                         let ctx = canvas.getContext('2d');
@@ -1772,7 +1773,14 @@
                         uploadedImages[idx].edited = canvas.toDataURL('image/jpeg', 0.85);
                         renderImagePreviews();
                     };
-                    tempImg.src = imgObj.src;
+
+                    if (imgObj.src.startsWith('http')) {
+                        tempImg.crossOrigin = "anonymous";
+                        const sep = imgObj.src.includes('?') ? '&' : '?';
+                        tempImg.src = imgObj.src + sep + 'cors=' + Date.now();
+                    } else {
+                        tempImg.src = imgObj.src;
+                    }
                 });
             }
 
