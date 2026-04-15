@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filtered.forEach((car, index) => {
             const card = document.createElement('div');
             card.classList.add('vehicle-card', 'animate-on-scroll');
+            card.style.cursor = 'pointer';
             card.style.transitionDelay = `${index * 0.08}s`;
             const priceDisplay = car.price === 'Consultar' ? `<span class="price-consult">Consultar Precio</span>` : car.price;
             const availabilityClass = car.availability === 'entrega_inmediata' ? 'available' : 'order';
@@ -429,9 +430,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('click', (e) => {
         const viewBtn = e.target.closest('.view-details');
+        const vehicleCard = e.target.closest('.vehicle-card');
+
         if (viewBtn) {
             e.preventDefault();
             openModal(viewBtn.dataset.id);
+        } else if (vehicleCard && !e.target.closest('a') && !e.target.closest('button')) {
+            const viewLink = vehicleCard.querySelector('.view-details');
+            if (viewLink) {
+                openModal(viewLink.dataset.id);
+            }
         }
 
         // Info Modal links
@@ -671,8 +679,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const repuesto = includeRepairs ? baseCost * 0.12 : 0;
         const includeKit = document.getElementById('calcMaintenanceKit').checked;
         const kit = includeKit ? 300 : 0;
+        const includeWarranty = document.getElementById('calcWarranty') ? document.getElementById('calcWarranty').checked : false;
+        const warranty = includeWarranty ? 1500 : 0;
+        const serviceFee = 900;
 
-        const total = baseCost + buyFee + internetFee + envFee + titleFee + flete + aduana + docVzla + costTraslado + repuesto + kit;
+        const total = baseCost + buyFee + internetFee + envFee + titleFee + flete + aduana + docVzla + costTraslado + repuesto + kit + warranty + serviceFee;
 
         const fmt = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.round(val));
 
@@ -685,8 +696,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resAduana').textContent = fmt(aduana);
         document.getElementById('resDocVzla').textContent = fmt(docVzla);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
+        document.getElementById('resServiceFee').textContent = fmt(serviceFee);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
         document.getElementById('resKit').textContent = fmt(kit);
+        document.getElementById('resWarranty').textContent = fmt(warranty);
         document.getElementById('resTotal').textContent = fmt(total);
     }
 
@@ -695,6 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('calcRepairs')?.addEventListener('change', updateCalc);
     document.getElementById('calcMaintenanceKit')?.addEventListener('change', updateCalc);
+    document.getElementById('calcWarranty')?.addEventListener('change', updateCalc);
     document.getElementById('calcBaseCost')?.addEventListener('input', updateCalc);
     document.getElementById('calcState')?.addEventListener('change', updateCalc);
 
