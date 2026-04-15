@@ -1358,6 +1358,14 @@
                                     <img id="editorImage" src="" style="max-width:100%; display:block;">
                                 </div>
                                 <div class="editor-actions" style="margin-top:15px">
+                                    <div
+                                        style="margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        <input type="checkbox" id="applyCropToAll"
+                                            style="width: auto; margin:0; cursor: pointer;">
+                                        <label for="applyCropToAll"
+                                            style="color: var(--on-surface-variant); font-size: 0.85rem; cursor: pointer;">Aplicar
+                                            este recorte a todas las fotos</label>
+                                    </div>
                                     <button class="btn btn-ghost btn-sm" id="editorClearCrop" type="button"><i
                                             class="fas fa-eraser"></i> Quitar Recorte</button>
                                     <button class="btn btn-ghost btn-sm" id="editorReset" type="button"><i
@@ -1727,6 +1735,42 @@
             });
             if (!croppedCanvas) return;
             uploadedImages[currentEditIndex].edited = croppedCanvas.toDataURL('image/jpeg', 0.85);
+
+            const applyToAll = document.getElementById('applyCropToAll')?.checked;
+            if (applyToAll) {
+                const cData = currentCropper.getData();
+                showToast('Aplicando recorte en lote...', 'info');
+
+                uploadedImages.forEach((imgObj, idx) => {
+                    if (idx === currentEditIndex) return;
+
+                    let tempImg = new Image();
+                    tempImg.crossOrigin = "anonymous";
+                    tempImg.onload = () => {
+                        let canvas = document.createElement('canvas');
+                        let ctx = canvas.getContext('2d');
+
+                        let tWidth = cData.width;
+                        let tHeight = cData.height;
+
+                        if (tWidth > 1920 || tHeight > 1080) {
+                            let ratio = Math.min(1920 / tWidth, 1080 / tHeight);
+                            canvas.width = tWidth * ratio;
+                            canvas.height = tHeight * ratio;
+                            ctx.drawImage(tempImg, cData.x, cData.y, cData.width, cData.height, 0, 0, canvas.width, canvas.height);
+                        } else {
+                            canvas.width = tWidth;
+                            canvas.height = tHeight;
+                            ctx.drawImage(tempImg, cData.x, cData.y, cData.width, cData.height, 0, 0, tWidth, tHeight);
+                        }
+
+                        uploadedImages[idx].edited = canvas.toDataURL('image/jpeg', 0.85);
+                        renderImagePreviews();
+                    };
+                    tempImg.src = imgObj.src;
+                });
+            }
+
             renderImagePreviews();
             showToast('Recorte aplicado', 'success');
         });
