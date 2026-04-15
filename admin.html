@@ -1686,6 +1686,11 @@
             currentEditIndex = i;
             document.getElementById('imageEditorSection').style.display = 'block';
             const editorImg = document.getElementById('editorImage');
+            if (uploadedImages[i].src.startsWith('http')) {
+                editorImg.crossOrigin = "anonymous";
+            } else {
+                editorImg.removeAttribute('crossOrigin');
+            }
             editorImg.src = uploadedImages[i].src;
 
             if (currentCropper) {
@@ -1745,7 +1750,7 @@
                     if (idx === currentEditIndex) return;
 
                     let tempImg = new Image();
-                    tempImg.crossOrigin = "anonymous";
+                    if (imgObj.src.startsWith('http')) tempImg.crossOrigin = "anonymous";
                     tempImg.onload = () => {
                         let canvas = document.createElement('canvas');
                         let ctx = canvas.getContext('2d');
