@@ -2043,13 +2043,14 @@ body::after {
     height: 460px;
     position: relative;
     overflow: hidden;
+    background-color: var(--surface-dim);
 }
 
 .modal-slider img {
     width: 100%;
-    height: 115%;
-    object-fit: cover;
-    object-position: center top;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
     display: none;
 }
 
