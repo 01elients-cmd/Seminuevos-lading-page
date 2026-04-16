@@ -666,37 +666,45 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const buyFee = 500;
-        const internetFee = 100;
-        const envFee = 25;
-        const titleFee = 25;
+        // === TARIFAS DE SUBASTA (corregidas) ===
+        const buyFee = baseCost * 0.10;       // Tarifa de compra de subasta: 10%
+        const internetFee = 160;              // Tarifa de oferta por internet: $160
+        const auctionServiceFee = 95;         // Tarifa de servicio de subasta: $95
+        const envFee = 15;                    // Tarifas ambientales: $15
+        const titleFee = 20;                  // Trámite de título in USA: $20
+        const stateTax = baseCost * 0.07;     // Impuestos del estado: 7%
+        const brokerFee = 500;                // Tarifa broker: $500
+        const serviceFee = 900;               // Tarifa de servicio: $900
+
         const flete = 3500;
         const aduana = 3500;
         const docVzla = 1000;
         const distanceMiles = parseFloat(document.getElementById('calcState').value) || 0;
-        const costTraslado = distanceMiles * 1; // Each mile is $1
+        const costTraslado = distanceMiles * 1; // $1 por milla hasta Florida
         const includeRepairs = document.getElementById('calcRepairs').checked;
         const repuesto = includeRepairs ? baseCost * 0.12 : 0;
         const includeKit = document.getElementById('calcMaintenanceKit').checked;
         const kit = includeKit ? 300 : 0;
         const includeWarranty = document.getElementById('calcWarranty') ? document.getElementById('calcWarranty').checked : false;
         const warranty = includeWarranty ? 1500 : 0;
-        const serviceFee = 900;
 
-        const total = baseCost + buyFee + internetFee + envFee + titleFee + flete + aduana + docVzla + costTraslado + repuesto + kit + warranty + serviceFee;
+        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + flete + aduana + docVzla + costTraslado + repuesto + kit + warranty;
 
         const fmt = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.round(val));
 
         document.getElementById('resBase').textContent = fmt(baseCost);
         document.getElementById('resBuyFee').textContent = fmt(buyFee);
         document.getElementById('resInternetFee').textContent = fmt(internetFee);
+        document.getElementById('resAuctionServiceFee').textContent = fmt(auctionServiceFee);
         document.getElementById('resEnvFee').textContent = fmt(envFee);
         document.getElementById('resTitleFee').textContent = fmt(titleFee);
+        document.getElementById('resStateTax').textContent = fmt(stateTax);
+        document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
+        document.getElementById('resServiceFee').textContent = fmt(serviceFee);
         document.getElementById('resFlete').textContent = fmt(flete);
         document.getElementById('resAduana').textContent = fmt(aduana);
         document.getElementById('resDocVzla').textContent = fmt(docVzla);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
-        document.getElementById('resServiceFee').textContent = fmt(serviceFee);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
         document.getElementById('resKit').textContent = fmt(kit);
         document.getElementById('resWarranty').textContent = fmt(warranty);
