@@ -3277,3 +3277,61 @@ body::after {
     background: rgba(39, 92, 234, 0.25);
     border-color: rgba(39, 92, 234, 0.4);
 }
+
+/* ===== CALCULATOR RANGE TOTAL ===== */
+.calc-row.total-range {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.calc-row.total-range>span:first-child {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    color: var(--on-surface);
+}
+
+.total-range-values {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.total-range-values #resTotal {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+}
+
+.text-accent-max {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    color: #4d7aef;
+}
+
+.range-separator {
+    font-size: 1.1rem;
+    color: var(--outline);
+    font-weight: 300;
+}
+
+.calc-range-note {
+    font-size: 0.7rem;
+    color: var(--outline);
+    text-align: right;
+    margin-top: 6px;
+    padding-bottom: 4px;
+}
+
+.calc-range-note i {
+    margin-right: 4px;
+    color: var(--primary-dim);
+}

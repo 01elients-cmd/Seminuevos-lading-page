@@ -490,13 +490,13 @@
                         <div class="form-group">
                             <label for="calcState">Ubicación del vehículo (USA)</label>
                             <select id="calcState" class="calc-select">
-                                <option value="0">Florida (Local)</option>
-                                <option value="450">Georgia / South Carolina</option>
-                                <option value="700">North Carolina / Alabama</option>
-                                <option value="1100">Texas / Illinois / Louisiana</option>
-                                <option value="1250">New York / New Jersey / Penn</option>
-                                <option value="2500">California / Washington / Oregon</option>
-                                <option value="1500">Otros Estados (Medio Oeste)</option>
+                                <option value="450">Florida (Local)</option>
+                                <option value="900">Georgia / South Carolina</option>
+                                <option value="1150">North Carolina / Alabama</option>
+                                <option value="1550">Texas / Illinois / Louisiana</option>
+                                <option value="1700">New York / New Jersey / Penn</option>
+                                <option value="2950">California / Washington / Oregon</option>
+                                <option value="1950">Otros Estados (Medio Oeste)</option>
                             </select>
                             <p style="font-size: 0.7rem; color: var(--outline); margin-top: 4px;">Selecciona el estado
                                 de origen. El sistema calcula $1 por milla aproximada hasta Florida.</p>
@@ -519,30 +519,37 @@
                 </div>
                 <div class="calculator-results" id="calcResults">
                     <div class="calc-row"><span>Costo de Compra</span><span id="resBase">$0</span></div>
-                    <div class="calc-row"><span>Tarifa de compra de subasta (10%)</span><span id="resBuyFee">$0</span>
+                    <div class="calc-row"><span>Tarifa de compra de subasta</span><span id="resBuyFee">$0</span></div>
+                    <div class="calc-row"><span>Tarifa de oferta por internet</span><span id="resInternetFee">$0</span>
                     </div>
-                    <div class="calc-row"><span>Tarifa de oferta por internet</span><span
-                            id="resInternetFee">$160</span></div>
                     <div class="calc-row"><span>Tarifa de servicio de subasta</span><span
-                            id="resAuctionServiceFee">$95</span></div>
-                    <div class="calc-row"><span>Tarifas ambientales</span><span id="resEnvFee">$15</span></div>
-                    <div class="calc-row"><span>Trámite de título in USA</span><span id="resTitleFee">$20</span></div>
-                    <div class="calc-row"><span>Impuestos del estado (7%)</span><span id="resStateTax">$0</span></div>
-                    <div class="calc-row"><span>Tarifa broker</span><span id="resBrokerFee">$500</span></div>
-                    <div class="calc-row"><span>Tarifa de servicio</span><span id="resServiceFee">$900</span></div>
-                    <div class="calc-row"><span>Flete a Venezuela</span><span id="resFlete">$3,500</span></div>
-                    <div class="calc-row"><span>Gastos Aduanales</span><span id="resAduana">$3,500</span></div>
-                    <div class="calc-row"><span>Documentación legal en Vzla</span><span id="resDocVzla">$1,000</span>
-                    </div>
-                    <div class="calc-row"><span>Traslado Interno (USA)</span><span id="resTraslado">$0</span></div>
+                            id="resAuctionServiceFee">$0</span></div>
+                    <div class="calc-row"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
+                    <div class="calc-row"><span>Trámite de título in USA</span><span id="resTitleFee">$0</span></div>
+                    <div class="calc-row"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
+                    <div class="calc-row"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
+                    <div class="calc-row"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
+                    <div class="calc-row"><span>Flete a Venezuela</span><span id="resFlete">$0</span></div>
+                    <div class="calc-row"><span>Gastos Aduanales</span><span id="resAduana">$0</span></div>
+                    <div class="calc-row"><span>Documentación legal en Vzla</span><span id="resDocVzla">$0</span></div>
+                    <div class="calc-row"><span>Traslado / Grúa (USA)</span><span id="resTraslado">$0</span></div>
                     <div class="calc-row"><span>Repuestos adicionales requeribles</span><span id="resRepuesto">$0</span>
                     </div>
                     <div class="calc-row"><span>Kit de mantenimiento</span><span id="resKit">$0</span></div>
                     <div class="calc-row"><span>Soporte y ext. de garantía</span><span id="resWarranty">$0</span></div>
                     <div class="calc-divider"></div>
-                    <div class="calc-row total"><span>PRECIO TOTAL APROX.</span><span id="resTotal"
-                            class="text-accent">$0</span></div>
+                    <div class="calc-row total-range">
+                        <span>ESTIMADO TOTAL</span>
+                        <span class="total-range-values">
+                            <span id="resTotal" class="text-accent">$0</span>
+                            <span class="range-separator"> – </span>
+                            <span id="resTotalMax" class="text-accent-max">$0</span>
+                        </span>
+                    </div>
+                    <p class="calc-range-note"><i class="fas fa-info-circle"></i> El rango superior incluye un margen
+                        estimado de variación del 10%</p>
                 </div>
+
             </div>
             <p class="calculator-legal-notice">
                 <i class="fas fa-exclamation-triangle"></i>

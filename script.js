@@ -677,12 +677,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCalc() {
         const baseCost = parseFloat(document.getElementById('calcBaseCost').value) || 0;
+        const fmt = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.round(val));
+
+        // Reset all to $0 if no base cost
         if (baseCost <= 0) {
-            document.getElementById('resTotal').textContent = "$0";
+            const ids = ['resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee', 'resEnvFee',
+                'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee', 'resFlete',
+                'resAduana', 'resDocVzla', 'resTraslado', 'resRepuesto', 'resKit', 'resWarranty',
+                'resTotal', 'resTotalMax'];
+            ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '$0'; });
             return;
         }
 
-        // === TARIFAS DE SUBASTA (corregidas) ===
+        // === TARIFAS DE SUBASTA ===
         const buyFee = baseCost * 0.10;       // Tarifa de compra de subasta: 10%
         const internetFee = 160;              // Tarifa de oferta por internet: $160
         const auctionServiceFee = 95;         // Tarifa de servicio de subasta: $95
@@ -695,8 +702,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const flete = 3500;
         const aduana = 3500;
         const docVzla = 1000;
-        const distanceMiles = parseFloat(document.getElementById('calcState').value) || 0;
-        const costTraslado = distanceMiles * 1; // $1 por milla hasta Florida
+        // costTraslado viene directo del select (ya incluye el costo base de la grúa por ubicación)
+        const costTraslado = parseFloat(document.getElementById('calcState').value) || 0;
         const includeRepairs = document.getElementById('calcRepairs').checked;
         const repuesto = includeRepairs ? baseCost * 0.12 : 0;
         const includeKit = document.getElementById('calcMaintenanceKit').checked;
@@ -705,8 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const warranty = includeWarranty ? 1500 : 0;
 
         const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + flete + aduana + docVzla + costTraslado + repuesto + kit + warranty;
-
-        const fmt = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.round(val));
+        const totalMax = total * 1.10;
 
         document.getElementById('resBase').textContent = fmt(baseCost);
         document.getElementById('resBuyFee').textContent = fmt(buyFee);
@@ -725,6 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resKit').textContent = fmt(kit);
         document.getElementById('resWarranty').textContent = fmt(warranty);
         document.getElementById('resTotal').textContent = fmt(total);
+        document.getElementById('resTotalMax').textContent = fmt(totalMax);
     }
 
     const btnCalculateCost = document.getElementById('btnCalculateCost');
