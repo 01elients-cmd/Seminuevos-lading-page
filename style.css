@@ -320,6 +320,13 @@ body::after {
     align-items: center;
     gap: 14px;
     z-index: 1001;
+    margin-right: auto;
+}
+
+.main-logo {
+    height: 96px;
+    width: auto;
+    max-height: 96px;
 }
 
 .logo-icon {
@@ -352,6 +359,7 @@ body::after {
     display: flex;
     align-items: center;
     gap: 6px;
+    margin-right: 2rem;
 }
 
 .nav-link {
@@ -2399,7 +2407,17 @@ body::after {
         justify-content: center;
         padding: 40px;
         gap: 20px;
+        margin-right: 0;
         transition: right 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .nav-logo {
+        margin-right: 0;
+    }
+
+    .main-logo {
+        height: 52px;
+        max-height: 52px;
     }
 
     .nav-menu.open {

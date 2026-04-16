@@ -1027,12 +1027,46 @@
         }
 
         @media(max-width:768px) {
+            .admin-layout {
+                flex-direction: column
+            }
+
             .sidebar {
-                display: none
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 15px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                align-items: center;
+            }
+
+            .sidebar-logo {
+                display: none;
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 5px;
+                gap: 5px;
+            }
+
+            .sidebar-link {
+                white-space: nowrap;
+                padding: 8px 14px;
+            }
+
+            .sidebar-divider,
+            .sidebar-user,
+            #logoutBtn,
+            .btn-ghost[href="index.html"] {
+                display: none;
             }
 
             .main-content {
-                margin-left: 0
+                margin-left: 0;
+                padding: 15px;
             }
 
             .form-grid,
