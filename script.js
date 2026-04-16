@@ -371,19 +371,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const car = allVehs.find(v => String(v.id) === carId);
         if (!car) return;
 
-        // === INCREMENT VIEW COUNT ===
+        // === INCREMENT VIEW COUNT (via RPC para evitar problemas de RLS) ===
         try {
             const newViews = (car.views || 0) + 1;
-            car.views = newViews; // update local cache immediately
-            // Update in Supabase (fire & forget)
-            supabaseClient.from('vehicles').update({ views: newViews }).eq('id', car.id);
-            // Update card badge live
+            car.views = newViews; // actualiza cache local inmediatamente
+            // Llama la función del servidor que bypasea RLS
+            supabaseClient.rpc('increment_vehicle_views', { vehicle_id: car.id })
+                .then(({ error }) => {
+                    if (error) console.warn('Views RPC error:', error.message);
+                });
+            // Actualiza el badge en la tarjeta en vivo
             const cardBadge = document.getElementById(`views-card-${car.id}`);
             if (cardBadge) {
                 cardBadge.style.display = '';
                 cardBadge.innerHTML = `<i class="fas fa-eye"></i> ${newViews} vista${newViews !== 1 ? 's' : ''}`;
             }
-        } catch (e) { /* silently ignore */ }
+        } catch (e) { console.warn('Views update error:', e); }
 
         // Verify BODY_TYPE_LABELS is defined, otherwise fallback gracefully
         const fallbackBodyType = typeof BODY_TYPE_LABELS !== 'undefined' && BODY_TYPE_LABELS[car.bodyType] ? BODY_TYPE_LABELS[car.bodyType] : car.bodyType || 'Vehículo';
