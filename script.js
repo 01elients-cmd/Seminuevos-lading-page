@@ -191,8 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const availabilityText = car.availability === 'entrega_inmediata' ? 'Entrega Inmediata' : 'Por Pedido';
             const availabilityIcon = car.availability === 'entrega_inmediata' ? 'fa-bolt' : 'fa-clock';
             const originBadge = car.origin === 'importado' ? `<span class="origin-badge importado"><i class="fas fa-globe"></i> Importado</span>` : `<span class="origin-badge nacional"><i class="fas fa-flag"></i> Nacional</span>`;
+            const viewCount = car.views || 0;
+            const viewsBadge = viewCount > 0 ? `<span class="views-badge" id="views-card-${car.id}"><i class="fas fa-eye"></i> ${viewCount} vista${viewCount !== 1 ? 's' : ''}</span>` : `<span class="views-badge" id="views-card-${car.id}" style="display:none;"></span>`;
             card.innerHTML = `
-                <div class="vehicle-card-image"><img src="${car.images[0]}" alt="${car.title}" loading="lazy">${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}<div class="vehicle-card-tags">${originBadge}</div></div>
+                <div class="vehicle-card-image"><img src="${car.images[0]}" alt="${car.title}" loading="lazy">${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}${viewsBadge}<div class="vehicle-card-tags">${originBadge}</div></div>
                 <div class="vehicle-card-body"><div class="vehicle-card-header"><h3 class="vehicle-card-title">${car.title}</h3><span class="vehicle-availability ${availabilityClass}"><i class="fas ${availabilityIcon}"></i> ${availabilityText}</span></div><p class="vehicle-card-price">${priceDisplay}</p><div class="vehicle-card-specs"><span class="spec-item"><i class="fas fa-calendar"></i> ${car.year}</span><span class="spec-item"><i class="fas fa-road"></i> ${car.km}</span><span class="spec-item"><i class="fas fa-gas-pump"></i> ${car.fuel}</span><span class="spec-item"><i class="fas fa-gears"></i> ${car.transmission}</span></div></div>
                 <div class="vehicle-card-footer"><a href="#" class="view-details" data-id="${car.id}"><i class="fas fa-eye"></i> Ver detalles</a><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${car.availability === 'por_pedido' ? 'Por Pedido' : car.price}. ¿Me pueden cotizar?`)}" target="_blank"><i class="fab fa-whatsapp"></i> Cotiza</a></div>
             `;
@@ -363,11 +365,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modalPrev')?.addEventListener('click', () => modalGallery.prev());
     document.getElementById('modalNext')?.addEventListener('click', () => modalGallery.next());
 
-    function openModal(carIdStr) {
+    async function openModal(carIdStr) {
         const carId = String(carIdStr);
         const allVehs = [...appVehiclesSeminuevos, ...appVehiclesPorPedido, ...appVehicles0km];
         const car = allVehs.find(v => String(v.id) === carId);
         if (!car) return;
+
+        // === INCREMENT VIEW COUNT ===
+        try {
+            const newViews = (car.views || 0) + 1;
+            car.views = newViews; // update local cache immediately
+            // Update in Supabase (fire & forget)
+            supabaseClient.from('vehicles').update({ views: newViews }).eq('id', car.id);
+            // Update card badge live
+            const cardBadge = document.getElementById(`views-card-${car.id}`);
+            if (cardBadge) {
+                cardBadge.style.display = '';
+                cardBadge.innerHTML = `<i class="fas fa-eye"></i> ${newViews} vista${newViews !== 1 ? 's' : ''}`;
+            }
+        } catch (e) { /* silently ignore */ }
 
         // Verify BODY_TYPE_LABELS is defined, otherwise fallback gracefully
         const fallbackBodyType = typeof BODY_TYPE_LABELS !== 'undefined' && BODY_TYPE_LABELS[car.bodyType] ? BODY_TYPE_LABELS[car.bodyType] : car.bodyType || 'Vehículo';
