@@ -324,7 +324,6 @@ body::after {
     align-items: center;
     gap: 14px;
     z-index: 1001;
-    margin-right: auto;
 }
 
 .main-logo {
@@ -363,7 +362,7 @@ body::after {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-right: 2rem;
+    margin: 0 auto;
 }
 
 .nav-link {
