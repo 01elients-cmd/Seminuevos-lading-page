@@ -76,41 +76,49 @@
     <section class="hero" id="inicio">
         <div class="hero-slider" id="heroSlider">
 
-            <!-- SLIDE 1: 2026 Tacoma Example -->
-            <div class="hero-slide active" style="background-image: url('images/hero1.png')">
+            <!-- SLIDE 1: 4Runner in Centered Layout -->
+            <div class="hero-slide active" style="background-image: url('images/4runner-trail-2021.jpg')">
                 <div class="hero-overlay"
                     style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%);">
                 </div>
                 <div class="hero-content"
                     style="left: 0; right: 0; margin: 0 auto; text-align: center; bottom: 8%; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center;">
+
+                    <div
+                        style="font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; color: var(--outline); margin-bottom: 8px; text-transform: uppercase;">
+                        <i class="fas fa-star"></i> 0 KM — DISPONIBLE
+                    </div>
                     <h1 class="hero-title"
-                        style="font-size: clamp(3rem, 5vw, 4rem); text-transform: none; margin-bottom: 10px; font-weight: 700;">
-                        2026 Tacoma</h1>
-                    <p style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface);">Make every day a play
-                        day.</p>
+                        style="font-size: clamp(3rem, 5vw, 4rem); text-transform: none; margin-bottom: 8px; font-weight: 700;">
+                        4Runner Trail 2021</h1>
+                    <p style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface);">Toyota • Cement Gray
+                    </p>
 
                     <div style="display: flex; gap: 40px; margin-bottom: 30px; justify-content: center;">
                         <div style="text-align: center;">
-                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">2.49%</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">4.0L</div>
                             <div
                                 style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
-                                APR</div>
+                                V6</div>
                         </div>
                         <div style="text-align: center;">
-                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">36</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">4x4</div>
                             <div
                                 style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
-                                mos</div>
+                                Trail Edition</div>
                         </div>
                     </div>
 
                     <div class="hero-buttons" style="justify-content: center; gap: 16px;">
-                        <a href="#catalogo" class="btn"
-                            style="background: #fff; color: #000; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none;">View
-                            Offers</a>
-                        <a href="#contacto" class="btn"
-                            style="background: #fff; color: #000; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none;">Learn
-                            More</a>
+                        <button class="btn" onclick="openVehicleInfoModal('4runner-2021')"
+                            style="background: #fff; color: #000; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none; cursor: pointer;">
+                            <i class="fas fa-info-circle" style="margin-right: 6px;"></i> Ver Información
+                        </button>
+                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20comprar%20el%20Toyota%204Runner%20Trail%202021%200KM.%20¿Está%20disponible?"
+                            target="_blank" class="btn"
+                            style="background: transparent; color: #fff; border: 1px solid #fff; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; box-shadow: none;">
+                            <i class="fab fa-whatsapp" style="margin-right: 6px;"></i> Comprar Ahora
+                        </a>
                     </div>
                 </div>
 
@@ -136,7 +144,7 @@
                 </div>
             </div>
 
-            <!-- SLIDE 2: Telluride Example -->
+            <!-- SLIDE 2: Generic 0KM Placeholder in Telluride Layout -->
             <div class="hero-slide" style="background-image: url('images/hero2.png')">
                 <div class="hero-overlay"
                     style="background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);">
@@ -144,25 +152,31 @@
                 <div class="hero-content" style="bottom: 35%; left: 7%;">
                     <div
                         style="font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; color: #d1d1d1; margin-bottom: 12px; text-transform: uppercase;">
-                        THE FIRST-EVER</div>
+                        <i class="fas fa-star"></i> PRÓXIMAMENTE</div>
                     <h1 class="hero-title"
                         style="font-size: clamp(3rem, 5.5vw, 4.5rem); line-height: 1.05; margin-bottom: 32px; text-transform: none; font-weight: 700;">
-                        2027 Telluride<br>Turbo-Hybrid</h1>
+                        Nuevos Modelos<br><span class="text-accent"
+                            style="background: none; -webkit-text-fill-color: initial; color: var(--primary);">0KM
+                            2025</span></h1>
 
                     <div class="hero-buttons">
                         <a href="#catalogo" class="btn"
-                            style="background: #fff; color: #000; border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border: none; box-shadow: none;">Meet
-                            Telluride Hybrid</a>
-                        <a href="#contacto" class="btn btn-outline"
-                            style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border-color: #fff; color: #fff; background: transparent;">Build
-                            Yours</a>
+                            onclick="document.querySelector('[data-section=\'0km\']').click()"
+                            style="background: #fff; color: #000; border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border: none; box-shadow: none;">Ver
+                            Catálogo 0KM</a>
+                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20información%20sobre%20vehículos%200KM%20disponibles."
+                            target="_blank" class="btn btn-outline"
+                            style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border-color: #fff; color: #fff; background: transparent;">Consultar</a>
                     </div>
                 </div>
 
-                <!-- Disclaimers text -->
-                <div style="position: absolute; bottom: 30px; right: 40px; z-index: 10;" class="slide-extra-info">
-                    <a href="#"
-                        style="font-size: 0.8rem; color: #b0b0b0; text-decoration: none; border-bottom: 1px solid #b0b0b0; padding-bottom: 1px;">Disclaimers</a>
+                <!-- Specs row on bottom side (replacing disclaimers) -->
+                <div style="position: absolute; bottom: 30px; left: 7%; z-index: 10;" class="slide-extra-info">
+                    <div style="display: flex; gap: 20px; font-size: 0.85rem; color: #b0b0b0;">
+                        <span><i class="fas fa-ship"></i> Importación Directa</span>
+                        <span><i class="fas fa-shield-halved"></i> Garantía 2 Años</span>
+                        <span><i class="fas fa-file-circle-check"></i> Documentación USA</span>
+                    </div>
                 </div>
             </div>
 
