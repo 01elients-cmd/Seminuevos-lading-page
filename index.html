@@ -72,74 +72,116 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- ===== HERO SECTION — 0KM VEHICLE SHOWCASE ===== -->
+    <!-- ===== HERO SECTION — VEHICLE SHOWCASE ===== -->
     <section class="hero" id="inicio">
         <div class="hero-slider" id="heroSlider">
 
-            <!-- SLIDE 1: Toyota 4Runner Trail 2021 -->
-            <div class="hero-slide active" style="background-image: url('images/4runner-trail-2021.jpg')">
-                <div class="hero-overlay"></div>
-                <div class="hero-content hero-content-vehicle">
-                    <div class="hero-vehicle-badge">
-                        <i class="fas fa-star"></i> 0 KM — DISPONIBLE
+            <!-- SLIDE 1: 2026 Tacoma Example -->
+            <div class="hero-slide active" style="background-image: url('images/hero1.png')">
+                <div class="hero-overlay"
+                    style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%);">
+                </div>
+                <div class="hero-content"
+                    style="left: 0; right: 0; margin: 0 auto; text-align: center; bottom: 8%; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center;">
+                    <h1 class="hero-title"
+                        style="font-size: clamp(3rem, 5vw, 4rem); text-transform: none; margin-bottom: 10px; font-weight: 700;">
+                        2026 Tacoma</h1>
+                    <p style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface);">Make every day a play
+                        day.</p>
+
+                    <div style="display: flex; gap: 40px; margin-bottom: 30px; justify-content: center;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">2.49%</div>
+                            <div
+                                style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
+                                APR</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">36</div>
+                            <div
+                                style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
+                                mos</div>
+                        </div>
                     </div>
-                    <div class="hero-vehicle-brand">TOYOTA</div>
-                    <h1 class="hero-title hero-vehicle-title">4Runner<br><span class="text-accent">Trail 2021</span>
-                    </h1>
-                    <div class="hero-vehicle-specs">
-                        <span><i class="fas fa-tachometer-alt"></i> 4.0L V6</span>
-                        <span><i class="fas fa-road"></i> 4x4 Trail Edition</span>
-                        <span><i class="fas fa-palette"></i> Cement Gray</span>
+
+                    <div class="hero-buttons" style="justify-content: center; gap: 16px;">
+                        <a href="#catalogo" class="btn"
+                            style="background: #fff; color: #000; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none;">View
+                            Offers</a>
+                        <a href="#contacto" class="btn"
+                            style="background: #fff; color: #000; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none;">Learn
+                            More</a>
                     </div>
-                    <div class="hero-buttons">
-                        <button class="btn btn-primary" onclick="openVehicleInfoModal('4runner-2021')">
-                            <i class="fas fa-info-circle"></i> Ver Información
-                        </button>
-                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20comprar%20el%20Toyota%204Runner%20Trail%202021%200KM.%20¿Está%20disponible?"
-                            target="_blank" class="btn btn-outline btn-buy">
-                            <i class="fab fa-whatsapp"></i> Comprar Ahora
-                        </a>
+                </div>
+
+                <!-- Opt-out button -->
+                <div style="position: absolute; bottom: 100px; left: 40px; z-index: 10;" class="slide-extra-info">
+                    <button
+                        style="background: #fff; color: #000; border: none; border-radius: 6px; padding: 12px 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">Opt-Out
+                        Request Honored</button>
+                </div>
+                <!-- Pause/Play button control -->
+                <div style="position: absolute; bottom: 40px; left: 40px; z-index: 10;" class="slide-extra-info">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #000;"
+                        id="heroPauseBtn">
+                        <i class="fas fa-pause" style="font-size: 0.9rem;"></i>
+                    </div>
+                </div>
+                <!-- Info button -->
+                <div style="position: absolute; bottom: 40px; right: 40px; z-index: 10;" class="slide-extra-info">
+                    <div
+                        style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff;">
+                        <i class="fas fa-info" style="font-size: 0.8rem;"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- SLIDE 2: Generic 0KM placeholder (reemplazar con próximo vehículo) -->
+            <!-- SLIDE 2: Telluride Example -->
             <div class="hero-slide" style="background-image: url('images/hero2.png')">
-                <div class="hero-overlay"></div>
-                <div class="hero-content hero-content-vehicle">
-                    <div class="hero-vehicle-badge">
-                        <i class="fas fa-star"></i> 0 KM — POR PEDIDO
-                    </div>
-                    <div class="hero-vehicle-brand">PRÓXIMAMENTE</div>
-                    <h1 class="hero-title hero-vehicle-title">Nuevos Modelos<br><span class="text-accent">0KM
-                            2025</span></h1>
-                    <div class="hero-vehicle-specs">
-                        <span><i class="fas fa-ship"></i> Importación Directa</span>
-                        <span><i class="fas fa-shield-halved"></i> Garantía 2 Años</span>
-                        <span><i class="fas fa-file-circle-check"></i> Documentación USA</span>
-                    </div>
+                <div class="hero-overlay"
+                    style="background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);">
+                </div>
+                <div class="hero-content" style="bottom: 35%; left: 7%;">
+                    <div
+                        style="font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; color: #d1d1d1; margin-bottom: 12px; text-transform: uppercase;">
+                        THE FIRST-EVER</div>
+                    <h1 class="hero-title"
+                        style="font-size: clamp(3rem, 5.5vw, 4.5rem); line-height: 1.05; margin-bottom: 32px; text-transform: none; font-weight: 700;">
+                        2027 Telluride<br>Turbo-Hybrid</h1>
+
                     <div class="hero-buttons">
-                        <a href="#catalogo" class="btn btn-primary"
-                            onclick="document.querySelector('[data-section=\'0km\']').click()">
-                            <i class="fas fa-star"></i> Ver Catálogo 0KM
-                        </a>
-                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20información%20sobre%20vehículos%200KM%20disponibles."
-                            target="_blank" class="btn btn-outline btn-buy">
-                            <i class="fab fa-whatsapp"></i> Consultar
-                        </a>
+                        <a href="#catalogo" class="btn"
+                            style="background: #fff; color: #000; border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border: none; box-shadow: none;">Meet
+                            Telluride Hybrid</a>
+                        <a href="#contacto" class="btn btn-outline"
+                            style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border-color: #fff; color: #fff; background: transparent;">Build
+                            Yours</a>
                     </div>
+                </div>
+
+                <!-- Disclaimers text -->
+                <div style="position: absolute; bottom: 30px; right: 40px; z-index: 10;" class="slide-extra-info">
+                    <a href="#"
+                        style="font-size: 0.8rem; color: #b0b0b0; text-decoration: none; border-bottom: 1px solid #b0b0b0; padding-bottom: 1px;">Disclaimers</a>
                 </div>
             </div>
 
         </div>
 
         <!-- Hero Controls -->
-        <div class="hero-controls">
-            <button class="hero-arrow hero-prev" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
+        <div class="hero-dots-container" style="display:none;">
+            <!-- Hidden dots if they want it exact as mockup, but we'll leave it in DOM to avoid JS errors -->
             <div class="hero-dots" id="heroDots"></div>
-            <button class="hero-arrow hero-next" id="heroNext"><i class="fas fa-chevron-right"></i></button>
         </div>
-        <div class="hero-scroll-indicator">
+
+        <button class="hero-arrow hero-prev" id="heroPrev"
+            style="position: absolute; left: 40px; top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
+                class="fas fa-chevron-left" style="color:#fff;"></i></button>
+        <button class="hero-arrow hero-next" id="heroNext"
+            style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
+                class="fas fa-chevron-right" style="color:#fff;"></i></button>
+
+        <div class="hero-scroll-indicator" style="display:none;">
             <span>Desliza</span>
             <div class="scroll-line"></div>
         </div>
