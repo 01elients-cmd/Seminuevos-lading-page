@@ -95,22 +95,26 @@
                         Libre
                     </p>
 
-                    <div style="display: flex; gap: 40px; margin-bottom: 30px; justify-content: center;">
+                    <div
+                        style="display: flex; gap: clamp(20px, 5vw, 40px); margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
                         <div style="text-align: center;">
-                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">$42.500</div>
+                            <div style="font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; line-height: 1;">
+                                $42.500</div>
                             <div
                                 style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
                                 PRECIO</div>
                         </div>
                         <div style="text-align: center;">
-                            <div style="font-size: 1.8rem; font-weight: 700; line-height: 1;">51.000</div>
+                            <div style="font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; line-height: 1;">51.000
+                            </div>
                             <div
                                 style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
                                 KM</div>
                         </div>
                     </div>
 
-                    <div class="hero-buttons" style="justify-content: center; gap: 16px;">
+                    <div class="hero-buttons"
+                        style="justify-content: center; gap: 16px; flex-wrap: wrap; display: flex; width: 100%;">
                         <a href="#catalogo" class="btn"
                             onclick="document.querySelector('[data-section=\'seminuevos\']').click()"
                             style="background: #fff; color: #000; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none; cursor: pointer;">
@@ -171,10 +175,10 @@
         </div>
 
         <button class="hero-arrow hero-prev" id="heroPrev"
-            style="position: absolute; left: 40px; top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
+            style="position: absolute; left: clamp(10px, 4vw, 40px); top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
                 class="fas fa-chevron-left" style="color:#fff;"></i></button>
         <button class="hero-arrow hero-next" id="heroNext"
-            style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
+            style="position: absolute; right: clamp(10px, 4vw, 40px); top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
                 class="fas fa-chevron-right" style="color:#fff;"></i></button>
 
         <div class="hero-scroll-indicator" style="display:none;">
