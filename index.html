@@ -84,10 +84,6 @@
                 <div class="hero-content"
                     style="left: 0; right: 0; margin: 0 auto; text-align: center; bottom: 8%; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center;">
 
-                    <div
-                        style="font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; color: var(--outline); margin-bottom: 8px; text-transform: uppercase;">
-                        <i class="fas fa-star"></i> 0 KM — DISPONIBLE
-                    </div>
                     <h1 class="hero-title"
                         style="font-size: clamp(3rem, 5vw, 4rem); text-transform: none; margin-bottom: 8px; font-weight: 700;">
                         4Runner Trail 2021</h1>
@@ -110,36 +106,16 @@
                     </div>
 
                     <div class="hero-buttons" style="justify-content: center; gap: 16px;">
-                        <button class="btn" onclick="openVehicleInfoModal('4runner-2021')"
+                        <a href="#catalogo" class="btn"
+                            onclick="document.querySelector('[data-section=\'0km\']').click()"
                             style="background: #fff; color: #000; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none; cursor: pointer;">
                             <i class="fas fa-info-circle" style="margin-right: 6px;"></i> Ver Información
-                        </button>
+                        </a>
                         <a href="https://wa.me/584147977832?text=Hola,%20quiero%20comprar%20el%20Toyota%204Runner%20Trail%202021%200KM.%20¿Está%20disponible?"
                             target="_blank" class="btn"
                             style="background: transparent; color: #fff; border: 1px solid #fff; border-radius: 40px; padding: 14px 32px; font-size: 0.9rem; box-shadow: none;">
                             <i class="fab fa-whatsapp" style="margin-right: 6px;"></i> Comprar Ahora
                         </a>
-                    </div>
-                </div>
-
-                <!-- Opt-out button -->
-                <div style="position: absolute; bottom: 100px; left: 40px; z-index: 10;" class="slide-extra-info">
-                    <button
-                        style="background: #fff; color: #000; border: none; border-radius: 6px; padding: 12px 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">Opt-Out
-                        Request Honored</button>
-                </div>
-                <!-- Pause/Play button control -->
-                <div style="position: absolute; bottom: 40px; left: 40px; z-index: 10;" class="slide-extra-info">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #000;"
-                        id="heroPauseBtn">
-                        <i class="fas fa-pause" style="font-size: 0.9rem;"></i>
-                    </div>
-                </div>
-                <!-- Info button -->
-                <div style="position: absolute; bottom: 40px; right: 40px; z-index: 10;" class="slide-extra-info">
-                    <div
-                        style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff;">
-                        <i class="fas fa-info" style="font-size: 0.8rem;"></i>
                     </div>
                 </div>
             </div>
@@ -152,7 +128,8 @@
                 <div class="hero-content" style="bottom: 35%; left: 7%;">
                     <div
                         style="font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; color: #d1d1d1; margin-bottom: 12px; text-transform: uppercase;">
-                        <i class="fas fa-star"></i> PRÓXIMAMENTE</div>
+                        <i class="fas fa-star"></i> PRÓXIMAMENTE
+                    </div>
                     <h1 class="hero-title"
                         style="font-size: clamp(3rem, 5.5vw, 4.5rem); line-height: 1.05; margin-bottom: 32px; text-transform: none; font-weight: 700;">
                         Nuevos Modelos<br><span class="text-accent"
