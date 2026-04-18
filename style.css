@@ -544,10 +544,14 @@ body::after {
     opacity: 0;
     transition: opacity 1.2s ease-in-out;
     transform: scale(1.05);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .hero-slide.active {
     opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
     animation: heroZoom 8s ease-out forwards;
 }
 
