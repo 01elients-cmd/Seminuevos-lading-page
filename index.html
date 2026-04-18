@@ -72,60 +72,68 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- ===== HERO SECTION ===== -->
+    <!-- ===== HERO SECTION — 0KM VEHICLE SHOWCASE ===== -->
     <section class="hero" id="inicio">
         <div class="hero-slider" id="heroSlider">
-            <div class="hero-slide active" style="background-image: url('images/hero1.png')">
+
+            <!-- SLIDE 1: Toyota 4Runner Trail 2021 -->
+            <div class="hero-slide active" style="background-image: url('images/4runner-trail-2021.jpg')">
                 <div class="hero-overlay"></div>
-                <div class="hero-content">
-                    <span class="hero-tag">CONCESIONARIO PREMIUM</span>
-                    <h1 class="hero-title">MANEJA TUS SUEÑOS<br><span class="text-accent">HOY MISMO</span></h1>
-                    <p class="hero-subtitle">Tu auto nuevo, más cerca de lo que imaginas.</p>
+                <div class="hero-content hero-content-vehicle">
+                    <div class="hero-vehicle-badge">
+                        <i class="fas fa-star"></i> 0 KM — DISPONIBLE
+                    </div>
+                    <div class="hero-vehicle-brand">TOYOTA</div>
+                    <h1 class="hero-title hero-vehicle-title">4Runner<br><span class="text-accent">Trail 2021</span>
+                    </h1>
+                    <div class="hero-vehicle-specs">
+                        <span><i class="fas fa-tachometer-alt"></i> 4.0L V6</span>
+                        <span><i class="fas fa-road"></i> 4x4 Trail Edition</span>
+                        <span><i class="fas fa-palette"></i> Cement Gray</span>
+                    </div>
                     <div class="hero-buttons">
-                        <a href="#catalogo" class="btn btn-primary">
-                            <i class="fas fa-car"></i> Ver Catálogo
-                        </a>
-                        <a href="#contacto" class="btn btn-outline">
-                            <i class="fab fa-whatsapp"></i> Contáctanos
+                        <button class="btn btn-primary" onclick="openVehicleInfoModal('4runner-2021')">
+                            <i class="fas fa-info-circle"></i> Ver Información
+                        </button>
+                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20comprar%20el%20Toyota%204Runner%20Trail%202021%200KM.%20¿Está%20disponible?"
+                            target="_blank" class="btn btn-outline btn-buy">
+                            <i class="fab fa-whatsapp"></i> Comprar Ahora
                         </a>
                     </div>
                 </div>
             </div>
+
+            <!-- SLIDE 2: Generic 0KM placeholder (reemplazar con próximo vehículo) -->
             <div class="hero-slide" style="background-image: url('images/hero2.png')">
                 <div class="hero-overlay"></div>
-                <div class="hero-content">
-                    <span class="hero-tag">CALIDAD Y RESPALDO</span>
-                    <h1 class="hero-title">MÁS QUE AUTOS ENTREGAMOS<br><span class="text-accent">CONFIANZA TOTAL</span>
-                    </h1>
-                    <p class="hero-subtitle">La mejor relación calidad-precio en cada kilómetro.</p>
+                <div class="hero-content hero-content-vehicle">
+                    <div class="hero-vehicle-badge">
+                        <i class="fas fa-star"></i> 0 KM — POR PEDIDO
+                    </div>
+                    <div class="hero-vehicle-brand">PRÓXIMAMENTE</div>
+                    <h1 class="hero-title hero-vehicle-title">Nuevos Modelos<br><span class="text-accent">0KM
+                            2025</span></h1>
+                    <div class="hero-vehicle-specs">
+                        <span><i class="fas fa-ship"></i> Importación Directa</span>
+                        <span><i class="fas fa-shield-halved"></i> Garantía 2 Años</span>
+                        <span><i class="fas fa-file-circle-check"></i> Documentación USA</span>
+                    </div>
                     <div class="hero-buttons">
-                        <a href="#catalogo" class="btn btn-primary">
-                            <i class="fas fa-car"></i> Explorar
+                        <a href="#catalogo" class="btn btn-primary"
+                            onclick="document.querySelector('[data-section=\'0km\']').click()">
+                            <i class="fas fa-star"></i> Ver Catálogo 0KM
                         </a>
-                        <a href="#contacto" class="btn btn-outline">
-                            <i class="fas fa-search"></i> Consultar Modelo
+                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20información%20sobre%20vehículos%200KM%20disponibles."
+                            target="_blank" class="btn btn-outline btn-buy">
+                            <i class="fab fa-whatsapp"></i> Consultar
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="hero-slide" style="background-image: url('images/hero3.png')">
-                <div class="hero-overlay"></div>
-                <div class="hero-content">
-                    <span class="hero-tag">VEHÍCULOS CERTIFICADOS</span>
-                    <h1 class="hero-title">EXPERIMENTA LA POTENCIA<br><span class="text-accent">DE TU LIBERTAD</span>
-                    </h1>
-                    <p class="hero-subtitle">Diseñados para destacar, listos para rodar.</p>
-                    <div class="hero-buttons">
-                        <a href="#catalogo" class="btn btn-primary">
-                            <i class="fas fa-car-side"></i> Ver Opciones
-                        </a>
-                        <a href="#nosotros" class="btn btn-outline">
-                            <i class="fas fa-info-circle"></i> Conócenos
-                        </a>
-                    </div>
-                </div>
-            </div>
+
         </div>
+
+        <!-- Hero Controls -->
         <div class="hero-controls">
             <button class="hero-arrow hero-prev" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
             <div class="hero-dots" id="heroDots"></div>
@@ -136,6 +144,72 @@
             <div class="scroll-line"></div>
         </div>
     </section>
+
+    <!-- ===== VEHICLE INFO MODAL (0KM) ===== -->
+    <div class="vehicle-info-modal-overlay" id="vehicleInfoModal"
+        onclick="if(event.target===this)closeVehicleInfoModal()">
+        <div class="vehicle-info-modal">
+            <button class="vehicle-modal-close" onclick="closeVehicleInfoModal()"><i class="fas fa-times"></i></button>
+            <div class="vehicle-modal-img-wrap">
+                <img id="vehicleModalImg" src="images/4runner-trail-2021.jpg" alt="Vehículo 0KM">
+                <div class="vehicle-modal-badge"><i class="fas fa-star"></i> 0 KM</div>
+            </div>
+            <div class="vehicle-modal-body">
+                <div class="vehicle-modal-header">
+                    <span class="vehicle-modal-brand" id="vehicleModalBrand">TOYOTA</span>
+                    <h2 class="vehicle-modal-name" id="vehicleModalName">4Runner Trail 2021</h2>
+                    <span class="vehicle-modal-status available"><i class="fas fa-circle"></i> Disponible</span>
+                </div>
+                <div class="vehicle-modal-specs-grid" id="vehicleModalSpecs">
+                    <div class="v-spec"><i class="fas fa-tachometer-alt"></i>
+                        <div><strong>Motor</strong><span>4.0L V6 270 hp</span></div>
+                    </div>
+                    <div class="v-spec"><i class="fas fa-road"></i>
+                        <div><strong>Tracción</strong><span>4x4 Trail Edition</span></div>
+                    </div>
+                    <div class="v-spec"><i class="fas fa-palette"></i>
+                        <div><strong>Color</strong><span>Cement Gray</span></div>
+                    </div>
+                    <div class="v-spec"><i class="fas fa-gas-pump"></i>
+                        <div><strong>Combustible</strong><span>Gasolina</span></div>
+                    </div>
+                    <div class="v-spec"><i class="fas fa-cog"></i>
+                        <div><strong>Transmisión</strong><span>Automática 5 vel.</span></div>
+                    </div>
+                    <div class="v-spec"><i class="fas fa-calendar"></i>
+                        <div><strong>Año</strong><span>2021</span></div>
+                    </div>
+                    <div class="v-spec"><i class="fas fa-gauge-high"></i>
+                        <div><strong>Kilometraje</strong><span>0 KM</span></div>
+                    </div>
+                    <div class="v-spec"><i class="fas fa-map-marker-alt"></i>
+                        <div><strong>Estatus</strong><span>Puerto Libre</span></div>
+                    </div>
+                </div>
+                <div class="vehicle-modal-features">
+                    <h4>Equipamiento Destacado</h4>
+                    <ul>
+                        <li><i class="fas fa-check"></i> TRD Off-Road Package</li>
+                        <li><i class="fas fa-check"></i> Llantas BBS 17" Black</li>
+                        <li><i class="fas fa-check"></i> Cámara trasera HD</li>
+                        <li><i class="fas fa-check"></i> Apple CarPlay / Android Auto</li>
+                        <li><i class="fas fa-check"></i> Control de crucero adaptativo</li>
+                        <li><i class="fas fa-check"></i> Asientos de cuero calefaccionados</li>
+                    </ul>
+                </div>
+                <div class="vehicle-modal-actions">
+                    <a href="https://wa.me/584147977832?text=Hola,%20quiero%20comprar%20el%20Toyota%204Runner%20Trail%202021%200KM.%20¿Está%20disponible?"
+                        target="_blank" class="btn btn-primary btn-full">
+                        <i class="fab fa-whatsapp"></i> Quiero Comprarlo
+                    </a>
+                    <a href="https://wa.me/584147977832?text=Hola,%20quiero%20más%20información%20sobre%20el%20Toyota%204Runner%20Trail%202021%200KM."
+                        target="_blank" class="btn btn-outline btn-full">
+                        <i class="fas fa-comments"></i> Solicitar Más Info
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== NUESTRA HISTORIA (Intro after Hero) ===== -->
     <section class="about-section about-intro" id="nosotros">
