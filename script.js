@@ -215,6 +215,15 @@ document.addEventListener('DOMContentLoaded', () => {
         renderVehicles(appVehiclesSeminuevos, seminuevosGrid, filtersState.seminuevos.type, filtersState.seminuevos.brand);
         renderVehicles(appVehiclesPorPedido, porpedidoGrid, filtersState.porpedido.type, filtersState.porpedido.brand);
         renderVehicles(appVehicles0km, zerokmGrid, filtersState.zerokm.type, filtersState.zerokm.brand);
+
+        // Featured grid population
+        const featuredGrid = document.getElementById('featuredVehiclesGrid');
+        if (featuredGrid) {
+            let allVehicles = [...appVehiclesSeminuevos, ...appVehicles0km, ...appVehiclesPorPedido];
+            // Sort by views descending to show the most popular cars
+            allVehicles.sort((a, b) => (b.views || 0) - (a.views || 0));
+            renderVehicles(allVehicles.slice(0, 4), featuredGrid, 'todos', 'todos');
+        }
     }
 
     // ===== FILTER STATE =====
