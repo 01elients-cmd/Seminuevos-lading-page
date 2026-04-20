@@ -1322,8 +1322,9 @@
                         <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
                         <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
                         <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
-                        <strong>Tip del Experto:</strong> Usa el <strong>Bookmarklet</strong> para importar desde
-                        Copart/IAAI sin restricciones. Arrastra este botón a tu barra de marcadores:
+                        <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa el
+                        <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
+                        importar incluso si el sitio bloquea al servidor.
                         <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
                             class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
                     </p>
@@ -2017,7 +2018,7 @@
                     fillForm(result.data);
                     showToast('Datos importados con éxito', 'success');
                 } else {
-                    showToast('No se pudo extraer data automáticamente. Prueba el Bookmarklet.', 'error');
+                    showToast('Sitio bloqueado o sin datos. ¡Usa el Bookmarklet!', 'warning');
                 }
             } catch (err) {
                 showToast('Error de conexión con el importador', 'error');
