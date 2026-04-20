@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let allVehicles = [...appVehiclesSeminuevos, ...appVehicles0km, ...appVehiclesPorPedido];
             // Sort by views descending to show the most popular cars
             allVehicles.sort((a, b) => (b.views || 0) - (a.views || 0));
-            renderVehicles(allVehicles.slice(0, 4), featuredGrid, 'todos', 'todos');
+            renderVehicles(allVehicles.slice(0, 3), featuredGrid, 'todos', 'todos');
         }
     }
 
