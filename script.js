@@ -8,6 +8,25 @@
 window.WHATSAPP_NUMBER = "584147977832"; // Default fallback
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ===== ANALYTICS TRACKING =====
+    let modalStartTime = 0;
+    let currentVehicleId = null;
+    let currentVehicleTitle = '';
+
+    async function logAnalyticsEvent(type, data = {}) {
+        try {
+            await supabaseClient.from('site_analytics').insert([{
+                event_type: type,
+                event_data: data,
+                url: window.location.pathname
+            }]);
+        } catch (e) {
+            console.warn('Analytics error:', e);
+        }
+    }
+
+    // Initial page view
+    logAnalyticsEvent('page_view', { referrer: document.referrer });
 
     // ===== HERO SLIDER =====
     const heroSlider = {
@@ -196,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="vehicle-card-image"><img src="${car.images[0]}" alt="${car.title}" loading="lazy">${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}${viewsBadge}<div class="vehicle-card-tags">${originBadge}</div></div>
                 <div class="vehicle-card-body"><div class="vehicle-card-header"><h3 class="vehicle-card-title">${car.title}</h3><span class="vehicle-availability ${availabilityClass}"><i class="fas ${availabilityIcon}"></i> ${availabilityText}</span></div><p class="vehicle-card-price">${priceDisplay}</p><div class="vehicle-card-specs"><span class="spec-item"><i class="fas fa-calendar"></i> ${car.year}</span><span class="spec-item"><i class="fas fa-road"></i> ${car.km}</span><span class="spec-item"><i class="fas fa-gas-pump"></i> ${car.fuel}</span><span class="spec-item"><i class="fas fa-gears"></i> ${car.transmission}</span></div></div>
-                <div class="vehicle-card-footer"><a href="#" class="view-details" data-id="${car.id}"><i class="fas fa-eye"></i> Ver detalles</a><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${car.availability === 'por_pedido' ? 'Por Pedido' : car.price}. ¿Me pueden cotizar?`)}" target="_blank"><i class="fab fa-whatsapp"></i> Cotiza</a></div>
+                <div class="vehicle-card-footer"><a href="#" class="view-details" data-id="${car.id}"><i class="fas fa-eye"></i> Ver detalles</a><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${car.availability === 'por_pedido' ? 'Por Pedido' : car.price}. ¿Me pueden cotizar?`)}" class="track-whatsapp" data-title="${car.title}" target="_blank"><i class="fab fa-whatsapp"></i> Cotiza</a></div>
             `;
             gridElement.appendChild(card);
         });
@@ -380,6 +399,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const car = allVehs.find(v => String(v.id) === carId);
         if (!car) return;
 
+        // Analytics Tracking
+        modalStartTime = performance.now();
+        currentVehicleId = car.id;
+        currentVehicleTitle = car.title;
+        logAnalyticsEvent('vehicle_view', { vehicle_id: car.id, title: car.title });
+
         // === INCREMENT VIEW COUNT (via RPC para evitar problemas de RLS) ===
         try {
             const newViews = (car.views || 0) + 1;
@@ -433,6 +458,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const whatsappLink = document.getElementById('modalWhatsapp');
         const priceText = car.price === 'Consultar' ? 'Consultar precio' : car.price;
         whatsappLink.href = `https://wa.me/${window.WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${priceText}. ¿Me pueden cotizar?`)}`;
+        whatsappLink.classList.add('track-whatsapp');
+        whatsappLink.dataset.title = car.title;
         whatsappLink.innerHTML = '<i class="fab fa-whatsapp"></i> Cotiza tu vehículo';
 
         modal.classList.add('active');
@@ -440,8 +467,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeModal() {
+        if (modal.classList.contains('active') && currentVehicleId) {
+            const duration = Math.round((performance.now() - modalStartTime) / 1000);
+            if (duration > 1) {
+                logAnalyticsEvent('time_spent', {
+                    vehicle_id: currentVehicleId,
+                    title: currentVehicleTitle,
+                    duration_seconds: duration
+                });
+            }
+        }
         modal.classList.remove('active');
         document.body.style.overflow = '';
+        currentVehicleId = null;
     }
 
     modalClose?.addEventListener('click', closeModal);
@@ -457,6 +495,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('click', (e) => {
+        const waBtn = e.target.closest('.track-whatsapp');
+        if (waBtn) {
+            logAnalyticsEvent('whatsapp_click', { vehicle: waBtn.dataset.title });
+        }
+
         const viewBtn = e.target.closest('.view-details');
         const vehicleCard = e.target.closest('.vehicle-card');
 
