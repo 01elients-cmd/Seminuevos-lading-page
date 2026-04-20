@@ -716,8 +716,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const docVzla = 1000;
         // costTraslado viene directo del select (ya incluye el costo base de la grúa por ubicación)
         const costTraslado = parseFloat(document.getElementById('calcState').value) || 0;
-        const includeRepairs = document.getElementById('calcRepairs').checked;
-        const repuesto = includeRepairs ? baseCost * 0.12 : 0;
+        const includeRepairs1 = document.getElementById('calcRepairs1').checked;
+        const includeRepairs2 = document.getElementById('calcRepairs2').checked;
+        const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
         const includeKit = document.getElementById('calcMaintenanceKit').checked;
         const kit = includeKit ? 300 : 0;
         const includeWarranty = document.getElementById('calcWarranty') ? document.getElementById('calcWarranty').checked : false;
@@ -749,7 +750,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCalculateCost = document.getElementById('btnCalculateCost');
     btnCalculateCost?.addEventListener('click', updateCalc);
 
-    document.getElementById('calcRepairs')?.addEventListener('change', updateCalc);
+    document.getElementById('calcRepairs1')?.addEventListener('change', updateCalc);
+    document.getElementById('calcRepairs2')?.addEventListener('change', updateCalc);
     document.getElementById('calcMaintenanceKit')?.addEventListener('change', updateCalc);
     document.getElementById('calcWarranty')?.addEventListener('change', updateCalc);
     document.getElementById('calcBaseCost')?.addEventListener('input', updateCalc);
