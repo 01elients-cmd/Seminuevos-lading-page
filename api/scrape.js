@@ -47,7 +47,7 @@ export default async function handler(req, res) {
         }
 
         const site = url.includes('copart.com') ? 'copart' : url.includes('iaai.com') ? 'iaai' : 'generic';
-        const data = site === 'copart' ? parseCopart(content) : site === 'iaai' ? parseIAAI(content) : parseGeneric(content, url);
+        const data = site === 'copart' ? parseCopart(content, url) : site === 'iaai' ? parseIAAI(content, url) : parseGeneric(content, url);
 
         return res.status(200).json({
             success: !!(data.title || data.images?.length),
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     }
 }
 
-function parseCopart(html) {
+function parseCopart(html, url = "") {
     const data = { images: [] };
 
     // Title / Year
@@ -72,48 +72,63 @@ function parseCopart(html) {
         if (yearMatch) data.year = yearMatch[0];
     }
 
-    // Specs - Using more robust patterns (handles data-uname and labels)
     const getSpec = (label) => {
         const regex = new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i');
         const match = html.match(regex);
-        return match ? match[1].trim().replace(/^[:\s-]+/, '') : null;
+        return match ? match[1].trim().replace(/^[:\s-]+/, '').trim() : null;
     };
 
     data.km = getSpec('Odometer');
     data.engine = getSpec('Engine type') || getSpec('Engine');
     data.transmission = getSpec('Transmission');
     data.fuel = getSpec('Fuel');
-
-    const bodyMatch = getSpec('Body Style') || getSpec('Body Style :');
-    data.bodyType = bodyMatch ? bodyMatch.toLowerCase() : null;
+    data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
     // Price
-    const priceMatch = html.match(/current-bid[^>]*>[\s]*\$?([\d,]+)/i) || html.match(/"currentBid":([\d.]+)/);
+    const priceMatch = html.match(/current-bid[^>]*>[\s]*\$?([\d,]+)/i) ||
+        html.match(/"currentBid":([\d.]+)/) ||
+        html.match(/item-value">\$([\d,]+)/i);
     if (priceMatch) data.price = '$' + priceMatch[1].replace(/,/g, '');
 
-    // Images
+    // Images discovery
     const imgRegexes = [
         /"fullUrl":"([^"]+)"/g,
         /"highResUrl":"([^"]+)"/g,
-        /https:\/\/static\.copart\.com\/[^"']+-X\.JPG/g,
-        /https:\/\/cs\.copart\.com\/v1\/[^"']+\.jpg/g
+        /https:\/\/static\.copart\.com\/[^"']+\.JPG/gi,
+        /https:\/\/cs\.copart\.com\/v1\/[^"']+\.jpg/gi
     ];
-
     imgRegexes.forEach(reg => {
         let m;
         while ((m = reg.exec(html)) !== null) {
-            const url = Array.isArray(m) ? m[m.length - 1] : m;
-            if (!data.images.includes(url) && url.includes('.jpg')) data.images.push(url);
+            const src = Array.isArray(m) ? m[m.length - 1] : m;
+            if (src.includes('.jpg') || src.includes('.JPG')) {
+                if (!data.images.includes(src)) data.images.push(src);
+            }
         }
     });
 
-    data.images = [...new Set(data.images)].slice(0, 15);
-    data.description = "Importado vía subasta Copart. " + (getSpec('Damage') ? `Daño: ${getSpec('Damage')}. ` : "");
+    // Lot ID from URL if possible
+    const lotIdFromUrl = url.match(/lot\/(\d+)/i);
+    if (lotIdFromUrl && data.images.length === 0) {
+        // Construct standard Copart image pattern
+        for (let i = 1; i <= 10; i++) {
+            data.images.push(`https://static.copart.com/content/resp/lotImages/full/${lotIdFromUrl[1]}_${i}.JPG`);
+        }
+    }
 
+    data.images = [...new Set(data.images)].slice(0, 15);
+
+    // Detailed Description
+    let desc = `Importado vía subasta Copart.`;
+    if (getSpec('Damage') || getSpec('Primary Damage')) desc += ` Daño: ${getSpec('Damage') || getSpec('Primary Damage')}.`;
+    if (data.engine) desc += ` Motor: ${data.engine}.`;
+    if (data.transmission) desc += ` Transmisión: ${data.transmission}.`;
+    if (data.km) desc += ` Odometer: ${data.km}.`;
+    data.description = desc;
     return data;
 }
 
-function parseIAAI(html) {
+function parseIAAI(html, url = "") {
     const data = { images: [] };
 
     // Title / Year
@@ -136,24 +151,32 @@ function parseIAAI(html) {
     data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Extract Lot Number for Image Construction
+    // Price
+    const priceMatch = html.match(/current-bid[^>]*>[\s]*\$?([\d,]+)/i) ||
+        html.match(/bid-amount">\$([\d,]+)/i) ||
+        html.match(/item-value">\$([\d,]+)/i);
+    if (priceMatch) data.price = '$' + priceMatch[1].replace(/,/g, '');
+
+    // Extract Lot Number from HTML or URL
+    const lotIdFromUrl = url.match(/VehicleDetail\/(\d+)/i) || url.match(/~/i) ? url.split('VehicleDetail/')[1]?.split('~')[0] : null;
     const lotMatch = html.match(/Lot\s*#\s*:?\s*(\d{8})/i) || html.match(/Stock\s*#\s*:?\s*(\d{8})/i) || html.match(/stockNumber\s*:\s*"(\d+)"/);
-    const lotId = lotMatch ? lotMatch[1] : null;
+    const lotId = lotMatch ? lotMatch[1] : (typeof lotIdFromUrl === 'string' ? lotIdFromUrl : null);
 
     if (lotId) {
-        // Generate potential high-res image URLs for IAAI
         for (let i = 1; i <= 12; i++) {
             data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
         }
     }
 
-    // Fallback for images already in HTML
-    const imgRegex = /https:\/\/vis\.iaai\.com\/[^"'\s]+Width=800/g;
-    const foundImgs = html.match(imgRegex) || [];
-    foundImgs.forEach(img => { if (!data.images.includes(img)) data.images.push(img); });
+    data.images = [...new Set(data.images)].slice(0, 15);
 
-    data.description = "Importado vía subasta IAAI. " + (getSpec('Primary Damage') ? `Daño: ${getSpec('Primary Damage')}. ` : "");
-
+    // Detailed Description
+    let desc = `Importado vía subasta IAAI.`;
+    if (getSpec('Primary Damage')) desc += ` Daño: ${getSpec('Primary Damage')}.`;
+    if (data.engine) desc += ` Motor: ${data.engine}.`;
+    if (data.transmission) desc += ` Transmisión: ${data.transmission}.`;
+    if (data.km) desc += ` Odometer: ${data.km}.`;
+    data.description = desc;
     return data;
 }
 
