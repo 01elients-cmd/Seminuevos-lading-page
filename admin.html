@@ -2027,7 +2027,7 @@
             }
         });
 
-        function fillForm(data) {
+        async function fillForm(data) {
             if (!data) return;
             if (data.title) document.getElementById('vTitle').value = data.title;
             if (data.price) document.getElementById('vPrice').value = data.price;
@@ -2044,8 +2044,30 @@
             document.getElementById('vAvailability').value = 'por_pedido';
 
             if (data.images && data.images.length) {
-                uploadedImages = data.images.map(src => ({ src, edited: null }));
+                showToast('Descargando imágenes...', 'info');
+                uploadedImages = [];
                 renderImagePreviews();
+
+                for (const src of data.images) {
+                    try {
+                        // Proxy through our API to avoid CORS and get blob
+                        const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(src)}`;
+                        const res = await fetch(proxyUrl);
+                        if (!res.ok) throw new Error("Proxy error");
+                        const blob = await res.blob();
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            uploadedImages.push({ src: reader.result, edited: null });
+                            renderImagePreviews();
+                        };
+                        reader.readAsDataURL(blob);
+                    } catch (e) {
+                        console.error("Failed to proxy image", src, e);
+                        // Fallback
+                        uploadedImages.push({ src, edited: null });
+                        renderImagePreviews();
+                    }
+                }
             }
         }
 

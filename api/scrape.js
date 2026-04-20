@@ -4,6 +4,21 @@
  */
 
 export default async function handler(req, res) {
+    // IMAGE PROXY MODE
+    if (req.method === 'GET' && req.query.proxy) {
+        try {
+            const target = decodeURIComponent(req.query.proxy);
+            const response = await fetch(target);
+            const blob = await response.blob();
+            const buffer = Buffer.from(await blob.arrayBuffer());
+            res.setHeader('Content-Type', response.headers.get('Content-Type') || 'image/jpeg');
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            return res.send(buffer);
+        } catch (e) {
+            return res.status(500).send('Proxy error');
+        }
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
@@ -14,7 +29,7 @@ export default async function handler(req, res) {
     try {
         let content = html;
 
-        // If HTML not provided, try to fetch it (often blocked by protected sites)
+        // If HTML not provided, try to fetch it
         if (!content) {
             const response = await fetch(url, {
                 headers: {
@@ -43,7 +58,6 @@ function parseCopart(html) {
     const data = { images: [] };
 
     // Title / Year
-    // Usually: 2023 TOYOTA TACOMA ...
     const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i);
     if (titleMatch) {
         data.title = titleMatch[1].replace(/Lot #\d+/i, '').replace(/[\r\n\t]+/g, ' ').trim();
@@ -51,39 +65,42 @@ function parseCopart(html) {
         if (yearMatch) data.year = yearMatch[0];
     }
 
-    // Specs
+    // Specs - Using more robust patterns (handles data-uname and labels)
     const getSpec = (label) => {
-        const regex = new RegExp(label + ':[^>]*>([^<]+)', 'i');
+        const regex = new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i');
         const match = html.match(regex);
-        return match ? match[1].trim() : null;
+        return match ? match[1].trim().replace(/^[:\s-]+/, '') : null;
     };
 
-    data.km = getSpec('Odometer') || getSpec('KM');
-    data.engine = getSpec('Engine');
+    data.km = getSpec('Odometer');
+    data.engine = getSpec('Engine type') || getSpec('Engine');
     data.transmission = getSpec('Transmission');
     data.fuel = getSpec('Fuel');
-    data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Price (Bid)
-    const priceMatch = html.match(/"currentBid":([\d.]+)/) || html.match(/\$([\d,]+)/);
-    if (priceMatch) data.price = priceMatch[1].startsWith('$') ? priceMatch[0] : '$' + priceMatch[1];
+    const bodyMatch = getSpec('Body Style') || getSpec('Body Style :');
+    data.bodyType = bodyMatch ? bodyMatch.toLowerCase() : null;
+
+    // Price
+    const priceMatch = html.match(/current-bid[^>]*>[\s]*\$?([\d,]+)/i) || html.match(/"currentBid":([\d.]+)/);
+    if (priceMatch) data.price = '$' + priceMatch[1].replace(/,/g, '');
 
     // Images
-    // Copart images are often listed in a script or in highResUrl
-    const imgRegex = /"fullUrl":"([^"]+)"/g;
-    let match;
-    while ((match = imgRegex.exec(html)) !== null) {
-        if (!data.images.includes(match[1])) data.images.push(match[1]);
-    }
+    const imgRegexes = [
+        /"fullUrl":"([^"]+)"/g,
+        /"highResUrl":"([^"]+)"/g,
+        /https:\/\/static\.copart\.com\/[^"']+-X\.JPG/g,
+        /https:\/\/cs\.copart\.com\/v1\/[^"']+\.jpg/g
+    ];
 
-    // Fallback images from traditional img tags if script parsing fails
-    if (data.images.length === 0) {
-        const thumbRegex = /https:\/\/static\.copart\.com\/[^"]+-X\.JPG/g;
-        const thumbs = html.match(thumbRegex) || [];
-        data.images = [...new Set(thumbs)];
-    }
+    imgRegexes.forEach(reg => {
+        let m;
+        while ((m = reg.exec(html)) !== null) {
+            const url = Array.isArray(m) ? m[m.length - 1] : m;
+            if (!data.images.includes(url) && url.includes('.jpg')) data.images.push(url);
+        }
+    });
 
-    // Description
+    data.images = [...new Set(data.images)].slice(0, 15);
     data.description = "Importado vía subasta Copart. " + (getSpec('Damage') ? `Daño: ${getSpec('Damage')}. ` : "");
 
     return data;
@@ -92,7 +109,6 @@ function parseCopart(html) {
 function parseIAAI(html) {
     const data = { images: [] };
 
-    // Title
     const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
     if (titleMatch) {
         data.title = titleMatch[1].replace(/[\r\n\t]+/g, ' ').trim();
@@ -100,11 +116,10 @@ function parseIAAI(html) {
         if (yearMatch) data.year = yearMatch[0];
     }
 
-    // Specs
     const getSpec = (label) => {
-        const regex = new RegExp(label + '[^<]*<\/span>[^<]*<span[^>]*>([^<]+)', 'i');
+        const regex = new RegExp(`${label}[\\s\\S]{0,100}?>[\\s\\S]*?([^<]{2,})<`, 'i');
         const match = html.match(regex);
-        return match ? match[1].trim() : null;
+        return match ? match[1].trim().replace(/^[:\s-]+/, '') : null;
     };
 
     data.km = getSpec('Odometer');
@@ -113,10 +128,8 @@ function parseIAAI(html) {
     data.fuel = getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Images
     const imgRegex = /https:\/\/vis\.iaai\.com\/[^"'\s]+Width=800/g;
-    data.images = html.match(imgRegex) || [];
-
+    data.images = [...new Set(html.match(imgRegex) || [])].slice(0, 15);
     data.description = "Importado vía subasta IAAI.";
 
     return data;
@@ -126,10 +139,8 @@ function parseGeneric(html, url) {
     const data = { images: [] };
     const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
     data.title = titleMatch ? titleMatch[1].trim() : 'Vehículo Importado';
-
     const imgRegex = /<meta property="og:image" content="([^"]+)"/i;
     const imgMatch = html.match(imgRegex);
     if (imgMatch) data.images.push(imgMatch[1]);
-
     return data;
 }
