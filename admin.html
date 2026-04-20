@@ -1298,71 +1298,72 @@
                     <button class="btn btn-primary" id="saveSettingsBtn"><i class="fas fa-save"></i> Guardar
                         Configuración</button>
                 </div>
+            </div>
 
-                <!-- BULK IMPORT TAB -->
-                <div class="tab-content" id="tab-bulk">
-                    <div class="page-header">
-                        <h1 class="page-title">Importación <span>Masiva</span></h1>
-                        <button class="btn btn-primary" id="startBulkImport"><i class="fas fa-play"></i> Iniciar
-                            Proceso</button>
-                    </div>
-                    <div class="info-banner"><i class="fas fa-info-circle"></i>
-                        <p>Pega una lista de enlaces (uno por línea). El sistema los procesará e importará
-                            automáticamente.</p>
-                    </div>
-                    <div class="form-group full">
-                        <textarea class="form-textarea" id="bulkLinks" style="height: 300px; font-family: monospace;"
-                            placeholder="https://www.iaai.com/VehicleDetail/...\nhttps://www.copart.com/lot/..."></textarea>
-                    </div>
-                    <div id="bulkStatus" style="margin-top: 20px;"></div>
+            <!-- BULK IMPORT TAB -->
+            <div class="tab-content" id="tab-bulk">
+                <div class="page-header">
+                    <h1 class="page-title">Importación <span>Masiva</span></h1>
+                    <button class="btn btn-primary" id="startBulkImport"><i class="fas fa-play"></i> Iniciar
+                        Proceso</button>
                 </div>
+                <div class="info-banner"><i class="fas fa-info-circle"></i>
+                    <p>Pega una lista de enlaces (uno por línea). El sistema los procesará e importará
+                        automáticamente.</p>
+                </div>
+                <div class="form-group full">
+                    <textarea class="form-textarea" id="bulkLinks" style="height: 300px; font-family: monospace;"
+                        placeholder="https://www.iaai.com/VehicleDetail/...\nhttps://www.copart.com/lot/..."></textarea>
+                </div>
+                <div id="bulkStatus" style="margin-top: 20px;"></div>
+            </div>
 
-                <!-- EXPORT TAB -->
-                <div class="tab-content" id="tab-export">
-                    <div class="page-header">
-                        <h1 class="page-title">Exportar <span>Datos</span></h1><button class="btn btn-primary"
-                            id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar Código</button>
-                    </div>
-                    <div class="info-banner"><i class="fas fa-info-circle"></i>
-                        <p>Este código se genera automáticamente desde la base de datos. Copia y pega en
-                            <strong>data.js</strong> si necesitas un backup estático.
-                        </p>
-                    </div>
-                    <div class="code-preview">
-                        <div class="code-header">
-                            <h3><i class="fas fa-file-code"></i> data.js</h3>
-                        </div>
-                        <div class="code-body" id="codeOutput"></div>
-                    </div>
+            <!-- EXPORT TAB -->
+            <div class="tab-content" id="tab-export">
+                <div class="page-header">
+                    <h1 class="page-title">Exportar <span>Datos</span></h1><button class="btn btn-primary"
+                        id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar Código</button>
                 </div>
+                <div class="info-banner"><i class="fas fa-info-circle"></i>
+                    <p>Este código se genera automáticamente desde la base de datos. Copia y pega en
+                        <strong>data.js</strong> si necesitas un backup estático.
+                    </p>
+                </div>
+                <div class="code-preview">
+                    <div class="code-header">
+                        <h3><i class="fas fa-file-code"></i> data.js</h3>
+                    </div>
+                    <div class="code-body" id="codeOutput"></div>
+                </div>
+            </div>
 
-                <!-- HELP TAB -->
-                <div class="tab-content" id="tab-help">
-                    <div class="page-header">
-                        <h1 class="page-title">Centro de <span>Ayuda</span></h1>
-                    </div>
-                    <div class="info-banner"><i class="fas fa-lightbulb"></i>
-                        <p><strong>Panel conectado a Base de Datos</strong><br>
-                            Este panel está conectado a Supabase. Todos los cambios se reflejan en la página
-                            automáticamente.<br><br>
-                            <strong>Vehículos:</strong> Agrega, edita y elimina vehículos. Las imágenes se suben al
-                            storage.<br>
-                            <strong>Consultas:</strong> Ve los mensajes de clientes que llegan por el formulario de
-                            contacto.<br>
-                            <strong>Configuración:</strong> Cambia WhatsApp, redes sociales y datos de la empresa.<br>
-                            <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
-                            <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
-                            <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
-                            <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
-                            <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa
-                            el
-                            <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
-                            importar incluso si el sitio bloquea al servidor.
-                            <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
-                                class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
-                        </p>
-                    </div>
+            <!-- HELP TAB -->
+            <div class="tab-content" id="tab-help">
+                <div class="page-header">
+                    <h1 class="page-title">Centro de <span>Ayuda</span></h1>
                 </div>
+                <div class="info-banner"><i class="fas fa-lightbulb"></i>
+                    <p><strong>Panel conectado a Base de Datos</strong><br>
+                        Este panel está conectado a Supabase. Todos los cambios se reflejan en la página
+                        automáticamente.<br><br>
+                        <strong>Vehículos:</strong> Agrega, edita y elimina vehículos. Las imágenes se suben al
+                        storage.<br>
+                        <strong>Consultas:</strong> Ve los mensajes de clientes que llegan por el formulario de
+                        contacto.<br>
+                        <strong>Configuración:</strong> Cambia WhatsApp, redes sociales y datos de la empresa.<br>
+                        <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
+                        <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
+                        <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
+                        <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
+                        <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa
+                        el
+                        <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
+                        importar incluso si el sitio bloquea al servidor.
+                        <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
+                            class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
+                    </p>
+                </div>
+            </div>
         </main>
     </div>
 
