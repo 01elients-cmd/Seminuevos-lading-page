@@ -2102,17 +2102,22 @@
                         const data = result.data;
                         const finalImgs = [];
 
-                        for (const src of (data.images || []).slice(0, 5)) {
+                        for (const src of (data.images || []).slice(0, 6)) {
                             try {
-                                const res = await fetch(`/api/scrape?proxy=${encodeURIComponent(src)}`);
+                                const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(src)}${proxyKey ? '&key=' + proxyKey : ''}`;
+                                const res = await fetch(proxyUrl);
                                 if (res.ok) {
                                     const blob = await res.blob();
-                                    const fname = `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
-                                    await supabaseClient.storage.from('vehicle-images').upload(fname, blob, { contentType: 'image/jpeg' });
-                                    const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
-                                    finalImgs.push(urlData.publicUrl);
+                                    if (blob.size > 2000) { // check if it's a real image
+                                        const fname = `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
+                                        await supabaseClient.storage.from('vehicle-images').upload(fname, blob, { contentType: 'image/jpeg' });
+                                        const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
+                                        finalImgs.push(urlData.publicUrl);
+                                    }
                                 }
-                            } catch (e) { console.error(e); }
+                            } catch (e) {
+                                console.error(e);
+                            }
                         }
 
                         const vehicleData = {
@@ -2151,6 +2156,7 @@
             statusBox.innerHTML += `<div class="info-banner" style="margin-top:10px; background:var(--bg3)"><strong>Proceso terminado:</strong> ${successCount} éxitos, ${errorCount} errores.</div>`;
             await loadDashboard();
         });
+
 
         async function fillForm(data) {
             if (!data) return;

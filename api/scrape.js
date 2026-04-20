@@ -8,11 +8,15 @@ export default async function handler(req, res) {
     if (req.method === 'GET' && req.query.proxy) {
         try {
             const target = decodeURIComponent(req.query.proxy);
-            const response = await fetch(target);
+            const key = req.query.key;
+            let fetchUrl = target;
+            if (key) {
+                fetchUrl = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(target)}`;
+            }
+            const response = await fetch(fetchUrl);
             const blob = await response.blob();
             const buffer = Buffer.from(await blob.arrayBuffer());
             res.setHeader('Content-Type', response.headers.get('Content-Type') || 'image/jpeg');
-            res.setHeader('Cache-Control', 'public, max-age=86400');
             return res.send(buffer);
         } catch (e) {
             return res.status(500).send('Proxy error');
@@ -151,15 +155,27 @@ function parseIAAI(html, url = "") {
     data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Price
-    const priceMatch = html.match(/current-bid[^>]*>[\s]*\$?([\d,]+)/i) ||
-        html.match(/bid-amount">\$([\d,]+)/i) ||
-        html.match(/item-value">\$([\d,]+)/i);
-    if (priceMatch) data.price = '$' + priceMatch[1].replace(/,/g, '');
+    // Price - Deep search
+    const pricePatterns = [
+        /bid-amount[^>]*>\$?([\d,.]+)/i,
+        /current-bid[^>]*>\$?([\d,.]+)/i,
+        /item-value">\$?([\d,.]+)/i,
+        /current bid[\s\S]*?\$([\d,.]+)/i,
+        /buy it now[\s\S]*?\$([\d,.]+)/i,
+        /\$([\d,]{4,7})/
+    ];
+    for (const reg of pricePatterns) {
+        const m = html.match(reg);
+        if (m && m[1]) {
+            data.price = '$' + m[1].replace(/[,.]/g, '');
+            if (data.price.length > 2) break;
+        }
+    }
+    if (!data.price || data.price === "$0") data.price = "Consultar";
 
     // Extract Lot Number from HTML or URL
-    const lotIdFromUrl = url.match(/VehicleDetail\/(\d+)/i) || url.match(/~/i) ? url.split('VehicleDetail/')[1]?.split('~')[0] : null;
-    const lotMatch = html.match(/Lot\s*#\s*:?\s*(\d{8})/i) || html.match(/Stock\s*#\s*:?\s*(\d{8})/i) || html.match(/stockNumber\s*:\s*"(\d+)"/);
+    const lotIdFromUrl = url.match(/VehicleDetail\/(\d+)/i) || (url.match(/~/i) ? url.split('VehicleDetail/')[1]?.split('~')[0] : null);
+    const lotMatch = html.match(/Lot\s*#\s*:?\s*(\d{7,10})/i) || html.match(/Stock\s*#\s*:?\s*(\d{7,10})/i) || html.match(/stockNumber\s*:\s*"(\d+)"/);
     const lotId = lotMatch ? lotMatch[1] : (typeof lotIdFromUrl === 'string' ? lotIdFromUrl : null);
 
     if (lotId) {
