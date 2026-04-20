@@ -109,28 +109,43 @@ function parseCopart(html) {
 function parseIAAI(html) {
     const data = { images: [] };
 
-    const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    // Title / Year
+    const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i);
     if (titleMatch) {
-        data.title = titleMatch[1].replace(/[\r\n\t]+/g, ' ').trim();
+        data.title = titleMatch[1].replace(/[\r\n\t]+/g, ' ').replace(/Stock\s*#.*/i, '').trim();
         const yearMatch = data.title.match(/\d{4}/);
         if (yearMatch) data.year = yearMatch[0];
     }
 
     const getSpec = (label) => {
-        const regex = new RegExp(`${label}[\\s\\S]{0,100}?>[\\s\\S]*?([^<]{2,})<`, 'i');
+        const regex = new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i');
         const match = html.match(regex);
-        return match ? match[1].trim().replace(/^[:\s-]+/, '') : null;
+        return match ? match[1].trim().replace(/^[:\s-]+/, '').replace(/\([^)]*\)/g, '').trim() : null;
     };
 
-    data.km = getSpec('Odometer');
+    data.km = getSpec('Odometer') || getSpec('Mileage');
     data.engine = getSpec('Engine');
     data.transmission = getSpec('Transmission');
-    data.fuel = getSpec('Fuel');
+    data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
+    // Extract Lot Number for Image Construction
+    const lotMatch = html.match(/Lot\s*#\s*:?\s*(\d{8})/i) || html.match(/Stock\s*#\s*:?\s*(\d{8})/i) || html.match(/stockNumber\s*:\s*"(\d+)"/);
+    const lotId = lotMatch ? lotMatch[1] : null;
+
+    if (lotId) {
+        // Generate potential high-res image URLs for IAAI
+        for (let i = 1; i <= 12; i++) {
+            data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
+        }
+    }
+
+    // Fallback for images already in HTML
     const imgRegex = /https:\/\/vis\.iaai\.com\/[^"'\s]+Width=800/g;
-    data.images = [...new Set(html.match(imgRegex) || [])].slice(0, 15);
-    data.description = "Importado vía subasta IAAI.";
+    const foundImgs = html.match(imgRegex) || [];
+    foundImgs.forEach(img => { if (!data.images.includes(img)) data.images.push(img); });
+
+    data.description = "Importado vía subasta IAAI. " + (getSpec('Primary Damage') ? `Daño: ${getSpec('Primary Damage')}. ` : "");
 
     return data;
 }
