@@ -1122,6 +1122,40 @@
                 transform: translate(-30px, 50px) scale(0.9);
             }
         }
+
+        /* IMPORT SECTION */
+        .import-section {
+            background: rgba(39, 92, 234, 0.08);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .import-section .form-label {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .bookmarklet-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border-accent);
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: move;
+        }
+
+        .bookmarklet-btn:hover {
+            background: var(--border-accent);
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -1287,7 +1321,11 @@
                         <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
                         <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
                         <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
-                        <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA
+                        <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
+                        <strong>Tip del Experto:</strong> Usa el <strong>Bookmarklet</strong> para importar desde
+                        Copart/IAAI sin restricciones. Arrastra este botón a tu barra de marcadores:
+                        <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
+                            class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
                     </p>
                 </div>
             </div>
@@ -1302,6 +1340,21 @@
                 <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
+                <!-- LINK IMPORTER -->
+                <div class="import-section">
+                    <label class="form-label" style="display: block; margin-bottom: 8px;"><i class="fas fa-magic"></i>
+                        Importador Mágico (Copart / IAAI)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" class="form-input" id="vImportUrl"
+                            placeholder="Pega el link de Copart o IAAI aquí..." style="flex: 1; margin-bottom: 0;">
+                        <button class="btn btn-primary" id="btnDoImport" type="button"><i
+                                class="fas fa-download"></i></button>
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--text3); margin-top: 8px;"><i
+                            class="fas fa-info-circle"></i> Autocompleta fotos, descripción y especificaciones técnicas.
+                    </p>
+                </div>
+
                 <form id="vehicleForm">
                     <div class="form-grid">
                         <div class="form-group full"><label class="form-label">Nombre del Vehículo *</label><input
@@ -1943,6 +1996,100 @@
 
         // ===== INIT =====
         async function loadDashboard() { await loadVehicles(); }
+
+        // ===== IMPORT LOGIC =====
+        document.getElementById('btnDoImport').addEventListener('click', async () => {
+            const url = document.getElementById('vImportUrl').value.trim();
+            if (!url) return;
+            const btn = document.getElementById('btnDoImport');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const response = await fetch('/api/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    fillForm(result.data);
+                    showToast('Datos importados con éxito', 'success');
+                } else {
+                    showToast('No se pudo extraer data automáticamente. Prueba el Bookmarklet.', 'error');
+                }
+            } catch (err) {
+                showToast('Error de conexión con el importador', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        });
+
+        function fillForm(data) {
+            if (!data) return;
+            if (data.title) document.getElementById('vTitle').value = data.title;
+            if (data.price) document.getElementById('vPrice').value = data.price;
+            if (data.year) document.getElementById('vYear').value = data.year;
+            if (data.km) document.getElementById('vKm').value = data.km;
+            if (data.engine) document.getElementById('vEngine').value = data.engine;
+            if (data.transmission) document.getElementById('vTransmission').value = data.transmission;
+            if (data.fuel) document.getElementById('vFuel').value = data.fuel;
+            if (data.description) document.getElementById('vDescription').value = data.description;
+            if (data.bodyType) document.getElementById('vBodyType').value = data.bodyType;
+
+            // Set catalog to "importados" as these are usually from auctions
+            document.getElementById('vCatalog').value = 'importados';
+            document.getElementById('vAvailability').value = 'por_pedido';
+
+            if (data.images && data.images.length) {
+                uploadedImages = data.images.map(src => ({ src, edited: null }));
+                renderImagePreviews();
+            }
+        }
+
+        // Handle Bookmarklet Import
+        const urlParams = new URLSearchParams(window.location.search);
+        const importDataRaw = urlParams.get('import');
+        if (importDataRaw) {
+            try {
+                const importData = JSON.parse(importDataRaw);
+                console.log("Importing from Bookmarklet:", importData);
+                // Clean URL for clean dashboard load next time
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+                // Show modal and fill it
+                setTimeout(() => {
+                    openModal();
+                    // We send the HTML to the scraper API too, so it can parse it locally without being blocked by Copart
+                    processHtmlImport(importData);
+                }, 500);
+            } catch (e) { console.error("Error parsing import data", e); }
+        }
+
+        async function processHtmlImport(importData) {
+            const btn = document.getElementById('btnDoImport');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                const response = await fetch('/api/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: importData.url, html: importData.html })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    fillForm(result.data);
+                    showToast('Importado desde pestaña activa', 'success');
+                }
+            } catch (err) { console.error(err); }
+            finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-download"></i> Importar';
+            }
+        }
+
         checkAuth().then(ok => { if (ok) loadDashboard(); });
     </script>
 </body>
