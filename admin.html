@@ -1186,6 +1186,8 @@
             </div>
             <nav class="sidebar-nav">
                 <button class="sidebar-link active" data-tab="vehicles"><i class="fas fa-car"></i> Vehículos</button>
+                <button class="sidebar-link" data-tab="bulk"><i class="fas fa-layer-group"></i> Importar en
+                    Lote</button>
                 <button class="sidebar-link" data-tab="inquiries"><i class="fas fa-envelope"></i> Consultas</button>
                 <button class="sidebar-link" data-tab="settings"><i class="fas fa-cog"></i> Configuración</button>
                 <div class="sidebar-divider"></div>
@@ -1280,56 +1282,87 @@
                         <div class="form-group"><label class="form-label">YouTube</label><input type="text"
                                 class="form-input" id="sYoutube"></div>
                     </div>
-                </div>
-                <button class="btn btn-primary" id="saveSettingsBtn"><i class="fas fa-save"></i> Guardar
-                    Configuración</button>
-            </div>
-
-            <!-- EXPORT TAB -->
-            <div class="tab-content" id="tab-export">
-                <div class="page-header">
-                    <h1 class="page-title">Exportar <span>Datos</span></h1><button class="btn btn-primary"
-                        id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar Código</button>
-                </div>
-                <div class="info-banner"><i class="fas fa-info-circle"></i>
-                    <p>Este código se genera automáticamente desde la base de datos. Copia y pega en
-                        <strong>data.js</strong> si necesitas un backup estático.
-                    </p>
-                </div>
-                <div class="code-preview">
-                    <div class="code-header">
-                        <h3><i class="fas fa-file-code"></i> data.js</h3>
+                    <div class="settings-section">
+                        <h3><i class="fas fa-key"></i> Configuración Avanzada</h3>
+                        <div class="settings-grid">
+                            <div class="form-group full">
+                                <label class="form-label">Scraper Proxy Key (ScraperAPI)</label>
+                                <input type="password" class="form-input" id="sProxyKey"
+                                    placeholder="Tu API Key de ScraperAPI para bypass de bloqueos">
+                                <p style="font-size: 0.75rem; color: var(--text3); margin-top: 4px;">Necesario para
+                                    importar links de IAAI/Copart en lote sin VPN. Consigue una gratis en scraperapi.com
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="code-body" id="codeOutput"></div>
+                    <button class="btn btn-primary" id="saveSettingsBtn"><i class="fas fa-save"></i> Guardar
+                        Configuración</button>
                 </div>
-            </div>
 
-            <!-- HELP TAB -->
-            <div class="tab-content" id="tab-help">
-                <div class="page-header">
-                    <h1 class="page-title">Centro de <span>Ayuda</span></h1>
+                <!-- BULK IMPORT TAB -->
+                <div class="tab-content" id="tab-bulk">
+                    <div class="page-header">
+                        <h1 class="page-title">Importación <span>Masiva</span></h1>
+                        <button class="btn btn-primary" id="startBulkImport"><i class="fas fa-play"></i> Iniciar
+                            Proceso</button>
+                    </div>
+                    <div class="info-banner"><i class="fas fa-info-circle"></i>
+                        <p>Pega una lista de enlaces (uno por línea). El sistema los procesará e importará
+                            automáticamente.</p>
+                    </div>
+                    <div class="form-group full">
+                        <textarea class="form-textarea" id="bulkLinks" style="height: 300px; font-family: monospace;"
+                            placeholder="https://www.iaai.com/VehicleDetail/...\nhttps://www.copart.com/lot/..."></textarea>
+                    </div>
+                    <div id="bulkStatus" style="margin-top: 20px;"></div>
                 </div>
-                <div class="info-banner"><i class="fas fa-lightbulb"></i>
-                    <p><strong>Panel conectado a Base de Datos</strong><br>
-                        Este panel está conectado a Supabase. Todos los cambios se reflejan en la página
-                        automáticamente.<br><br>
-                        <strong>Vehículos:</strong> Agrega, edita y elimina vehículos. Las imágenes se suben al
-                        storage.<br>
-                        <strong>Consultas:</strong> Ve los mensajes de clientes que llegan por el formulario de
-                        contacto.<br>
-                        <strong>Configuración:</strong> Cambia WhatsApp, redes sociales y datos de la empresa.<br>
-                        <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
-                        <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
-                        <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
-                        <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
-                        <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa el
-                        <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
-                        importar incluso si el sitio bloquea al servidor.
-                        <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
-                            class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
-                    </p>
+
+                <!-- EXPORT TAB -->
+                <div class="tab-content" id="tab-export">
+                    <div class="page-header">
+                        <h1 class="page-title">Exportar <span>Datos</span></h1><button class="btn btn-primary"
+                            id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar Código</button>
+                    </div>
+                    <div class="info-banner"><i class="fas fa-info-circle"></i>
+                        <p>Este código se genera automáticamente desde la base de datos. Copia y pega en
+                            <strong>data.js</strong> si necesitas un backup estático.
+                        </p>
+                    </div>
+                    <div class="code-preview">
+                        <div class="code-header">
+                            <h3><i class="fas fa-file-code"></i> data.js</h3>
+                        </div>
+                        <div class="code-body" id="codeOutput"></div>
+                    </div>
                 </div>
-            </div>
+
+                <!-- HELP TAB -->
+                <div class="tab-content" id="tab-help">
+                    <div class="page-header">
+                        <h1 class="page-title">Centro de <span>Ayuda</span></h1>
+                    </div>
+                    <div class="info-banner"><i class="fas fa-lightbulb"></i>
+                        <p><strong>Panel conectado a Base de Datos</strong><br>
+                            Este panel está conectado a Supabase. Todos los cambios se reflejan en la página
+                            automáticamente.<br><br>
+                            <strong>Vehículos:</strong> Agrega, edita y elimina vehículos. Las imágenes se suben al
+                            storage.<br>
+                            <strong>Consultas:</strong> Ve los mensajes de clientes que llegan por el formulario de
+                            contacto.<br>
+                            <strong>Configuración:</strong> Cambia WhatsApp, redes sociales y datos de la empresa.<br>
+                            <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
+                            <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
+                            <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
+                            <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
+                            <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa
+                            el
+                            <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
+                            importar incluso si el sitio bloquea al servidor.
+                            <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
+                                class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
+                        </p>
+                    </div>
+                </div>
         </main>
     </div>
 
@@ -1938,6 +1971,7 @@
             document.getElementById('sInstagram').value = map.social_instagram || '';
             document.getElementById('sTiktok').value = map.social_tiktok || '';
             document.getElementById('sYoutube').value = map.social_youtube || '';
+            document.getElementById('sProxyKey').value = map.scraper_proxy_key || '';
         }
         document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
             const settings = {
@@ -1949,7 +1983,8 @@
                 social_facebook: document.getElementById('sFacebook').value,
                 social_instagram: document.getElementById('sInstagram').value,
                 social_tiktok: document.getElementById('sTiktok').value,
-                social_youtube: document.getElementById('sYoutube').value
+                social_youtube: document.getElementById('sYoutube').value,
+                scraper_proxy_key: document.getElementById('sProxyKey').value
             };
             for (const [key, val] of Object.entries(settings)) {
                 await supabaseClient.from('site_settings').upsert({ key, value: JSON.stringify(val), updated_at: new Date().toISOString() });
@@ -2007,15 +2042,17 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
+            const proxyKey = document.getElementById('sProxyKey')?.value;
+
             try {
                 const response = await fetch('/api/scrape', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
+                    body: JSON.stringify({ url, proxyKey })
                 });
                 const result = await response.json();
                 if (result.success) {
-                    fillForm(result.data);
+                    await fillForm(result.data);
                     showToast('Datos importados con éxito', 'success');
                 } else {
                     showToast('Sitio bloqueado o sin datos. ¡Usa el Bookmarklet!', 'warning');
@@ -2026,6 +2063,92 @@
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
             }
+        });
+
+        // BULK IMPORT LOGIC
+        document.getElementById('startBulkImport').addEventListener('click', async () => {
+            const linksText = document.getElementById('bulkLinks').value.trim();
+            if (!linksText) return;
+            const links = linksText.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+            if (!links.length) { showToast('No se encontraron enlaces válidos', 'error'); return; }
+
+            const btn = document.getElementById('startBulkImport');
+            const statusBox = document.getElementById('bulkStatus');
+            const proxyKey = document.getElementById('sProxyKey')?.value;
+
+            if (!proxyKey) { showToast('Se recomienda Scraper Proxy Key para procesos en lote', 'warning'); }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            statusBox.innerHTML = `<div class="info-banner" style="background:var(--accent); color:#000; font-weight:700;">Iniciando importación de ${links.length} vehículos...</div>`;
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let i = 0; i < links.length; i++) {
+                const url = links[i];
+                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8">[${i + 1}/${links.length}] Procesando: ${url.substring(0, 50)}...</div>`;
+
+                try {
+                    const response = await fetch('/api/scrape', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url, proxyKey })
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const data = result.data;
+                        const finalImgs = [];
+
+                        for (const src of (data.images || []).slice(0, 5)) {
+                            try {
+                                const res = await fetch(`/api/scrape?proxy=${encodeURIComponent(src)}`);
+                                if (res.ok) {
+                                    const blob = await res.blob();
+                                    const fname = `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
+                                    await supabaseClient.storage.from('vehicle-images').upload(fname, blob, { contentType: 'image/jpeg' });
+                                    const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
+                                    finalImgs.push(urlData.publicUrl);
+                                }
+                            } catch (e) { console.error(e); }
+                        }
+
+                        const vehicleData = {
+                            title: data.title || 'Vehículo Importado',
+                            price: data.price || '$0',
+                            year: parseInt(data.year) || new Date().getFullYear(),
+                            km: data.km || '0 KM',
+                            engine: data.engine || '',
+                            transmission: data.transmission || 'Automático',
+                            fuel: data.fuel || 'Gasolina',
+                            body_type: data.bodyType || 'suv',
+                            catalog: 'importados',
+                            availability: 'por_pedido',
+                            origin: 'importado',
+                            condition: 'seminuevo',
+                            status: 'active',
+                            description: data.description || '',
+                            images: finalImgs
+                        };
+
+                        const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
+                        if (!error) {
+                            successCount++;
+                            statusBox.innerHTML += `<div style="color:var(--accent); font-size:0.8rem; font-weight:600;">✓ Guardado: ${data.title}</div>`;
+                        } else { throw error; }
+                    } else { throw new Error('Bloqueado o sin datos'); }
+                } catch (err) {
+                    errorCount++;
+                    statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Error en lote ${i + 1}: ${err.message}</div>`;
+                }
+                statusBox.scrollTop = statusBox.scrollHeight;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play"></i> Iniciar Proceso';
+            statusBox.innerHTML += `<div class="info-banner" style="margin-top:10px; background:var(--bg3)"><strong>Proceso terminado:</strong> ${successCount} éxitos, ${errorCount} errores.</div>`;
+            await loadDashboard();
         });
 
         async function fillForm(data) {

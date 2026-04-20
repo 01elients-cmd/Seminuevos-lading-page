@@ -23,7 +23,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    const { url, html } = req.body;
+    const { url, html, proxyKey } = req.body;
     if (!url) return res.status(400).json({ message: 'Target URL is required' });
 
     try {
@@ -31,7 +31,14 @@ export default async function handler(req, res) {
 
         // If HTML not provided, try to fetch it
         if (!content) {
-            const response = await fetch(url, {
+            let fetchUrl = url;
+            if (proxyKey) {
+                // Use ScraperAPI as proxy if key is provided
+                fetchUrl = `https://api.scraperapi.com?api_key=${proxyKey}&url=${encodeURIComponent(url)}`;
+                console.log("Using Proxy Fetch:", fetchUrl);
+            }
+
+            const response = await fetch(fetchUrl, {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
                 }
