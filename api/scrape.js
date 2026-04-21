@@ -72,11 +72,12 @@ export default async function handler(req, res) {
         const site = url.includes('copart.com') ? 'copart' : url.includes('iaai.com') ? 'iaai' : 'generic';
         const data = site === 'copart' ? parseCopart(content, url) : site === 'iaai' ? parseIAAI(content, url) : parseGeneric(content, url);
 
-        // Final validation
-        const hasData = !!(data.title && (data.price && data.price !== '$0' && data.price !== 'Consultar'));
+        // Final validation - require at least a title to be considered success
+        const hasRealTitle = data.title && data.title !== 'Vehículo Importado' && data.title.length > 5;
+        const hasRealPrice = data.price && data.price !== 'Consultar' && data.price !== '$0';
 
         return res.status(200).json({
-            success: hasData || (data.images?.length > 2),
+            success: !!(hasRealTitle && (hasRealPrice || data.images?.length > 0)),
             data,
             site
         });
@@ -90,17 +91,15 @@ export default async function handler(req, res) {
 function parseCopart(html, url = "") {
     const data = { images: [] };
 
-    // Try to find JSON metadata often found in script tags
+    // Try to find JSON metadata
     const jsonMatch = html.match(/var\s+data\s*=\s*({[\s\S]*?});/i) || html.match(/window\._b\s*=\s*({[\s\S]*?});/i);
     let jsonData = null;
     if (jsonMatch) {
-        try {
-            jsonData = JSON.parse(jsonMatch[1]);
-        } catch (e) { /* ignore */ }
+        try { jsonData = JSON.parse(jsonMatch[1]); } catch (e) { /* ignore */ }
     }
 
     // Title / Year
-    const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i);
+    const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i) || html.match(/class="lot-title"[\s\S]*?>([\s\S]*?)<\/h1>/i);
     if (titleMatch) {
         data.title = titleMatch[1].replace(/Lot #\d+/i, '').replace(/[\r\n\t]+/g, ' ').replace(/<[^>]*>/g, '').trim();
         const yearMatch = data.title.match(/\d{4}/);
@@ -108,10 +107,10 @@ function parseCopart(html, url = "") {
     }
 
     const getSpec = (label) => {
-        // More robust spec matching
         const patterns = [
-            new RegExp(`${label}[\\s\\S]{0,100}?>[\\s\\S]*?([^<]{2,})<`, 'i'),
-            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i')
+            new RegExp(`${label}[\\s\\S]{0,120}?>[\\s\\S]*?([^<]{2,})<`, 'i'),
+            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i'),
+            new RegExp(`data-qa="${label}"[^>]*>([^<]+)`, 'i')
         ];
         for (const reg of patterns) {
             const match = html.match(reg);
@@ -120,52 +119,45 @@ function parseCopart(html, url = "") {
         return null;
     };
 
-    data.km = getSpec('Odometer') || getSpec('Kilometraje');
+    data.km = getSpec('Odometer') || getSpec('Kilometraje') || getSpec('Mileage');
     data.engine = getSpec('Engine type') || getSpec('Engine') || getSpec('Motor');
     data.transmission = getSpec('Transmission') || getSpec('Transmisión');
     data.fuel = getSpec('Fuel') || getSpec('Combustible');
     data.bodyType = (getSpec('Body Style') || getSpec('Carrocería') || '').toLowerCase();
 
-    // Price - improved matching
+    // Price
     const priceMatch = html.match(/current-bid[^>]*>[\s]*\$?([\d,]+)/i) ||
         html.match(/"currentBid":([\d.]+)/) ||
         html.match(/item-value">\$([\d,]+)/i) ||
-        html.match(/id="bid-amount">\$([\d,]+)/i);
+        html.match(/id="bid-amount">\$([\d,]+)/i) ||
+        html.match(/\$([\d,]{3,7})\.00/);
 
     if (priceMatch) {
         data.price = '$' + priceMatch[1].replace(/,/g, '');
-    } else if (jsonData && jsonData.lotDetails && jsonData.lotDetails.currentBid) {
+    } else if (jsonData?.lotDetails?.currentBid) {
         data.price = '$' + jsonData.lotDetails.currentBid;
     }
 
     if (!data.price || data.price === "$0") data.price = "Consultar";
 
-    // Images discovery - improved
-    const imgRegexes = [
-        /"fullUrl":"([^"]+)"/g,
-        /"highResUrl":"([^"]+)"/g,
-        /https:\/\/static\.copart\.com\/[^"']+\.JPG/gi,
-        /https:\/\/cs\.copart\.com\/v1\/[^"']+\.jpg/gi
-    ];
+    // Images
+    const imgRegexes = [/"fullUrl":"([^"]+)"/g, /"highResUrl":"([^"]+)"/g, /https:\/\/static\.copart\.com\/[^"']+\.JPG/gi];
     imgRegexes.forEach(reg => {
         let m;
         while ((m = reg.exec(html)) !== null) {
-            const src = Array.isArray(m) ? m[m.length - 1] : m;
+            const src = (Array.isArray(m) ? m[m.length - 1] : m).replace(/\\/g, '');
             if (src.includes('.jpg') || src.includes('.JPG')) {
-                const cleanSrc = src.replace(/\\/g, '');
-                if (!data.images.includes(cleanSrc)) data.images.push(cleanSrc);
+                if (!data.images.includes(src)) data.images.push(src);
             }
         }
     });
 
     const lotIdFromUrl = url.match(/lot\/(\d+)/i);
     if (lotIdFromUrl && data.images.length < 5) {
-        for (let i = 1; i <= 10; i++) {
-            data.images.push(`https://static.copart.com/content/resp/lotImages/full/${lotIdFromUrl[1]}_${i}.JPG`);
-        }
+        for (let i = 1; i <= 10; i++) data.images.push(`https://static.copart.com/content/resp/lotImages/full/${lotIdFromUrl[1]}_${i}.JPG`);
     }
 
-    data.images = [...new Set(data.images)].filter(s => s.startsWith('http')).slice(0, 15);
+    data.images = [...new Set(data.images)].filter(s => s.startsWith('http') && !s.includes('logo')).slice(0, 15);
 
     // Description
     let desc = `Importado vía subasta Copart.`;
@@ -182,9 +174,9 @@ function parseIAAI(html, url = "") {
     const data = { images: [] };
 
     // Title / Year
-    const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i);
+    const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i) || html.match(/class="vehicle-title"[\s\S]*?>([\s\S]*?)<\/h1>/i);
     if (titleMatch) {
-        data.title = titleMatch[1].replace(/[\r\n\t]+/g, ' ').replace(/Stock\s*#.*/i, '').replace(/<[^>]*>/g, '').trim();
+        data.title = titleMatch[1].replace(/[\r\n\t]+/g, ' ').replace(/Stock\s*#.*/i, '').replace(/<[^>]*>/g, '').replace(/\|\s*IAAI/i, '').trim();
         const yearMatch = data.title.match(/\d{4}/);
         if (yearMatch) data.year = yearMatch[0];
     }
@@ -192,7 +184,8 @@ function parseIAAI(html, url = "") {
     const getSpec = (label) => {
         const patterns = [
             new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i'),
-            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i')
+            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i'),
+            new RegExp(`data-automation="${label}"[^>]*>([^<]+)`, 'i')
         ];
         for (const reg of patterns) {
             const match = html.match(reg);
@@ -207,14 +200,14 @@ function parseIAAI(html, url = "") {
     data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Price - improved
+    // Price
     const pricePatterns = [
         /bid-amount[^>]*>\$?([\d,.]+)/i,
         /current-bid[^>]*>\$?([\d,.]+)/i,
         /item-value">\$?([\d,.]+)/i,
-        /item-value-text">\$?([\d,.]+)/i,
         /current bid[\s\S]*?\$([\d,.]+)/i,
-        /buy\s+it\s+now[\s\S]*?\$([\d,.]+)/i
+        /buy\s+it\s+now[\s\S]*?\$([\d,.]+)/i,
+        /<span>\$([\d,]{4,7})<\/span>/i
     ];
     for (const reg of pricePatterns) {
         const m = html.match(reg);
@@ -231,19 +224,16 @@ function parseIAAI(html, url = "") {
     const lotId = lotMatch ? lotMatch[1] : (lotIdFromUrl || null);
 
     if (lotId) {
-        for (let i = 1; i <= 12; i++) {
-            data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
-        }
+        for (let i = 1; i <= 12; i++) data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
     }
 
-    // Try to find images in HTML too
     const imgReg = /https:\/\/vis\.iaai\.com\/[^"']+\d+\/1024/gi;
     let imgM;
     while ((imgM = imgReg.exec(html)) !== null) {
         if (!data.images.includes(imgM[0])) data.images.push(imgM[0]);
     }
 
-    data.images = [...new Set(data.images)].filter(s => s.startsWith('http')).slice(0, 15);
+    data.images = [...new Set(data.images)].filter(s => s.startsWith('http') && !s.includes('iaai-logo')).slice(0, 15);
 
     // Description
     let desc = `Importado vía subasta IAAI.`;
