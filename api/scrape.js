@@ -201,7 +201,7 @@ function parseIAAI(html, url = "") {
     data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Price - prioritize data-automation and specific classes
+    // Price - search for ANY dollar amount that looks like a car price (> $500)
     const pricePatterns = [
         /data-automation="current-bid-amount"[^>]*>\$?([\d,]+)(\.?\d+)?/i,
         /data-automation="bid-amount"[^>]*>\$?([\d,]+)(\.?\d+)?/i,
@@ -209,14 +209,15 @@ function parseIAAI(html, url = "") {
         /bid-amount[^>]*>\$?([\d,]+)(\.?\d+)?/i,
         /current-bid[^>]*>\$?([\d,]+)(\.?\d+)?/i,
         /item-value">\$?([\d,]+)(\.?\d+)?/i,
-        /<span>\$([\d,]{4,7})<\/span>/i,
-        /current bid[\s\S]*?\$([\d,]+)(\.?\d+)?/i
+        /<span>\$([\d,]+)<\/span>/i,
+        /\$([\d,]{4,6})/ // Broad fallback for $X,XXX or $XX,XXX
     ];
     for (const reg of pricePatterns) {
         const m = html.match(reg);
         if (m && m[1]) {
             const p = m[1].replace(/,/g, '');
-            if (parseInt(p) > 100) { // Assume real prices are > $100 to avoid fees
+            const val = parseInt(p);
+            if (val > 500 && val < 500000) {
                 data.price = '$' + p;
                 break;
             }
@@ -224,23 +225,22 @@ function parseIAAI(html, url = "") {
     }
     if (!data.price || data.price === "$0") data.price = "Consultar";
 
-    // Images
+    // Images - discover actual high res links in the rendered content
     const lotIdMatch = html.match(/Lot\s*#\s*:?\s*(\d{8})/i) || html.match(/Stock\s*#\s*:?\s*(\d{8})/i) || html.match(/stockNumber\s*:\s*"(\d{8})"/);
     const lotId = lotIdMatch ? lotIdMatch[1] : (url.match(/(\d{8})/)?.[1] || null);
 
-    if (lotId) {
-        // High res patterns for IAAI
-        for (let i = 1; i <= 6; i++) {
-            data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/800`);
-            data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
-        }
-    }
-
-    // Try to find ANY high res vis.iaai links in the HTML
-    const imgReg = /https:\/\/vis\.iaai\.com\/[^"']+\d+\/(800|1024)/gi;
+    // Scan for any vis.iaai.com links (they usually contain the lot and res)
+    const imgReg = /https:\/\/vis\.iaai\.com\/[^"']+\d+\/(800|1024)[^"']*/gi;
     let imgM;
     while ((imgM = imgReg.exec(html)) !== null) {
-        if (!data.images.includes(imgM[0])) data.images.push(imgM[0]);
+        let src = imgM[0];
+        if (!data.images.includes(src)) data.images.push(src);
+    }
+
+    if (lotId && data.images.length < 3) {
+        for (let i = 1; i <= 8; i++) {
+            data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
+        }
     }
 
     data.images = [...new Set(data.images)].filter(s => s.startsWith('http') && !s.includes('iaai-logo')).slice(0, 15);
