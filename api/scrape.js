@@ -7,30 +7,40 @@ export default async function handler(req, res) {
     // IMAGE PROXY MODE
     if (req.method === 'GET' && req.query.proxy) {
         try {
-            const target = decodeURIComponent(req.query.proxy);
-            const key = req.query.key;
-            const isAuctionAsset = target.includes('iaai.com') || target.includes('copart.com');
+            const target = decodeURIComponent(req.query.proxy).trim();
+            const key = (req.query.key || '').trim();
+
+            if (!target.startsWith('http')) {
+                return res.status(400).send('Invalid Target URL');
+            }
 
             let response;
             try {
-                // Try direct fetch first (faster, no cost)
-                response = await fetch(target, { headers: { 'Referer': 'https://www.google.com' } });
-                if (!response.ok) throw new Error('Direct blocked');
+                // Try direct fetch with common headers to look like a browser
+                response = await fetch(target, {
+                    headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.google.com' },
+                    signal: AbortSignal.timeout(5000)
+                });
+                if (!response.ok) throw new Error(`Direct failed: ${response.status}`);
             } catch (e) {
-                // Fallback to ScraperAPI if direct is blocked and we have a key
+                // Fallback to ScraperAPI
                 if (key) {
-                    response = await fetch(`https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(target)}&render=false`);
+                    const scraperUrl = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(target)}&country_code=us`;
+                    response = await fetch(scraperUrl, { signal: AbortSignal.timeout(10000) });
                 } else {
-                    throw e;
+                    return res.status(403).send('Directly blocked and no proxy key provided');
                 }
             }
+
+            if (!response.ok) return res.status(response.status).send('Asset not found');
 
             const blob = await response.blob();
             const buffer = Buffer.from(await blob.arrayBuffer());
             res.setHeader('Content-Type', response.headers.get('Content-Type') || 'image/jpeg');
             return res.send(buffer);
         } catch (e) {
-            return res.status(500).send('Proxy error');
+            console.error('Proxy Error:', e.message);
+            return res.status(500).send('Proxy error: ' + e.message);
         }
     }
 
