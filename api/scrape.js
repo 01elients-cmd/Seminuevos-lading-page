@@ -82,31 +82,63 @@ export default async function handler(req, res) {
 function parseIAAI(html, url) {
     const data = { images: [] };
 
-    // 1. Try to get structured JSON first (Most reliable)
-    const jsonMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/i);
-    let state = null;
-    if (jsonMatch) {
+    // 1. permissive JSON search
+    const stateStr = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});/i)?.[1];
+    if (stateStr) {
         try {
-            state = JSON.parse(jsonMatch[1]);
-            const details = state.inventoryDetail?.inventoryView?.attributes || {};
-            const bid = state.inventoryDetail?.auctionInformation?.biddingInformation || {};
+            const state = JSON.parse(stateStr);
 
-            data.title = `${details.Year || ''} ${details.Make || ''} ${details.Model || ''} ${details.Series || ''}`.trim();
-            data.year = details.Year;
-            data.price = bid.buyNowPrice ? `$${bid.buyNowPrice}` : (details.MinimumBidAmount ? `$${details.MinimumBidAmount}` : null);
-            data.vin = details.VIN;
-            data.km = `${details.ODOValue || ''} ${details.ODOUoM || ''}`.trim();
-            data.engine = (details.EngineInformation || details.EngineSize || '').replace(/\s+/g, ' ').trim();
-            data.transmission = details.Transmission;
-            data.bodyType = (details.BodyStyleName || details.VehicleClass || '').toLowerCase();
-            data.fuel = details.FuelTypeDesc || details.FuelTypeCode;
+            // Advanced Recursive search
+            const findKey = (obj, key) => {
+                if (!obj || typeof obj !== 'object') return null;
+                if (obj[key] !== undefined && obj[key] !== null) return obj[key];
+                for (let k in obj) {
+                    if (typeof obj[k] === 'object') {
+                        let res = findKey(obj[k], key);
+                        if (res !== null) return res;
+                    }
+                }
+                return null;
+            };
 
-            if (state.inventoryDetail?.imageDimensions?.keys?.$values) {
-                const keys = state.inventoryDetail.imageDimensions.keys.$values;
-                data.images = keys.map(k => `https://vis.iaai.com/dimensions?imageKeys=${k.k}&width=${k.w}&height=${k.h}`);
+            const attr = findKey(state, 'attributes') || findKey(state, 'inventoryView') || {};
+
+            data.year = attr.Year || findKey(state, 'Year');
+            const make = attr.Make || findKey(state, 'Make') || '';
+            const model = attr.Model || findKey(state, 'Model') || '';
+            const series = attr.Series || findKey(state, 'Series') || '';
+
+            if (make && model) {
+                data.title = `${data.year || ''} ${make} ${model} ${series}`.trim();
+            }
+
+            data.vin = attr.VIN || findKey(state, 'VIN');
+            data.km = `${attr.ODOValue || findKey(state, 'ODOValue') || ''} ${attr.ODOUoM || findKey(state, 'ODOUoM') || ''}`.trim();
+            data.engine = attr.EngineInformation || attr.EngineSize || findKey(state, 'EngineSize');
+            data.transmission = attr.Transmission || findKey(state, 'Transmission');
+            data.bodyType = (attr.BodyStyleName || attr.VehicleClass || findKey(state, 'BodyStyleName') || '').toLowerCase();
+            data.fuel = attr.FuelTypeDesc || attr.FuelTypeCode || findKey(state, 'FuelTypeDesc');
+
+            // Price search - prefer bidding info
+            data.price = findKey(state, 'buyNowPrice') || findKey(state, 'MinimumBidAmount') || findKey(state, 'highBidAmount');
+            if (data.price) {
+                const numericPrice = data.price.toString().replace(/\D/g, '');
+                if (numericPrice && numericPrice !== '0') data.price = `$${parseInt(numericPrice).toLocaleString()}`;
+                else data.price = null;
+            }
+
+            // Images search - looking for the keys array or values array
+            const imageContainer = findKey(state, 'imageDimensions') || findKey(state, 'imageKeys');
+            const imageKeys = findKey(imageContainer, '$values') || findKey(state, 'keys')?.$values;
+            if (Array.isArray(imageKeys)) {
+                data.images = imageKeys.map(k => {
+                    const keyStr = k.k || k.imageKey || (typeof k === 'string' ? k : null);
+                    if (!keyStr) return null;
+                    return `https://vis.iaai.com/dimensions?imageKeys=${encodeURIComponent(keyStr)}&width=1024&height=768`;
+                }).filter(Boolean);
             }
         } catch (e) {
-            console.warn("JSON State parse error", e.message);
+            console.warn("JSON parse error", e.message);
         }
     }
 
