@@ -34,47 +34,52 @@ export default async function handler(req, res) {
         let content = html;
 
         // If HTML not provided, try to fetch it
-    if (!content) {
-        let fetchUrl = url;
-        let fetchOptions = {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/121.0.0.0',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9,es;q=0.8'
+        if (!content) {
+            let fetchUrl = url;
+            let fetchOptions = {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/121.0.0.0',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9,es;q=0.8'
+                }
+            };
+
+            if (proxyKey) {
+                // For auction sites (Copart/IAAI), JavaScript Rendering and US proxies are often required to bypass PerimeterX/Incapsula
+                const isAuction = url.includes('copart') || url.includes('iaai');
+                const renderParam = isAuction ? 'true' : 'false';
+                fetchUrl = `https://api.scraperapi.com?api_key=${proxyKey}&url=${encodeURIComponent(url)}&render=${renderParam}&country_code=us`;
+                console.log("Using Proxy Fetch:", fetchUrl);
             }
-        };
 
-        if (proxyKey) {
-            // Use ScraperAPI with residential proxies if key is provided (residential works better for auctions)
-            fetchUrl = `https://api.scraperapi.com?api_key=${proxyKey}&url=${encodeURIComponent(url)}&render=false`;
-            console.log("Using Proxy Fetch:", fetchUrl);
+            const response = await fetch(fetchUrl, fetchOptions);
+            content = await response.text();
+
+            // Detect bot protection - but only if we truly didn't get useful data
+            const isBlocked = content.includes('px-captcha') || content.includes('cloudflare-static') || content.includes('distil-captcha') || (content.includes('/_Incapsula_Resource') && content.length < 5000);
+
+            if (isBlocked) {
+                console.warn("Bot protection detected on", url);
+                // If we have a proxy key and still blocked, maybe suggest residential proxies or account upgrade
+                return res.status(200).json({
+                    success: false,
+                    message: 'Bloqueo detectado. ScraperAPI no pudo saltar la protección. Prueba el Bookmarklet (opción infalible).',
+                    blocked: true
+                });
+            }
         }
 
-        const response = await fetch(fetchUrl, fetchOptions);
-        content = await response.text();
+        const site = url.includes('copart.com') ? 'copart' : url.includes('iaai.com') ? 'iaai' : 'generic';
+        const data = site === 'copart' ? parseCopart(content, url) : site === 'iaai' ? parseIAAI(content, url) : parseGeneric(content, url);
 
-        // Detect bot protection
-        if (content.includes('px-captcha') || content.includes('cloudflare-static') || content.includes('distil-captcha') || content.includes('/_Incapsula_Resource')) {
-            console.warn("Bot protection detected on", url);
-            return res.status(200).json({
-                success: false,
-                message: 'Bloqueo regional o detección de bot. ¡Usa el Bookmarklet desde la pestaña real o agrega una Proxy Key!',
-                blocked: true
-            });
-        }
-    }
+        // Final validation
+        const hasData = !!(data.title && (data.price && data.price !== '$0' && data.price !== 'Consultar'));
 
-    const site = url.includes('copart.com') ? 'copart' : url.includes('iaai.com') ? 'iaai' : 'generic';
-    const data = site === 'copart' ? parseCopart(content, url) : site === 'iaai' ? parseIAAI(content, url) : parseGeneric(content, url);
-
-    // Final validation
-    const hasData = !!(data.title && (data.price && data.price !== '$0' && data.price !== 'Consultar'));
-
-    return res.status(200).json({
-        success: hasData || (data.images?.length > 2),
-        data,
-        site
-    });
+        return res.status(200).json({
+            success: hasData || (data.images?.length > 2),
+            data,
+            site
+        });
 
     } catch (error) {
         console.error('Scrape Error:', error);
@@ -255,7 +260,7 @@ function parseGeneric(html, url) {
     const data = { images: [] };
     const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i) || html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
     data.title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : 'Vehículo Importado';
-    
+
     // OG Image
     const ogImg = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
     if (ogImg) data.images.push(ogImg[1]);
