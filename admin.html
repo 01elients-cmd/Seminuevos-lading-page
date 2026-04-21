@@ -304,6 +304,79 @@
             width: 100%
         }
 
+        /* Bulk Actions Floating Bar */
+        .bulk-floating-bar {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-full);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(39, 92, 234, 0.2);
+            backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .bulk-floating-bar.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .bulk-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .bulk-count-badge {
+            background: var(--accent);
+            color: var(--bg);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .bulk-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .bulk-actions-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .vehicle-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .vehicle-checkbox:active {
+            transform: scale(0.9);
+        }
+
+        table tr.selected {
+            background: rgba(39, 92, 234, 0.05) !important;
+        }
+
         /* STATS */
         .stats-row {
             display: grid;
@@ -514,6 +587,12 @@
             border-color: var(--danger);
             color: var(--danger);
             background: rgba(231, 76, 60, .05)
+        }
+
+        /* Selected row styling */
+        table tr.selected {
+            background: rgba(39, 92, 234, 0.08);
+            border-left: 3px solid var(--accent);
         }
 
         .empty-state {
@@ -1241,194 +1320,210 @@
                     </div>
                     <div id="vehicleTableBody"></div>
                 </div>
-            </div>
 
-            <!-- INQUIRIES TAB -->
-            <div class="tab-content" id="tab-inquiries">
-                <div class="page-header">
-                    <h1 class="page-title">Consultas de <span>Clientes</span></h1>
-                    <button class="btn btn-ghost" id="refreshInquiries"><i class="fas fa-sync-alt"></i>
-                        Actualizar</button>
-                </div>
-                <div id="inquiriesList"></div>
-            </div>
-
-            <!-- ANALYTICS TAB -->
-            <div class="tab-content" id="tab-analytics">
-                <div class="page-header">
-                    <h1 class="page-title">Análisis de <span>Consumidor</span></h1>
-                    <button class="btn btn-ghost" onclick="loadAnalyticsData()"><i class="fas fa-sync-alt"></i>
-                        Actualizar</button>
-                </div>
-
-                <div class="stats-row">
-                    <div class="stat-card">
-                        <div class="stat-card-icon"><i class="fas fa-eye"></i></div>
-                        <div class="stat-card-value" id="totalViews">0</div>
-                        <div class="stat-card-label">Vistas Totales</div>
+                <!-- Floating Bulk Bar -->
+                <div class="bulk-floating-bar" id="bulkFloatingBar">
+                    <div class="bulk-info">
+                        <div class="bulk-count-badge" id="bulkCount">0</div>
+                        <span>Vehículos seleccionados</span>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-card-icon"><i class="fas fa-door-open"></i></div>
-                        <div class="stat-card-value" id="totalSessions">0</div>
-                        <div class="stat-card-label">Sesiones</div>
+                    <div class="bulk-sep"></div>
+                    <div class="bulk-actions-btns">
+                        <button class="btn btn-ghost btn-sm" onclick="clearSelection()"><i class="fas fa-times"></i>
+                            Deseleccionar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSelected()"><i class="fas fa-trash"></i>
+                            Eliminar</button>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-card-icon"><i class="fas fa-clock"></i></div>
-                        <div class="stat-card-value" id="avgTime">0s</div>
-                        <div class="stat-card-label">Tiempo Promedio</div>
-                    </div>
-                </div>
-
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                    <div class="table-container" style="padding: 20px;">
-                        <h3 style="margin-bottom:15px;"><i class="fas fa-car" style="color:var(--accent)"></i> Top
-                            Vehículos Vistos</h3>
-                        <div style="height: 300px; position: relative;">
-                            <canvas id="topVehiclesChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="table-container" style="padding: 20px;">
-                        <h3 style="margin-bottom:15px;"><i class="fas fa-history" style="color:var(--accent)"></i>
-                            Actividad Reciente</h3>
-                        <div style="height: 300px; position: relative;">
-                            <canvas id="activityChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3><i class="fas fa-mouse-pointer"></i> Últimos Eventos</h3>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Evento</th>
-                                <th>Detalle</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody id="analyticsTableBody"></tbody>
-                    </table>
                 </div>
             </div>
+    </div>
 
-            <!-- SETTINGS TAB -->
-            <div class="tab-content" id="tab-settings">
-                <div class="page-header">
-                    <h1 class="page-title"><span>Configuración</span> del Sitio</h1>
-                </div>
-                <div class="settings-section">
-                    <h3><i class="fas fa-building"></i> Información de la Empresa</h3>
-                    <div class="settings-grid">
-                        <div class="form-group"><label class="form-label">WhatsApp</label><input type="text"
-                                class="form-input" id="sWhatsapp" placeholder="+58..."></div>
-                        <div class="form-group"><label class="form-label">Nombre</label><input type="text"
-                                class="form-input" id="sName"></div>
-                        <div class="form-group"><label class="form-label">Slogan</label><input type="text"
-                                class="form-input" id="sSlogan"></div>
-                        <div class="form-group"><label class="form-label">Dirección</label><input type="text"
-                                class="form-input" id="sAddress"></div>
-                        <div class="form-group"><label class="form-label">Horario</label><input type="text"
-                                class="form-input" id="sHours"></div>
-                    </div>
-                </div>
-                <div class="settings-section">
-                    <h3><i class="fas fa-share-alt"></i> Redes Sociales</h3>
-                    <div class="settings-grid">
-                        <div class="form-group"><label class="form-label">Facebook</label><input type="text"
-                                class="form-input" id="sFacebook"></div>
-                        <div class="form-group"><label class="form-label">Instagram</label><input type="text"
-                                class="form-input" id="sInstagram"></div>
-                        <div class="form-group"><label class="form-label">TikTok</label><input type="text"
-                                class="form-input" id="sTiktok"></div>
-                        <div class="form-group"><label class="form-label">YouTube</label><input type="text"
-                                class="form-input" id="sYoutube"></div>
-                    </div>
-                    <div class="settings-section">
-                        <h3><i class="fas fa-key"></i> Configuración Avanzada</h3>
-                        <div class="settings-grid">
-                            <div class="form-group full">
-                                <label class="form-label">Scraper Proxy Key (ScraperAPI)</label>
-                                <input type="password" class="form-input" id="sProxyKey"
-                                    placeholder="Tu API Key de ScraperAPI para bypass de bloqueos">
-                                <p style="font-size: 0.75rem; color: var(--text3); margin-top: 4px;">Necesario para
-                                    importar links de IAAI/Copart en lote sin VPN. Consigue una gratis en scraperapi.com
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" id="saveSettingsBtn"><i class="fas fa-save"></i> Guardar
-                        Configuración</button>
+    <!-- INQUIRIES TAB -->
+    <div class="tab-content" id="tab-inquiries">
+        <div class="page-header">
+            <h1 class="page-title">Consultas de <span>Clientes</span></h1>
+            <button class="btn btn-ghost" id="refreshInquiries"><i class="fas fa-sync-alt"></i>
+                Actualizar</button>
+        </div>
+        <div id="inquiriesList"></div>
+    </div>
+
+    <!-- ANALYTICS TAB -->
+    <div class="tab-content" id="tab-analytics">
+        <div class="page-header">
+            <h1 class="page-title">Análisis de <span>Consumidor</span></h1>
+            <button class="btn btn-ghost" onclick="loadAnalyticsData()"><i class="fas fa-sync-alt"></i>
+                Actualizar</button>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-card-icon"><i class="fas fa-eye"></i></div>
+                <div class="stat-card-value" id="totalViews">0</div>
+                <div class="stat-card-label">Vistas Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon"><i class="fas fa-door-open"></i></div>
+                <div class="stat-card-value" id="totalSessions">0</div>
+                <div class="stat-card-label">Sesiones</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-card-value" id="avgTime">0s</div>
+                <div class="stat-card-label">Tiempo Promedio</div>
+            </div>
+        </div>
+
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="table-container" style="padding: 20px;">
+                <h3 style="margin-bottom:15px;"><i class="fas fa-car" style="color:var(--accent)"></i> Top
+                    Vehículos Vistos</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="topVehiclesChart"></canvas>
                 </div>
             </div>
-
-            <!-- BULK IMPORT TAB -->
-            <div class="tab-content" id="tab-bulk">
-                <div class="page-header">
-                    <h1 class="page-title">Importación <span>Masiva</span></h1>
-                    <button class="btn btn-primary" id="startBulkImport"><i class="fas fa-play"></i> Iniciar
-                        Proceso</button>
+            <div class="table-container" style="padding: 20px;">
+                <h3 style="margin-bottom:15px;"><i class="fas fa-history" style="color:var(--accent)"></i>
+                    Actividad Reciente</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="activityChart"></canvas>
                 </div>
-                <div class="info-banner"><i class="fas fa-info-circle"></i>
-                    <p>Pega una lista de enlaces (uno por línea). El sistema los procesará e importará
-                        automáticamente.</p>
-                </div>
-                <div class="form-group full">
-                    <textarea class="form-textarea" id="bulkLinks" style="height: 300px; font-family: monospace;"
-                        placeholder="https://www.iaai.com/VehicleDetail/...\nhttps://www.copart.com/lot/..."></textarea>
-                </div>
-                <div id="bulkStatus" style="margin-top: 20px;"></div>
             </div>
+        </div>
 
-            <!-- EXPORT TAB -->
-            <div class="tab-content" id="tab-export">
-                <div class="page-header">
-                    <h1 class="page-title">Exportar <span>Datos</span></h1><button class="btn btn-primary"
-                        id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar Código</button>
-                </div>
-                <div class="info-banner"><i class="fas fa-info-circle"></i>
-                    <p>Este código se genera automáticamente desde la base de datos. Copia y pega en
-                        <strong>data.js</strong> si necesitas un backup estático.
-                    </p>
-                </div>
-                <div class="code-preview">
-                    <div class="code-header">
-                        <h3><i class="fas fa-file-code"></i> data.js</h3>
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-mouse-pointer"></i> Últimos Eventos</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Evento</th>
+                        <th>Detalle</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody id="analyticsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-content" id="tab-settings">
+        <div class="page-header">
+            <h1 class="page-title"><span>Configuración</span> del Sitio</h1>
+        </div>
+        <div class="settings-section">
+            <h3><i class="fas fa-building"></i> Información de la Empresa</h3>
+            <div class="settings-grid">
+                <div class="form-group"><label class="form-label">WhatsApp</label><input type="text" class="form-input"
+                        id="sWhatsapp" placeholder="+58..."></div>
+                <div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-input"
+                        id="sName"></div>
+                <div class="form-group"><label class="form-label">Slogan</label><input type="text" class="form-input"
+                        id="sSlogan"></div>
+                <div class="form-group"><label class="form-label">Dirección</label><input type="text" class="form-input"
+                        id="sAddress"></div>
+                <div class="form-group"><label class="form-label">Horario</label><input type="text" class="form-input"
+                        id="sHours"></div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h3><i class="fas fa-share-alt"></i> Redes Sociales</h3>
+            <div class="settings-grid">
+                <div class="form-group"><label class="form-label">Facebook</label><input type="text" class="form-input"
+                        id="sFacebook"></div>
+                <div class="form-group"><label class="form-label">Instagram</label><input type="text" class="form-input"
+                        id="sInstagram"></div>
+                <div class="form-group"><label class="form-label">TikTok</label><input type="text" class="form-input"
+                        id="sTiktok"></div>
+                <div class="form-group"><label class="form-label">YouTube</label><input type="text" class="form-input"
+                        id="sYoutube"></div>
+            </div>
+            <div class="settings-section">
+                <h3><i class="fas fa-key"></i> Configuración Avanzada</h3>
+                <div class="settings-grid">
+                    <div class="form-group full">
+                        <label class="form-label">Scraper Proxy Key (ScraperAPI)</label>
+                        <input type="password" class="form-input" id="sProxyKey"
+                            placeholder="Tu API Key de ScraperAPI para bypass de bloqueos">
+                        <p style="font-size: 0.75rem; color: var(--text3); margin-top: 4px;">Necesario para
+                            importar links de IAAI/Copart en lote sin VPN. Consigue una gratis en scraperapi.com
+                        </p>
                     </div>
-                    <div class="code-body" id="codeOutput"></div>
                 </div>
             </div>
+            <button class="btn btn-primary" id="saveSettingsBtn"><i class="fas fa-save"></i> Guardar
+                Configuración</button>
+        </div>
+    </div>
 
-            <!-- HELP TAB -->
-            <div class="tab-content" id="tab-help">
-                <div class="page-header">
-                    <h1 class="page-title">Centro de <span>Ayuda</span></h1>
-                </div>
-                <div class="info-banner"><i class="fas fa-lightbulb"></i>
-                    <p><strong>Panel conectado a Base de Datos</strong><br>
-                        Este panel está conectado a Supabase. Todos los cambios se reflejan en la página
-                        automáticamente.<br><br>
-                        <strong>Vehículos:</strong> Agrega, edita y elimina vehículos. Las imágenes se suben al
-                        storage.<br>
-                        <strong>Consultas:</strong> Ve los mensajes de clientes que llegan por el formulario de
-                        contacto.<br>
-                        <strong>Configuración:</strong> Cambia WhatsApp, redes sociales y datos de la empresa.<br>
-                        <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
-                        <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
-                        <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
-                        <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
-                        <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa
-                        el
-                        <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
-                        importar incluso si el sitio bloquea al servidor.
-                        <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
-                            class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
-                    </p>
-                </div>
+    <!-- BULK IMPORT TAB -->
+    <div class="tab-content" id="tab-bulk">
+        <div class="page-header">
+            <h1 class="page-title">Importación <span>Masiva</span></h1>
+            <button class="btn btn-primary" id="startBulkImport"><i class="fas fa-play"></i> Iniciar
+                Proceso</button>
+        </div>
+        <div class="info-banner"><i class="fas fa-info-circle"></i>
+            <p>Pega una lista de enlaces (uno por línea). El sistema los procesará e importará
+                automáticamente.</p>
+        </div>
+        <div class="form-group full">
+            <textarea class="form-textarea" id="bulkLinks" style="height: 300px; font-family: monospace;"
+                placeholder="https://www.iaai.com/VehicleDetail/...\nhttps://www.copart.com/lot/..."></textarea>
+        </div>
+        <div id="bulkStatus" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- EXPORT TAB -->
+    <div class="tab-content" id="tab-export">
+        <div class="page-header">
+            <h1 class="page-title">Exportar <span>Datos</span></h1><button class="btn btn-primary" id="copyCodeBtn"><i
+                    class="fas fa-copy"></i> Copiar Código</button>
+        </div>
+        <div class="info-banner"><i class="fas fa-info-circle"></i>
+            <p>Este código se genera automáticamente desde la base de datos. Copia y pega en
+                <strong>data.js</strong> si necesitas un backup estático.
+            </p>
+        </div>
+        <div class="code-preview">
+            <div class="code-header">
+                <h3><i class="fas fa-file-code"></i> data.js</h3>
             </div>
-        </main>
+            <div class="code-body" id="codeOutput"></div>
+        </div>
+    </div>
+
+    <!-- HELP TAB -->
+    <div class="tab-content" id="tab-help">
+        <div class="page-header">
+            <h1 class="page-title">Centro de <span>Ayuda</span></h1>
+        </div>
+        <div class="info-banner"><i class="fas fa-lightbulb"></i>
+            <p><strong>Panel conectado a Base de Datos</strong><br>
+                Este panel está conectado a Supabase. Todos los cambios se reflejan en la página
+                automáticamente.<br><br>
+                <strong>Vehículos:</strong> Agrega, edita y elimina vehículos. Las imágenes se suben al
+                storage.<br>
+                <strong>Consultas:</strong> Ve los mensajes de clientes que llegan por el formulario de
+                contacto.<br>
+                <strong>Configuración:</strong> Cambia WhatsApp, redes sociales y datos de la empresa.<br>
+                <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
+                <strong>Categorías:</strong> sedan, suv, pickup, deportivo<br>
+                <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
+                <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
+                <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa
+                el
+                <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
+                importar incluso si el sitio bloquea al servidor.
+                <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
+                    class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
+            </p>
+        </div>
+    </div>
+    </main>
     </div>
 
     <!-- VEHICLE FORM MODAL -->
@@ -1665,6 +1760,8 @@
             });
         });
 
+        let selectedVehicles = new Set();
+
         function renderTable(search = '') {
             let filtered = search ? vehicles.filter(v => v.title.toLowerCase().includes(search.toLowerCase())) : vehicles;
 
@@ -1672,13 +1769,23 @@
                 filtered = filtered.filter(v => v.catalog === currentAdminCatalogFilter);
             }
 
-            if (!filtered.length) { document.getElementById('vehicleTableBody').innerHTML = `<div class="empty-state"><i class="fas fa-car"></i><p>No hay vehículos en esta categoría</p></div>`; return; }
+            if (!filtered.length) {
+                document.getElementById('vehicleTableBody').innerHTML = `<div class="empty-state"><i class="fas fa-car"></i><p>No hay vehículos en esta categoría</p></div>`;
+                updateBulkBar();
+                return;
+            }
             const statusBadge = (s) => s === 'active' ? '<span class="badge badge-green">ACTIVO</span>' : s === 'sold' ? '<span class="badge badge-red">VENDIDO</span>' : '<span class="badge badge-blue">RESERVADO</span>';
             const imgSrc = (v) => v.images?.length ? v.images[0] : (v.image || '');
-            let html = `<table><thead><tr><th>Vehículo</th><th>Precio</th><th>Catálogo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
+
+            const allSelected = filtered.length > 0 && filtered.every(v => selectedVehicles.has(v.id));
+
+            let html = `<table><thead><tr><th style="width:50px; text-align:center;"><input type="checkbox" id="headerCheckbox" onchange="toggleSelectAll()" ${allSelected ? 'checked' : ''} class="vehicle-checkbox"></th><th>Vehículo</th><th>Precio</th><th>Catálogo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
             filtered.forEach(v => {
-                html += `<tr>
-                    <td><div class="vehicle-row-info"><img src="${imgSrc(v)}" class="vehicle-row-img" onerror="this.style.background='var(--bg3)'"><div><div class="vehicle-row-name">${v.title}</div><div class="vehicle-row-cat">${v.year} · ${v.body_type || v.bodyType || ''}</div></div></div></td>
+                const isChecked = selectedVehicles.has(v.id) ? 'checked' : '';
+                const isSelectedClass = selectedVehicles.has(v.id) ? 'class="selected"' : '';
+                html += `<tr data-id="${v.id}" ${isSelectedClass}>
+                    <td style="text-align:center;"><input type="checkbox" class="vehicle-checkbox" data-id="${v.id}" onchange="toggleVehicle(${v.id})" ${isChecked}></td>
+                    <td><div class="vehicle-row-info"><img src="${imgSrc(v)}" class="vehicle-row-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'42\' viewBox=\'0 0 60 42\'%3E%3Crect width=\'60\' height=\'42\' fill=\'%231a1a1a\'/%3E%3C/svg%3E';"><div><div class="vehicle-row-name">${v.title}</div><div class="vehicle-row-cat">${v.year} · ${(v.body_type || v.bodyType || '').toUpperCase()}</div></div></div></td>
                     <td style="color:var(--accent);font-weight:600">${v.price}</td>
                     <td><span class="badge badge-gold">${(v.catalog || '').toUpperCase()}</span></td>
                     <td>${statusBadge(v.status)}</td>
@@ -1687,6 +1794,7 @@
             });
             html += '</tbody></table>';
             document.getElementById('vehicleTableBody').innerHTML = html;
+            updateBulkBar();
         }
 
         // ===== MODAL =====
@@ -1820,6 +1928,105 @@
         }
 
         async function editVehicle(id) { const v = vehicles.find(v => v.id === id); if (v) openModal(v); }
+
+        function toggleVehicle(id) {
+            if (selectedVehicles.has(id)) {
+                selectedVehicles.delete(id);
+            } else {
+                selectedVehicles.add(id);
+            }
+            // Update table rows visually without full re-render
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const checkbox = row?.querySelector('.vehicle-checkbox');
+            if (row && checkbox) {
+                if (selectedVehicles.has(id)) {
+                    row.classList.add('selected');
+                    checkbox.checked = true;
+                } else {
+                    row.classList.remove('selected');
+                    checkbox.checked = false;
+                }
+            }
+            updateBulkBar();
+
+            // Check if all are selected to sync header
+            const headerCheckbox = document.getElementById('headerCheckbox');
+            if (headerCheckbox) {
+                const visibleCheckboxes = Array.from(document.querySelectorAll('tbody .vehicle-checkbox'));
+                headerCheckbox.checked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(cb => cb.checked);
+            }
+        }
+
+        function toggleSelectAll() {
+            const headerCheckbox = document.getElementById('headerCheckbox');
+            const search = document.getElementById('searchInput')?.value || '';
+            let filtered = search ? vehicles.filter(v => v.title.toLowerCase().includes(search.toLowerCase())) : vehicles;
+            if (currentAdminCatalogFilter !== 'todos') {
+                filtered = filtered.filter(v => v.catalog === currentAdminCatalogFilter);
+            }
+
+            if (headerCheckbox.checked) {
+                filtered.forEach(v => {
+                    selectedVehicles.add(v.id);
+                    const row = document.querySelector(`tr[data-id="${v.id}"]`);
+                    if (row) {
+                        row.classList.add('selected');
+                        const cb = row.querySelector('.vehicle-checkbox');
+                        if (cb) cb.checked = true;
+                    }
+                });
+            } else {
+                filtered.forEach(v => {
+                    selectedVehicles.delete(v.id);
+                    const row = document.querySelector(`tr[data-id="${v.id}"]`);
+                    if (row) {
+                        row.classList.remove('selected');
+                        const cb = row.querySelector('.vehicle-checkbox');
+                        if (cb) cb.checked = false;
+                    }
+                });
+            }
+            updateBulkBar();
+        }
+
+        function clearSelection() {
+            selectedVehicles.clear();
+            document.querySelectorAll('tr.selected').forEach(r => r.classList.remove('selected'));
+            document.querySelectorAll('.vehicle-checkbox').forEach(cb => cb.checked = false);
+            updateBulkBar();
+        }
+
+        function updateBulkBar() {
+            const bar = document.getElementById('bulkFloatingBar');
+            const count = document.getElementById('bulkCount');
+            if (!bar || !count) return;
+
+            count.textContent = selectedVehicles.size;
+            if (selectedVehicles.size > 0) {
+                bar.classList.add('active');
+            } else {
+                bar.classList.remove('active');
+            }
+        }
+
+        async function deleteSelected() {
+            if (selectedVehicles.size === 0) return;
+            if (!confirm(`¿Estás seguro de eliminar ${selectedVehicles.size} vehículo(s) seleccionado(s)?\n\nEsta acción no se puede deshacer.`)) return;
+
+            showToast('Eliminando vehículos...', 'info');
+            const idsToDelete = Array.from(selectedVehicles);
+            const { error } = await supabaseClient.from('vehicles').delete().in('id', idsToDelete);
+
+            if (error) {
+                showToast('Error: ' + error.message, 'error');
+                return;
+            }
+
+            showToast(`${idsToDelete.length} vehículo(s) eliminado(s)`, 'success');
+            selectedVehicles.clear();
+            await loadVehicles();
+        }
+
         async function deleteVehicle(id) {
             if (!confirm('¿Eliminar este vehículo?')) return;
             const { error } = await supabaseClient.from('vehicles').delete().eq('id', id);
