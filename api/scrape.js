@@ -10,7 +10,8 @@ export default async function handler(req, res) {
             const target = decodeURIComponent(req.query.proxy);
             const key = req.query.key;
             let fetchUrl = target;
-            if (key) {
+            const isAuctionAsset = target.includes('iaai.com') || target.includes('copart.com') || target.includes('cs.copart.com');
+            if (key && !isAuctionAsset) {
                 fetchUrl = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(target)}`;
             }
             const response = await fetch(fetchUrl);
@@ -200,31 +201,33 @@ function parseIAAI(html, url = "") {
     data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Price
+    // Price - handle decimals correctly
     const pricePatterns = [
-        /bid-amount[^>]*>\$?([\d,.]+)/i,
-        /current-bid[^>]*>\$?([\d,.]+)/i,
-        /item-value">\$?([\d,.]+)/i,
-        /current bid[\s\S]*?\$([\d,.]+)/i,
-        /buy\s+it\s+now[\s\S]*?\$([\d,.]+)/i,
-        /<span>\$([\d,]{4,7})<\/span>/i
+        /bid-amount[^>]*>\$?([\d,]+)(\.\d+)?/i,
+        /current-bid[^>]*>\$?([\d,]+)(\.\d+)?/i,
+        /item-value">\$?([\d,]+)(\.\d+)?/i,
+        /current bid[\s\S]*?\$([\d,]+)(\.\d+)?/i,
+        /buy\s+it\s+now[\s\S]*?\$([\d,]+)(\.\d+)?/i,
+        /<span>\$([\d,]+)<\/span>/i
     ];
     for (const reg of pricePatterns) {
         const m = html.match(reg);
         if (m && m[1]) {
-            data.price = '$' + m[1].replace(/[,.]/g, '');
+            data.price = '$' + m[1].replace(/,/g, '');
             if (data.price.length > 2) break;
         }
     }
     if (!data.price || data.price === "$0") data.price = "Consultar";
 
     // Images
-    const lotIdFromUrl = url.match(/VehicleDetail\/(\d+)/i) || (url.match(/~/i) ? url.split('VehicleDetail/')[1]?.split('~')[0] : null);
+    const lotIdFromUrlMatch = url.match(/VehicleDetail\/(\d+)/i);
+    const lotIdFromUrl = lotIdFromUrlMatch ? lotIdFromUrlMatch[1] : (url.match(/~/i) ? url.split('VehicleDetail/')[1]?.split('~')[0] : null);
+
     const lotMatch = html.match(/Lot\s*#\s*:?\s*(\d{7,10})/i) || html.match(/Stock\s*#\s*:?\s*(\d{7,10})/i) || html.match(/stockNumber\s*:\s*"(\d+)"/);
-    const lotId = lotMatch ? lotMatch[1] : (lotIdFromUrl || null);
+    const lotId = (lotMatch ? lotMatch[1] : null) || lotIdFromUrl;
 
     if (lotId) {
-        for (let i = 1; i <= 12; i++) data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
+        for (let i = 1; i <= 10; i++) data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
     }
 
     const imgReg = /https:\/\/vis\.iaai\.com\/[^"']+\d+\/1024/gi;
