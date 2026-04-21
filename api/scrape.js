@@ -204,9 +204,9 @@ function parseIAAI(html, url = "") {
 
     const getSpec = (label) => {
         const patterns = [
+            new RegExp(`data-automation="${label.toLowerCase().replace(/\s+/g, '-')}"[^>]*>([^<]+)`, 'i'),
             new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i'),
-            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i'),
-            new RegExp(`data-automation="${label}"[^>]*>([^<]+)`, 'i')
+            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i')
         ];
         for (const reg of patterns) {
             const match = html.match(reg);
