@@ -2417,7 +2417,10 @@
         function showToast(msg, type = 'success') { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast toast-${type} active`; setTimeout(() => t.classList.remove('active'), 3000); }
 
         // ===== INIT =====
-        async function loadDashboard() { await loadVehicles(); }
+        async function loadDashboard() { 
+            await loadVehicles(); 
+            await loadSettings(); // Important: load key for proxies
+        }
 
         // ===== IMPORT LOGIC =====
         document.getElementById('btnDoImport').addEventListener('click', async () => {
@@ -2567,10 +2570,13 @@
                 uploadedImages = [];
                 renderImagePreviews();
 
+                // Get key from settings
+                const proxyKey = document.getElementById('sProxyKey')?.value || '';
+
                 for (const src of data.images) {
                     try {
                         // Proxy through our API to avoid CORS and get blob
-                        const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(src)}`;
+                        const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(src)}${proxyKey ? '&key=' + proxyKey : ''}`;
                         const res = await fetch(proxyUrl);
                         if (!res.ok) throw new Error("Proxy error");
                         const blob = await res.blob();
