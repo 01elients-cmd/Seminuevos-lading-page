@@ -205,11 +205,12 @@ function parseIAAI(html, url = "") {
         return null;
     };
 
+    // Specs
     data.km = getSpec('Odometer') || getSpec('Mileage');
     data.engine = getSpec('Engine');
     data.transmission = getSpec('Transmission');
     data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
-    data.bodyType = (getSpec('Body Style') || '').toLowerCase();
+    data.bodyType = (getSpec('Body Style') || getSpec('Body') || '').toLowerCase();
 
     // Price - search for ANY dollar amount that looks like a car price (> $500)
     const pricePatterns = [
@@ -235,20 +236,31 @@ function parseIAAI(html, url = "") {
     }
     if (!data.price || data.price === "$0") data.price = "Consultar";
 
-    // Images - discover actual high res links in the rendered content
+    // Images - discover actual high res links or JSON state
     const lotIdMatch = html.match(/Lot\s*#\s*:?\s*(\d{8})/i) || html.match(/Stock\s*#\s*:?\s*(\d{8})/i) || html.match(/stockNumber\s*:\s*"(\d{8})"/);
     const lotId = lotIdMatch ? lotIdMatch[1] : (url.match(/(\d{8})/)?.[1] || null);
 
-    // Scan for any high-res auction links
+    // Deep scan for high-res auction links
     const imgReg = /https?:\/\/(vis|images|an-cdn)\.iaai\.com\/[^"']+\d+\/(800|1024)[^"']*/gi;
     let imgM;
     while ((imgM = imgReg.exec(html)) !== null) {
         if (!data.images.includes(imgM[0])) data.images.push(imgM[0]);
     }
 
+    // Try to find image list in JSON state
+    const stateMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*({[\s\S]*?});/);
+    if (stateMatch) {
+        try {
+            const state = JSON.parse(stateMatch[1]);
+            const imgSet = state?.vehicleDetails?.imageSet || [];
+            imgSet.forEach(img => {
+                if (img.url && !data.images.includes(img.url)) data.images.push(img.url);
+            });
+        } catch (e) { }
+    }
+
     if (lotId && data.images.length < 3) {
-        // Try multiple CDN patterns as fallbacks - corrected paths (usually no /Lot/ in modern CDN)
-        const paths = [`vis.iaai.com/mavp/Lot/${lotId}`, `images.iaai.com/inventory/${lotId}`, `an-cdn.iaai.com/inventory/${lotId}`];
+        const paths = [`images.iaai.com/inventory/${lotId}`, `an-cdn.iaai.com/inventory/${lotId}`, `vis.iaai.com/mavp/Lot/${lotId}`];
         for (const path of paths) {
             for (let i = 1; i <= 8; i++) {
                 data.images.push(`https://${path}/${i}/1024`);
