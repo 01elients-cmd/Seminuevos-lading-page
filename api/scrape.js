@@ -34,9 +34,12 @@ export default async function handler(req, res) {
 
             if (!response.ok) return res.status(response.status).send('Asset not found');
 
-            const blob = await response.blob();
-            const buffer = Buffer.from(await blob.arrayBuffer());
-            res.setHeader('Content-Type', response.headers.get('Content-Type') || 'image/jpeg');
+            const contentType = response.headers.get('Content-Type') || 'image/jpeg';
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Cache-Control', 'public, max-age=86400');
             return res.send(buffer);
         } catch (e) {
             console.error('Proxy Error:', e.message);
@@ -210,7 +213,10 @@ function parseIAAI(html, url = "") {
         ];
         for (const reg of patterns) {
             const match = html.match(reg);
-            if (match && match[1]) return match[1].trim().replace(/^[:\s-]+/, '').replace(/\([^)]*\)/g, '').trim();
+            if (match && match[1]) {
+                const clean = match[1].replace(/<[^>]*>/g, '').trim();
+                if (clean.length > 1) return clean.replace(/^[:\s-]+/, '').replace(/\([^)]*\)/g, '').trim();
+            }
         }
         return null;
     };
@@ -287,7 +293,7 @@ function parseIAAI(html, url = "") {
     if (data.engine) desc += ` Motor: ${data.engine}.`;
     if (data.transmission) desc += ` Transmisión: ${data.transmission}.`;
     if (data.km) desc += ` Odometer: ${data.km}.`;
-    data.description = desc;
+    data.description = desc.replace(/<[^>]*>/g, '');
     return data;
 }
 
