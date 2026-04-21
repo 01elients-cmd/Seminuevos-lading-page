@@ -1462,17 +1462,46 @@
             <div class="tab-content" id="tab-bulk">
                 <div class="page-header">
                     <h1 class="page-title">Importación <span>Masiva</span></h1>
-                    <button class="btn btn-primary" id="startBulkImport"><i class="fas fa-play"></i> Iniciar
-                        Proceso</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-ghost" onclick="setBulkMode('links')"><i class="fas fa-link"></i> Por
+                            Enlaces</button>
+                        <button class="btn btn-ghost" onclick="setBulkMode('manual')"><i class="fas fa-code"></i> Modo
+                            Manual</button>
+                    </div>
                 </div>
-                <div class="info-banner"><i class="fas fa-info-circle"></i>
-                    <p>Pega una lista de enlaces (uno por línea). El sistema los procesará e importará
-                        automáticamente.</p>
+
+                <div id="bulkLinksSection">
+                    <div class="info-banner"><i class="fas fa-info-circle"></i>
+                        <p>Pega una lista de enlaces (uno por línea). El sistema los procesará e importará
+                            automáticamente.</p>
+                    </div>
+                    <div class="form-group full">
+                        <textarea class="form-textarea" id="bulkLinks" style="height: 300px; font-family: monospace;"
+                            placeholder="https://www.iaai.com/VehicleDetail/...\nhttps://www.copart.com/lot/..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="startBulkImport" style="width:100%"><i class="fas fa-play"></i>
+                        Iniciar Proceso de Enlaces</button>
                 </div>
-                <div class="form-group full">
-                    <textarea class="form-textarea" id="bulkLinks" style="height: 300px; font-family: monospace;"
-                        placeholder="https://www.iaai.com/VehicleDetail/...\nhttps://www.copart.com/lot/..."></textarea>
+
+                <div id="bulkManualSection" style="display:none;">
+                    <div class="info-banner" style="background:var(--border-accent); border-color:var(--accent);">
+                        <i class="fas fa-magic"></i>
+                        <p><strong>Modo Manual (Anti-Bloqueo)</strong>: Si un link falla por seguridad, abre el link en
+                            tu navegador, presiona <strong>Ctrl+U</strong>, copia todo el código y pégalo aquí.</p>
+                    </div>
+                    <div class="form-group full">
+                        <textarea class="form-textarea" id="manualHtmlContent"
+                            style="height: 300px; font-family: monospace;"
+                            placeholder="Pega el código HTML (Ctrl+U) aquí..."></textarea>
+                    </div>
+                    <input type="text" id="manualUrl" class="form-input"
+                        placeholder="URL original (ej: https://www.iaai.com/VehicleDetail/44787414~US)"
+                        style="margin-bottom:15px;">
+                    <button class="btn btn-primary" id="startManualImport"
+                        style="width:100%; background:var(--success); color:#000;"><i class="fas fa-magic"></i> Importar
+                        desde mi Código</button>
                 </div>
+
                 <div id="bulkStatus" style="margin-top: 20px;"></div>
             </div>
 
@@ -2417,12 +2446,17 @@
         function showToast(msg, type = 'success') { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast toast-${type} active`; setTimeout(() => t.classList.remove('active'), 3000); }
 
         // ===== INIT =====
-        async function loadDashboard() { 
-            await loadVehicles(); 
+        async function loadDashboard() {
+            await loadVehicles();
             await loadSettings(); // Important: load key for proxies
         }
 
         // ===== IMPORT LOGIC =====
+        function setBulkMode(mode) {
+            document.getElementById('bulkLinksSection').style.display = mode === 'links' ? 'block' : 'none';
+            document.getElementById('bulkManualSection').style.display = mode === 'manual' ? 'block' : 'none';
+        }
+
         document.getElementById('btnDoImport').addEventListener('click', async () => {
             const url = document.getElementById('vImportUrl').value.trim();
             if (!url) return;
@@ -2546,6 +2580,40 @@
             btn.innerHTML = '<i class="fas fa-play"></i> Iniciar Proceso';
             statusBox.innerHTML += `<div class="info-banner" style="margin-top:10px; background:var(--bg3)"><strong>Proceso terminado:</strong> ${successCount} éxitos, ${errorCount} errores.</div>`;
             await loadDashboard();
+        });
+
+        // MANUAL HTML IMPORT LOGIC
+        document.getElementById('startManualImport').addEventListener('click', async () => {
+            const html = document.getElementById('manualHtmlContent').value.trim();
+            const url = document.getElementById('manualUrl').value.trim() || 'https://www.iaai.com/manual';
+            if (!html) { showToast('Pega el código HTML primero', 'error'); return; }
+
+            const btn = document.getElementById('startManualImport');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const response = await fetch('/api/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, html })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Código procesado. Completando formulario...', 'success');
+                    openModal();
+                    await fillForm(result.data);
+                } else {
+                    showToast('No se pudo extraer datos del código pegado', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error al procesar el código', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
         });
 
 

@@ -51,7 +51,8 @@ export default async function handler(req, res) {
 
         const html = providedHtml || await (async () => {
             if (providedKey) {
-                const sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=false&country_code=us`;
+                // Use render=true to bypass Imperva/hCaptcha challenges more effectively
+                const sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&country_code=us`;
                 const r = await fetch(sUrl);
                 return await r.text();
             } else {
@@ -80,6 +81,9 @@ export default async function handler(req, res) {
 }
 
 function parseIAAI(html, url) {
+    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva')) {
+        throw new Error('IAAI bloqueó el acceso (CAPTCHA). Usa el Botón Azul en la pestaña Ayuda.');
+    }
     const data = { images: [] };
 
     // 1. permissive JSON search
