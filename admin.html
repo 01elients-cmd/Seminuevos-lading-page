@@ -2073,7 +2073,7 @@
         document.getElementById('vImageFiles')?.addEventListener('change', e => handleFiles(e.target.files));
 
         function handleFiles(files) {
-            Array.from(files).slice(0, 5 - uploadedImages.length).forEach(file => {
+            Array.from(files).forEach(file => {
                 const r = new FileReader();
                 r.onload = e => { uploadedImages.push({ src: e.target.result, edited: null }); renderImagePreviews(); };
                 r.readAsDataURL(file);
@@ -2530,7 +2530,7 @@
                         }
                         const finalImgs = [];
 
-                        for (const src of (data.images || []).slice(0, 6)) {
+                        for (const src of (data.images || [])) {
                             try {
                                 const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(src)}${proxyKey ? '&key=' + proxyKey : ''}`;
                                 const res = await fetch(proxyUrl);
