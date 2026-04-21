@@ -9,12 +9,22 @@ export default async function handler(req, res) {
         try {
             const target = decodeURIComponent(req.query.proxy);
             const key = req.query.key;
-            let fetchUrl = target;
-            const isAuctionAsset = target.includes('iaai.com') || target.includes('copart.com') || target.includes('cs.copart.com');
-            if (key && !isAuctionAsset) {
-                fetchUrl = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(target)}`;
+            const isAuctionAsset = target.includes('iaai.com') || target.includes('copart.com');
+
+            let response;
+            try {
+                // Try direct fetch first (faster, no cost)
+                response = await fetch(target, { headers: { 'Referer': 'https://www.google.com' } });
+                if (!response.ok) throw new Error('Direct blocked');
+            } catch (e) {
+                // Fallback to ScraperAPI if direct is blocked and we have a key
+                if (key) {
+                    response = await fetch(`https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(target)}&render=false`);
+                } else {
+                    throw e;
+                }
             }
-            const response = await fetch(fetchUrl);
+
             const blob = await response.blob();
             const buffer = Buffer.from(await blob.arrayBuffer());
             res.setHeader('Content-Type', response.headers.get('Content-Type') || 'image/jpeg');
@@ -229,17 +239,20 @@ function parseIAAI(html, url = "") {
     const lotIdMatch = html.match(/Lot\s*#\s*:?\s*(\d{8})/i) || html.match(/Stock\s*#\s*:?\s*(\d{8})/i) || html.match(/stockNumber\s*:\s*"(\d{8})"/);
     const lotId = lotIdMatch ? lotIdMatch[1] : (url.match(/(\d{8})/)?.[1] || null);
 
-    // Scan for any vis.iaai.com links (they usually contain the lot and res)
-    const imgReg = /https:\/\/vis\.iaai\.com\/[^"']+\d+\/(800|1024)[^"']*/gi;
+    // Scan for any high-res auction links
+    const imgReg = /https?:\/\/(vis|images|an-cdn)\.iaai\.com\/[^"']+\d+\/(800|1024)[^"']*/gi;
     let imgM;
     while ((imgM = imgReg.exec(html)) !== null) {
-        let src = imgM[0];
-        if (!data.images.includes(src)) data.images.push(src);
+        if (!data.images.includes(imgM[0])) data.images.push(imgM[0]);
     }
 
     if (lotId && data.images.length < 3) {
-        for (let i = 1; i <= 8; i++) {
-            data.images.push(`https://vis.iaai.com/mavp/Lot/${lotId}/${i}/1024`);
+        // Try multiple CDN patterns as fallbacks
+        const cdns = ['vis.iaai.com/mavp', 'images.iaai.com/inventory', 'an-cdn.iaai.com/inventory'];
+        for (const cdn of cdns) {
+            for (let i = 1; i <= 6; i++) {
+                data.images.push(`https://${cdn}/Lot/${lotId}/${i}/1024`);
+            }
         }
     }
 
