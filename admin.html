@@ -1546,7 +1546,7 @@
                         el
                         <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
                         importar incluso si el sitio bloquea al servidor.
-                        <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl='https://'+window.location.hostname+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
+                        <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl=window.location.origin+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
                             class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
                     </p>
                 </div>
@@ -1752,7 +1752,8 @@
         async function loadVehicles() {
             const { data, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
             if (error) { showToast('Error cargando vehículos: ' + error.message, 'error'); return; }
-            vehicles = data || [];
+            // Filtrar basura (records vacíos o con títulos genéricos) para limpiar la vista del usuario
+            vehicles = (data || []).filter(v => v.title && !v.title.includes('Vehículo') && v.year !== 2026);
             renderStats();
             renderTable();
         }
@@ -2522,6 +2523,11 @@
 
                     if (result.success) {
                         const data = result.data;
+                        if (!data.year || !data.title || data.title.includes('Vehículo')) {
+                            console.warn("Skipping garbage data:", data);
+                            errorCount++;
+                            continue;
+                        }
                         const finalImgs = [];
 
                         for (const src of (data.images || []).slice(0, 6)) {
@@ -2703,6 +2709,19 @@
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-download"></i> Importar';
             }
+        }
+
+        async function cleanupGarbage() {
+            if (!confirm('¿Seguro que quieres borrar todos los vehículos vacíos ("Vehículo Copart", etc.)?')) return;
+            const garbage = vehicles.filter(v => v.title.includes('Vehículo') || !v.year);
+            if (garbage.length === 0) { showToast('No hay basura que limpiar', 'info'); return; }
+
+            showToast(`Limpiando ${garbage.length} registros...`, 'info');
+            for (const v of garbage) {
+                await supabaseClient.from('vehicles').delete().eq('id', v.id);
+            }
+            showToast('Limpieza completada', 'success');
+            loadVehicles();
         }
 
         checkAuth().then(ok => { if (ok) loadDashboard(); });
