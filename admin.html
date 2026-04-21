@@ -2528,7 +2528,10 @@
                             successCount++;
                             statusBox.innerHTML += `<div style="color:var(--accent); font-size:0.8rem; font-weight:600;">✓ Guardado: ${data.title}</div>`;
                         } else { throw error; }
-                    } else { throw new Error('Bloqueado o sin datos'); }
+                    } else {
+                        const msg = result.message || 'Bloqueado o sin datos';
+                        throw new Error(msg);
+                    }
                 } catch (err) {
                     errorCount++;
                     statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Error en lote ${i + 1}: ${err.message}</div>`;

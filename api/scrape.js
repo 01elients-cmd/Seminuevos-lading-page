@@ -34,30 +34,47 @@ export default async function handler(req, res) {
         let content = html;
 
         // If HTML not provided, try to fetch it
-        if (!content) {
-            let fetchUrl = url;
-            if (proxyKey) {
-                // Use ScraperAPI as proxy if key is provided
-                fetchUrl = `https://api.scraperapi.com?api_key=${proxyKey}&url=${encodeURIComponent(url)}`;
-                console.log("Using Proxy Fetch:", fetchUrl);
+    if (!content) {
+        let fetchUrl = url;
+        let fetchOptions = {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/121.0.0.0',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9,es;q=0.8'
             }
+        };
 
-            const response = await fetch(fetchUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-                }
-            });
-            content = await response.text();
+        if (proxyKey) {
+            // Use ScraperAPI with residential proxies if key is provided (residential works better for auctions)
+            fetchUrl = `https://api.scraperapi.com?api_key=${proxyKey}&url=${encodeURIComponent(url)}&render=false`;
+            console.log("Using Proxy Fetch:", fetchUrl);
         }
 
-        const site = url.includes('copart.com') ? 'copart' : url.includes('iaai.com') ? 'iaai' : 'generic';
-        const data = site === 'copart' ? parseCopart(content, url) : site === 'iaai' ? parseIAAI(content, url) : parseGeneric(content, url);
+        const response = await fetch(fetchUrl, fetchOptions);
+        content = await response.text();
 
-        return res.status(200).json({
-            success: !!(data.title || data.images?.length),
-            data,
-            site
-        });
+        // Detect bot protection
+        if (content.includes('px-captcha') || content.includes('cloudflare-static') || content.includes('distil-captcha') || content.includes('/_Incapsula_Resource')) {
+            console.warn("Bot protection detected on", url);
+            return res.status(200).json({
+                success: false,
+                message: 'Bloqueo regional o detección de bot. ¡Usa el Bookmarklet desde la pestaña real o agrega una Proxy Key!',
+                blocked: true
+            });
+        }
+    }
+
+    const site = url.includes('copart.com') ? 'copart' : url.includes('iaai.com') ? 'iaai' : 'generic';
+    const data = site === 'copart' ? parseCopart(content, url) : site === 'iaai' ? parseIAAI(content, url) : parseGeneric(content, url);
+
+    // Final validation
+    const hasData = !!(data.title && (data.price && data.price !== '$0' && data.price !== 'Consultar'));
+
+    return res.status(200).json({
+        success: hasData || (data.images?.length > 2),
+        data,
+        site
+    });
 
     } catch (error) {
         console.error('Scrape Error:', error);
@@ -68,33 +85,57 @@ export default async function handler(req, res) {
 function parseCopart(html, url = "") {
     const data = { images: [] };
 
+    // Try to find JSON metadata often found in script tags
+    const jsonMatch = html.match(/var\s+data\s*=\s*({[\s\S]*?});/i) || html.match(/window\._b\s*=\s*({[\s\S]*?});/i);
+    let jsonData = null;
+    if (jsonMatch) {
+        try {
+            jsonData = JSON.parse(jsonMatch[1]);
+        } catch (e) { /* ignore */ }
+    }
+
     // Title / Year
     const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i);
     if (titleMatch) {
-        data.title = titleMatch[1].replace(/Lot #\d+/i, '').replace(/[\r\n\t]+/g, ' ').trim();
+        data.title = titleMatch[1].replace(/Lot #\d+/i, '').replace(/[\r\n\t]+/g, ' ').replace(/<[^>]*>/g, '').trim();
         const yearMatch = data.title.match(/\d{4}/);
         if (yearMatch) data.year = yearMatch[0];
     }
 
     const getSpec = (label) => {
-        const regex = new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i');
-        const match = html.match(regex);
-        return match ? match[1].trim().replace(/^[:\s-]+/, '').trim() : null;
+        // More robust spec matching
+        const patterns = [
+            new RegExp(`${label}[\\s\\S]{0,100}?>[\\s\\S]*?([^<]{2,})<`, 'i'),
+            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i')
+        ];
+        for (const reg of patterns) {
+            const match = html.match(reg);
+            if (match && match[1]) return match[1].trim().replace(/^[:\s-]+/, '').trim();
+        }
+        return null;
     };
 
-    data.km = getSpec('Odometer');
-    data.engine = getSpec('Engine type') || getSpec('Engine');
-    data.transmission = getSpec('Transmission');
-    data.fuel = getSpec('Fuel');
-    data.bodyType = (getSpec('Body Style') || '').toLowerCase();
+    data.km = getSpec('Odometer') || getSpec('Kilometraje');
+    data.engine = getSpec('Engine type') || getSpec('Engine') || getSpec('Motor');
+    data.transmission = getSpec('Transmission') || getSpec('Transmisión');
+    data.fuel = getSpec('Fuel') || getSpec('Combustible');
+    data.bodyType = (getSpec('Body Style') || getSpec('Carrocería') || '').toLowerCase();
 
-    // Price
+    // Price - improved matching
     const priceMatch = html.match(/current-bid[^>]*>[\s]*\$?([\d,]+)/i) ||
         html.match(/"currentBid":([\d.]+)/) ||
-        html.match(/item-value">\$([\d,]+)/i);
-    if (priceMatch) data.price = '$' + priceMatch[1].replace(/,/g, '');
+        html.match(/item-value">\$([\d,]+)/i) ||
+        html.match(/id="bid-amount">\$([\d,]+)/i);
 
-    // Images discovery
+    if (priceMatch) {
+        data.price = '$' + priceMatch[1].replace(/,/g, '');
+    } else if (jsonData && jsonData.lotDetails && jsonData.lotDetails.currentBid) {
+        data.price = '$' + jsonData.lotDetails.currentBid;
+    }
+
+    if (!data.price || data.price === "$0") data.price = "Consultar";
+
+    // Images discovery - improved
     const imgRegexes = [
         /"fullUrl":"([^"]+)"/g,
         /"highResUrl":"([^"]+)"/g,
@@ -106,25 +147,25 @@ function parseCopart(html, url = "") {
         while ((m = reg.exec(html)) !== null) {
             const src = Array.isArray(m) ? m[m.length - 1] : m;
             if (src.includes('.jpg') || src.includes('.JPG')) {
-                if (!data.images.includes(src)) data.images.push(src);
+                const cleanSrc = src.replace(/\\/g, '');
+                if (!data.images.includes(cleanSrc)) data.images.push(cleanSrc);
             }
         }
     });
 
-    // Lot ID from URL if possible
     const lotIdFromUrl = url.match(/lot\/(\d+)/i);
-    if (lotIdFromUrl && data.images.length === 0) {
-        // Construct standard Copart image pattern
+    if (lotIdFromUrl && data.images.length < 5) {
         for (let i = 1; i <= 10; i++) {
             data.images.push(`https://static.copart.com/content/resp/lotImages/full/${lotIdFromUrl[1]}_${i}.JPG`);
         }
     }
 
-    data.images = [...new Set(data.images)].slice(0, 15);
+    data.images = [...new Set(data.images)].filter(s => s.startsWith('http')).slice(0, 15);
 
-    // Detailed Description
+    // Description
     let desc = `Importado vía subasta Copart.`;
-    if (getSpec('Damage') || getSpec('Primary Damage')) desc += ` Daño: ${getSpec('Damage') || getSpec('Primary Damage')}.`;
+    const damage = getSpec('Damage') || getSpec('Primary Damage');
+    if (damage) desc += ` Daño: ${damage}.`;
     if (data.engine) desc += ` Motor: ${data.engine}.`;
     if (data.transmission) desc += ` Transmisión: ${data.transmission}.`;
     if (data.km) desc += ` Odometer: ${data.km}.`;
@@ -138,15 +179,21 @@ function parseIAAI(html, url = "") {
     // Title / Year
     const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title>([\s\S]*?)<\/title>/i);
     if (titleMatch) {
-        data.title = titleMatch[1].replace(/[\r\n\t]+/g, ' ').replace(/Stock\s*#.*/i, '').trim();
+        data.title = titleMatch[1].replace(/[\r\n\t]+/g, ' ').replace(/Stock\s*#.*/i, '').replace(/<[^>]*>/g, '').trim();
         const yearMatch = data.title.match(/\d{4}/);
         if (yearMatch) data.year = yearMatch[0];
     }
 
     const getSpec = (label) => {
-        const regex = new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i');
-        const match = html.match(regex);
-        return match ? match[1].trim().replace(/^[:\s-]+/, '').replace(/\([^)]*\)/g, '').trim() : null;
+        const patterns = [
+            new RegExp(`${label}[\\s\\S]{0,150}?>[\\s\\S]*?([^<]{2,})<`, 'i'),
+            new RegExp(`${label}[\\s\\S]{0,100}?:\\s*([^<\\r\\n]{2,})`, 'i')
+        ];
+        for (const reg of patterns) {
+            const match = html.match(reg);
+            if (match && match[1]) return match[1].trim().replace(/^[:\s-]+/, '').replace(/\([^)]*\)/g, '').trim();
+        }
+        return null;
     };
 
     data.km = getSpec('Odometer') || getSpec('Mileage');
@@ -155,14 +202,14 @@ function parseIAAI(html, url = "") {
     data.fuel = getSpec('Fuel Type') || getSpec('Fuel');
     data.bodyType = (getSpec('Body Style') || '').toLowerCase();
 
-    // Price - Deep search
+    // Price - improved
     const pricePatterns = [
         /bid-amount[^>]*>\$?([\d,.]+)/i,
         /current-bid[^>]*>\$?([\d,.]+)/i,
         /item-value">\$?([\d,.]+)/i,
+        /item-value-text">\$?([\d,.]+)/i,
         /current bid[\s\S]*?\$([\d,.]+)/i,
-        /buy it now[\s\S]*?\$([\d,.]+)/i,
-        /\$([\d,]{4,7})/
+        /buy\s+it\s+now[\s\S]*?\$([\d,.]+)/i
     ];
     for (const reg of pricePatterns) {
         const m = html.match(reg);
@@ -173,10 +220,10 @@ function parseIAAI(html, url = "") {
     }
     if (!data.price || data.price === "$0") data.price = "Consultar";
 
-    // Extract Lot Number from HTML or URL
+    // Images
     const lotIdFromUrl = url.match(/VehicleDetail\/(\d+)/i) || (url.match(/~/i) ? url.split('VehicleDetail/')[1]?.split('~')[0] : null);
     const lotMatch = html.match(/Lot\s*#\s*:?\s*(\d{7,10})/i) || html.match(/Stock\s*#\s*:?\s*(\d{7,10})/i) || html.match(/stockNumber\s*:\s*"(\d+)"/);
-    const lotId = lotMatch ? lotMatch[1] : (typeof lotIdFromUrl === 'string' ? lotIdFromUrl : null);
+    const lotId = lotMatch ? lotMatch[1] : (lotIdFromUrl || null);
 
     if (lotId) {
         for (let i = 1; i <= 12; i++) {
@@ -184,11 +231,19 @@ function parseIAAI(html, url = "") {
         }
     }
 
-    data.images = [...new Set(data.images)].slice(0, 15);
+    // Try to find images in HTML too
+    const imgReg = /https:\/\/vis\.iaai\.com\/[^"']+\d+\/1024/gi;
+    let imgM;
+    while ((imgM = imgReg.exec(html)) !== null) {
+        if (!data.images.includes(imgM[0])) data.images.push(imgM[0]);
+    }
 
-    // Detailed Description
+    data.images = [...new Set(data.images)].filter(s => s.startsWith('http')).slice(0, 15);
+
+    // Description
     let desc = `Importado vía subasta IAAI.`;
-    if (getSpec('Primary Damage')) desc += ` Daño: ${getSpec('Primary Damage')}.`;
+    const damage = getSpec('Primary Damage') || getSpec('Damage');
+    if (damage) desc += ` Daño: ${damage}.`;
     if (data.engine) desc += ` Motor: ${data.engine}.`;
     if (data.transmission) desc += ` Transmisión: ${data.transmission}.`;
     if (data.km) desc += ` Odometer: ${data.km}.`;
@@ -198,10 +253,20 @@ function parseIAAI(html, url = "") {
 
 function parseGeneric(html, url) {
     const data = { images: [] };
-    const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
-    data.title = titleMatch ? titleMatch[1].trim() : 'Vehículo Importado';
-    const imgRegex = /<meta property="og:image" content="([^"]+)"/i;
-    const imgMatch = html.match(imgRegex);
-    if (imgMatch) data.images.push(imgMatch[1]);
+    const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i) || html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    data.title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : 'Vehículo Importado';
+    
+    // OG Image
+    const ogImg = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
+    if (ogImg) data.images.push(ogImg[1]);
+
+    // Try to find any car-looking image
+    const imgs = html.match(/https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp)/gi);
+    if (imgs) {
+        imgs.slice(0, 10).forEach(src => {
+            if (!data.images.includes(src)) data.images.push(src);
+        });
+    }
+
     return data;
 }
