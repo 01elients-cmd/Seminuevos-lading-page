@@ -247,11 +247,11 @@ function parseIAAI(html, url = "") {
     }
 
     if (lotId && data.images.length < 3) {
-        // Try multiple CDN patterns as fallbacks
-        const cdns = ['vis.iaai.com/mavp', 'images.iaai.com/inventory', 'an-cdn.iaai.com/inventory'];
-        for (const cdn of cdns) {
-            for (let i = 1; i <= 6; i++) {
-                data.images.push(`https://${cdn}/Lot/${lotId}/${i}/1024`);
+        // Try multiple CDN patterns as fallbacks - corrected paths (usually no /Lot/ in modern CDN)
+        const paths = [`vis.iaai.com/mavp/Lot/${lotId}`, `images.iaai.com/inventory/${lotId}`, `an-cdn.iaai.com/inventory/${lotId}`];
+        for (const path of paths) {
+            for (let i = 1; i <= 8; i++) {
+                data.images.push(`https://${path}/${i}/1024`);
             }
         }
     }
