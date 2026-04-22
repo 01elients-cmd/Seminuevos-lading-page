@@ -1705,6 +1705,10 @@
                                             class="fas fa-undo"></i> Reiniciar</button>
                                     <button class="btn btn-primary btn-sm" id="editorApply" type="button"><i
                                             class="fas fa-check"></i> Aplicar Recorte</button>
+                                    <button class="btn btn-ghost btn-sm" id="editorStampPlate" type="button"
+                                        style="color:#ffd700; border-color:#ffd700;">
+                                        <i class="fas fa-shield-halved"></i> Tapar Placa (Logo)
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -2196,6 +2200,42 @@
 
         document.getElementById('editorReset')?.addEventListener('click', () => {
             if (currentCropper) currentCropper.reset();
+        });
+
+        document.getElementById('editorStampPlate')?.addEventListener('click', () => {
+            if (currentEditIndex < 0 || !currentCropper) return;
+            const cData = currentCropper.getData();
+            const originalImg = document.getElementById('editorImage');
+
+            showToast('Estampando logo...', 'info');
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = originalImg.naturalWidth;
+            canvas.height = originalImg.naturalHeight;
+
+            // Draw original image
+            ctx.drawImage(originalImg, 0, 0);
+
+            // Draw Logo on top of selected area
+            const logo = new Image();
+            logo.src = 'images/monograma-final-3d.png';
+            logo.onload = () => {
+                // Determine color for the background (usually plates are light)
+                ctx.fillStyle = '#111'; // Dark background for the stamp
+                ctx.fillRect(cData.x, cData.y, cData.width, cData.height);
+
+                // Draw logo with some padding
+                const pad = Math.min(cData.width, cData.height) * 0.1;
+                ctx.drawImage(logo, cData.x + pad, cData.y + pad, cData.width - (pad * 2), cData.height - (pad * 2));
+
+                uploadedImages[currentEditIndex].edited = canvas.toDataURL('image/jpeg', 0.9);
+                renderImagePreviews();
+                showToast('¡Placa tapada con éxito!', 'success');
+
+                // Refresh cropper to show changes
+                openImageEditor(currentEditIndex);
+            };
         });
 
         document.getElementById('editorClearCrop')?.addEventListener('click', () => {
