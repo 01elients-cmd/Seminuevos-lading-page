@@ -1462,11 +1462,13 @@
             <div class="tab-content" id="tab-bulk">
                 <div class="page-header">
                     <h1 class="page-title">Importación <span>Masiva</span></h1>
-                    <div style="display:flex; gap:10px;">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
                         <button class="btn btn-ghost" onclick="setBulkMode('links')"><i class="fas fa-link"></i> Por
                             Enlaces</button>
                         <button class="btn btn-ghost" onclick="setBulkMode('manual')"><i class="fas fa-code"></i> Modo
                             Manual</button>
+                        <button class="btn btn-ghost" onclick="setBulkMode('rtf')"><i class="fas fa-file-invoice"></i>
+                            Por Archivo (RTF)</button>
                     </div>
                 </div>
 
@@ -1500,6 +1502,30 @@
                     <button class="btn btn-primary" id="startManualImport"
                         style="width:100%; background:var(--success); color:#000;"><i class="fas fa-magic"></i> Importar
                         desde mi Código</button>
+                </div>
+
+                <div id="bulkRtfSection" style="display:none; margin-top:20px;">
+                    <div class="info-banner" style="background:#ffd700; color:#000; border-color:#e6c300;">
+                        <i class="fas fa-file-upload"></i>
+                        <p><strong>Importador de Papelitos (RTF)</strong>: Selecciona el archivo .rtf con la info y
+                            todas las fotos del carro.</p>
+                    </div>
+                    <div class="bulk-setup-grid" style="grid-template-columns: 1fr 1.5fr; gap:15px; margin-top:15px;">
+                        <div class="form-group">
+                            <label class="form-label">Archivo de Datos (.rtf)</label>
+                            <input type="file" id="rtfFile" class="form-input" accept=".rtf"
+                                style="background:rgba(255,255,255,0.05); padding:10px;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fotos del Vehículo</label>
+                            <input type="file" id="rtfImages" class="form-input" accept="image/*" multiple
+                                style="background:rgba(255,255,255,0.05); padding:10px;">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="startRtfImport"
+                        style="width:100%; margin-top:20px; font-weight:700;">
+                        <i class="fas fa-magic"></i> Procesar Documento y Fotos
+                    </button>
                 </div>
 
                 <div id="bulkStatus" style="margin-top: 20px;"></div>
@@ -2456,7 +2482,64 @@
         function setBulkMode(mode) {
             document.getElementById('bulkLinksSection').style.display = mode === 'links' ? 'block' : 'none';
             document.getElementById('bulkManualSection').style.display = mode === 'manual' ? 'block' : 'none';
+            document.getElementById('bulkRtfSection').style.display = mode === 'rtf' ? 'block' : 'none';
         }
+
+        document.getElementById('startRtfImport')?.addEventListener('click', async () => {
+            const rtfFile = document.getElementById('rtfFile').files[0];
+            const imgFiles = document.getElementById('rtfImages').files;
+            if (!rtfFile) { showToast('Selecciona el archivo .rtf primero', 'warning'); return; }
+
+            const btn = document.getElementById('startRtfImport');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Leyendo papelito...';
+
+            try {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const content = e.target.result;
+                    // Simple RTF-to-Text extraction (strip commands)
+                    const plainText = content.replace(/\\([a-z]{1,32})(-?\d+)? ?|[\{\}]/g, " ").replace(/\s+/g, " ");
+
+                    const data = {
+                        title: plainText.split("PRICE:")[0].trim(),
+                        price: (plainText.match(/PRICE:\s*([^ ]+ [^ ]+ [^ ]+)/) || [])[1] || "",
+                        engine: (plainText.match(/Engine\s+([^ ]+)/) || [])[1] || "",
+                        km: (plainText.match(/Odometer\s+([^ ]+)/) || [])[1] || "0 KM",
+                        description: plainText.substring(0, 500) + "..."
+                    };
+
+                    // Try specifically for KIA format in your screenshot
+                    if (plainText.includes("MODEL")) {
+                        const modelMatch = plainText.match(/MODEL\s+([^ ]+ [^ ]+)/);
+                        if (modelMatch) data.title = modelMatch[1];
+                    }
+
+                    showToast('Información extraída. Abriendo formulario...', 'success');
+                    openModal();
+                    await fillForm(data);
+
+                    // Add images if selected
+                    if (imgFiles.length > 0) {
+                        for (const file of imgFiles) {
+                            const imgReader = new FileReader();
+                            imgReader.onload = (ev) => {
+                                uploadedImages.push({ src: ev.target.result, edited: null });
+                                renderImagePreviews();
+                            };
+                            imgReader.readAsDataURL(file);
+                        }
+                    }
+                };
+                reader.readAsText(rtfFile);
+            } catch (err) {
+                showToast('Error al leer el archivo', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        });
 
         document.getElementById('btnDoImport').addEventListener('click', async () => {
             const url = document.getElementById('vImportUrl').value.trim();
