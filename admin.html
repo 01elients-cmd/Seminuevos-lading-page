@@ -2204,36 +2204,41 @@
 
         document.getElementById('editorStampPlate')?.addEventListener('click', () => {
             if (currentEditIndex < 0 || !currentCropper) return;
-            const cData = currentCropper.getData();
+
+            // Usar true para obtener coordenadas reales de la foto original (sin importar el zoom)
+            const cData = currentCropper.getData(true);
             const originalImg = document.getElementById('editorImage');
 
-            showToast('Estampando logo...', 'info');
+            showToast('Identificando vehículo...', 'info');
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = originalImg.naturalWidth;
             canvas.height = originalImg.naturalHeight;
 
-            // Draw original image
+            // 1. Dibujar la foto COMPLETA
             ctx.drawImage(originalImg, 0, 0);
 
-            // Draw Logo on top of selected area
+            // 2. Cargar logo
             const logo = new Image();
             logo.src = 'images/monograma-final-3d.png';
             logo.onload = () => {
-                // Determine color for the background (usually plates are light)
-                ctx.fillStyle = '#111'; // Dark background for the stamp
+                // 3. Fondo oscuro sobre la placa original
+                ctx.fillStyle = '#0a0a0a';
                 ctx.fillRect(cData.x, cData.y, cData.width, cData.height);
 
-                // Draw logo with some padding
-                const pad = Math.min(cData.width, cData.height) * 0.1;
+                // 4. Logo centrado en el área seleccionada
+                const pad = Math.min(cData.width, cData.height) * 0.15;
                 ctx.drawImage(logo, cData.x + pad, cData.y + pad, cData.width - (pad * 2), cData.height - (pad * 2));
 
+                // 5. Guardar la nueva versión pero manteniendo la foto grande
                 uploadedImages[currentEditIndex].edited = canvas.toDataURL('image/jpeg', 0.9);
-                renderImagePreviews();
-                showToast('¡Placa tapada con éxito!', 'success');
 
-                // Refresh cropper to show changes
+                showToast('¡Identidad aplicada!', 'success');
+
+                // Limpiar selección y refrescar
+                currentCropper.clear();
+                renderImagePreviews();
                 openImageEditor(currentEditIndex);
             };
         });
