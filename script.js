@@ -871,82 +871,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // ===== SMART PLATE IDENTIFIER (AI) =====
+    // ===== SMART PLATE IDENTIFIER (AI) ===== 
     let plateDetector = null;
     const loadPlateDetector = async () => {
         try {
-            // Forzar CPU si WebGL da problemas de seguridad
             await tf.setBackend('cpu');
             plateDetector = await cocoSsd.load();
-            console.log("IA de detección activa (Modo Seguro)");
+            console.log("IA de protección activa");
             processVisibleImages();
-        } catch (e) {
-            console.warn("Error cargando detector:", e);
-        }
+        } catch (e) { console.warn("AI Load skipped"); }
     };
 
     const identifyAndBrandPlate = async (img) => {
-        if (!plateDetector || img.dataset.processed) return;
-
-        // Asegurar que la imagen permita acceso cross-origin
-        if (!img.crossOrigin) img.crossOrigin = "anonymous";
-
+        if (!plateDetector || img.dataset.processed || !img.complete) return;
         img.dataset.processed = "true";
 
         try {
-            // Un pequeño retraso para asegurar que los píxeles están disponibles
-            if (!img.complete) await new Promise(r => img.onload = r);
-
             const predictions = await plateDetector.detect(img);
-            const car = predictions.find(p => ['car', 'truck', 'bus'].includes(p.class));
+            const car = predictions.find(p => ['car', 'truck', 'bus', 'motorcycle'].includes(p.class));
 
             if (car) {
-                // Heurística rápida: La placa suele estar en el tercio inferior del carro, al centro.
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+
+                // Dibujar foto original
+                ctx.drawImage(img, 0, 0);
+
                 const [x, y, width, height] = car.bbox;
-                const plateRegion = {
-                    x: x + (width * 0.2),
-                    y: y + (height * 0.6),
-                    width: width * 0.6,
-                    height: height * 0.35
+                // Heurística mejorada: 25% del ancho, 65% abajo.
+                const px = x + (width * 0.25);
+                const py = y + (height * 0.65);
+                const pw = width * 0.5;
+                const ph = height * 0.25;
+
+                // Cargar logo para estampar
+                const logo = new Image();
+                logo.src = 'images/monograma-final-3d.png';
+                logo.crossOrigin = "anonymous";
+
+                logo.onload = () => {
+                    // 1. Fondo oscuro sobre la placa
+                    ctx.fillStyle = '#0a0a0a';
+                    ctx.fillRect(px, py, pw, ph);
+
+                    // 2. Logo SemiNuevos 3D
+                    const pad = Math.min(pw, ph) * 0.2;
+                    ctx.drawImage(logo, px + pad, py + pad, pw - (pad * 2), ph - (pad * 2));
+
+                    // 3. Reemplazo de fuente de imagen (Fijo y exacto)
+                    img.src = canvas.toDataURL('image/jpeg', 0.85);
                 };
-
-                // Crear el overlay si no existe
-                const container = img.parentElement;
-                if (!container.style.position) container.style.position = 'relative';
-
-                const stamp = document.createElement('div');
-                stamp.className = 'smart-plate-brand';
-                stamp.innerHTML = `<img src="images/monograma-final-3d.png" style="width:100%; height:100%; transform: scale(3);">`; // Zoom in on monogram for nice effect
-
-                // Estilo del Stamp
-                Object.assign(stamp.style, {
-                    position: 'absolute',
-                    background: 'rgba(10, 10, 10, 0.95)',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    pointerEvents: 'none',
-                    zIndex: '10',
-                    // Posición inicial (la IA nos dio la caja superior del carro)
-                    left: `${(plateRegion.x / img.naturalWidth) * 100}%`,
-                    top: `${(plateRegion.y / img.naturalHeight) * 100}%`,
-                    width: `${(plateRegion.width / img.naturalWidth) * 100}%`,
-                    height: `${(plateRegion.height / img.naturalHeight) * 100}%`,
-                    opacity: '0',
-                    transition: 'opacity 0.5s ease'
-                });
-
-                container.appendChild(stamp);
-                // Pequeño lag para efecto "escaneo"
-                setTimeout(() => stamp.style.opacity = '1', 500);
             }
-        } catch (err) {
-            console.error("Detección fallida:", err);
-        }
+        } catch (err) { }
     };
 
     const processVisibleImages = () => {
