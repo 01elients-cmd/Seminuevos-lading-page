@@ -1182,15 +1182,16 @@ body::after {
 
 .vehicle-card-image {
     position: relative;
-    height: 250px;
+    height: 300px;
     overflow: hidden;
+    background: #000;
 }
 
 .vehicle-card-image img {
     width: 100%;
-    height: 120%;
+    height: 100%;
     object-fit: cover;
-    object-position: center 15%;
+    object-position: center center;
     transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -1214,13 +1215,11 @@ body::after {
     box-shadow: var(--glow-gold);
 }
 
-/* Vehicle Card Tags (origin badges on image) */
+/* Vehicle Card Tags (now below image) */
 .vehicle-card-tags {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
     display: flex;
     gap: 6px;
+    margin-bottom: 12px;
 }
 
 .origin-badge {

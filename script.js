@@ -213,9 +213,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const viewCount = car.views || 0;
             const viewsBadge = viewCount > 0 ? `<span class="views-badge" id="views-card-${car.id}"><i class="fas fa-eye"></i> ${viewCount} vista${viewCount !== 1 ? 's' : ''}</span>` : `<span class="views-badge" id="views-card-${car.id}" style="display:none;"></span>`;
             card.innerHTML = `
-                <div class="vehicle-card-image"><img src="${car.images[0]}" alt="${car.title}" loading="lazy" crossorigin="anonymous">${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}${viewsBadge}<div class="vehicle-card-tags">${originBadge}</div></div>
-                <div class="vehicle-card-body"><div class="vehicle-card-header"><h3 class="vehicle-card-title">${car.title}</h3><span class="vehicle-availability ${availabilityClass}"><i class="fas ${availabilityIcon}"></i> ${availabilityText}</span></div><p class="vehicle-card-price">${priceDisplay}</p><div class="vehicle-card-specs"><span class="spec-item"><i class="fas fa-calendar"></i> ${car.year}</span><span class="spec-item"><i class="fas fa-road"></i> ${car.km}</span><span class="spec-item"><i class="fas fa-gas-pump"></i> ${car.fuel}</span><span class="spec-item"><i class="fas fa-gears"></i> ${car.transmission}</span></div></div>
-                <div class="vehicle-card-footer"><a href="#" class="view-details" data-id="${car.id}"><i class="fas fa-eye"></i> Ver detalles</a><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${car.availability === 'por_pedido' ? 'Por Pedido' : car.price}. ¿Me pueden cotizar?`)}" class="track-whatsapp" data-title="${car.title}" target="_blank"><i class="fab fa-whatsapp"></i> Cotiza</a></div>
+                <div class="vehicle-card-image">
+                    <img src="${car.images[0]}" alt="${car.title}" loading="lazy" crossorigin="anonymous">
+                    ${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}
+                    ${viewsBadge}
+                </div>
+                <div class="vehicle-card-body">
+                    <div class="vehicle-card-tags">${originBadge}</div>
+                    <div class="vehicle-card-header">
+                        <h3 class="vehicle-card-title">${car.title}</h3>
+                        <span class="vehicle-availability ${availabilityClass}"><i class="fas ${availabilityIcon}"></i> ${availabilityText}</span>
+                    </div>
+                    <p class="vehicle-card-price">${priceDisplay}</p>
+                    <div class="vehicle-card-specs">
+                        <span class="spec-item"><i class="fas fa-calendar"></i> ${car.year}</span>
+                        <span class="spec-item"><i class="fas fa-road"></i> ${car.km}</span>
+                        <span class="spec-item"><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
+                        <span class="spec-item"><i class="fas fa-gears"></i> ${car.transmission}</span>
+                    </div>
+                </div>
+                <div class="vehicle-card-footer">
+                    <a href="#" class="view-details" data-id="${car.id}"><i class="fas fa-eye"></i> Ver detalles</a>
+                    <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${car.availability === 'por_pedido' ? 'Por Pedido' : car.price}. ¿Me pueden cotizar?`)}" class="track-whatsapp" data-title="${car.title}" target="_blank"><i class="fab fa-whatsapp"></i> Cotiza</a>
+                </div>
             `;
             gridElement.appendChild(card);
         });
