@@ -1779,7 +1779,7 @@
             const { data, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
             if (error) { showToast('Error cargando vehículos: ' + error.message, 'error'); return; }
             // Filtrar basura (records vacíos o con títulos genéricos) para limpiar la vista del usuario
-            vehicles = (data || []).filter(v => v.title && !v.title.includes('Vehículo') && v.year !== 2026);
+            vehicles = (data || []).filter(v => v.title && !v.title.includes('Vehículo'));
             renderStats();
             renderTable();
         }
