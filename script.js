@@ -851,6 +851,100 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+    // ===== SMART PLATE IDENTIFIER (AI) =====
+    let plateDetector = null;
+    const loadPlateDetector = async () => {
+        try {
+            plateDetector = await cocoSsd.load();
+            console.log("IA de detección de vehículos cargada");
+            processVisibleImages();
+        } catch (e) {
+            console.warn("Error cargando detector:", e);
+        }
+    };
+
+    const identifyAndBrandPlate = async (img) => {
+        if (!plateDetector || img.dataset.processed) return;
+        img.dataset.processed = "true";
+
+        try {
+            const predictions = await plateDetector.detect(img);
+            const car = predictions.find(p => ['car', 'truck', 'bus'].includes(p.class));
+
+            if (car) {
+                // Heurística rápida: La placa suele estar en el tercio inferior del carro, al centro.
+                const [x, y, width, height] = car.bbox;
+                const plateRegion = {
+                    x: x + (width * 0.2),
+                    y: y + (height * 0.6),
+                    width: width * 0.6,
+                    height: height * 0.35
+                };
+
+                // Crear el overlay si no existe
+                const container = img.parentElement;
+                if (!container.style.position) container.style.position = 'relative';
+
+                const stamp = document.createElement('div');
+                stamp.className = 'smart-plate-brand';
+                stamp.innerHTML = `<img src="images/monograma-final-3d.png" style="width:100%; height:100%; transform: scale(3);">`; // Zoom in on monogram for nice effect
+
+                // Estilo del Stamp
+                Object.assign(stamp.style, {
+                    position: 'absolute',
+                    background: 'rgba(10, 10, 10, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none',
+                    zIndex: '10',
+                    // Posición inicial (la IA nos dio la caja superior del carro)
+                    left: `${(plateRegion.x / img.naturalWidth) * 100}%`,
+                    top: `${(plateRegion.y / img.naturalHeight) * 100}%`,
+                    width: `${(plateRegion.width / img.naturalWidth) * 100}%`,
+                    height: `${(plateRegion.height / img.naturalHeight) * 100}%`,
+                    opacity: '0',
+                    transition: 'opacity 0.5s ease'
+                });
+
+                container.appendChild(stamp);
+                // Pequeño lag para efecto "escaneo"
+                setTimeout(() => stamp.style.opacity = '1', 500);
+            }
+        } catch (err) {
+            console.error("Detección fallida:", err);
+        }
+    };
+
+    const processVisibleImages = () => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.complete) identifyAndBrandPlate(img);
+                    else img.onload = () => identifyAndBrandPlate(img);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.vehicle-card-image img').forEach(img => observer.observe(img));
+        document.querySelectorAll('.vehicle-modal-image img').forEach(img => observer.observe(img));
+    };
+
+    loadPlateDetector();
+
+    // Re-escaneo cuando cambian los paneles
+    const observer = new MutationObserver(processVisibleImages);
+    const grids = ['seminuevosGrid', 'porpedidoGrid', 'zerokmGrid'];
+    grids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { childList: true });
+    });
+
     // ===== AUCTION PUSH FORM =====
     const btnSubmitBid = document.getElementById('btnSubmitBid');
     if (btnSubmitBid) {
