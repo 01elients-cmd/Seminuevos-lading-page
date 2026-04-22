@@ -1705,10 +1705,6 @@
                                             class="fas fa-undo"></i> Reiniciar</button>
                                     <button class="btn btn-primary btn-sm" id="editorApply" type="button"><i
                                             class="fas fa-check"></i> Aplicar Recorte</button>
-                                    <button class="btn btn-ghost btn-sm" id="editorStampPlate" type="button"
-                                        style="color:#ffd700; border-color:#ffd700;">
-                                        <i class="fas fa-shield-halved"></i> Tapar Placa (Logo)
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -2202,46 +2198,6 @@
             if (currentCropper) currentCropper.reset();
         });
 
-        document.getElementById('editorStampPlate')?.addEventListener('click', () => {
-            if (currentEditIndex < 0 || !currentCropper) return;
-
-            // Usar true para obtener coordenadas reales de la foto original (sin importar el zoom)
-            const cData = currentCropper.getData(true);
-            const originalImg = document.getElementById('editorImage');
-
-            showToast('Identificando vehículo...', 'info');
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = originalImg.naturalWidth;
-            canvas.height = originalImg.naturalHeight;
-
-            // 1. Dibujar la foto COMPLETA
-            ctx.drawImage(originalImg, 0, 0);
-
-            // 2. Cargar logo
-            const logo = new Image();
-            logo.src = 'images/monograma-final-3d.png';
-            logo.onload = () => {
-                // 3. Fondo oscuro sobre la placa original
-                ctx.fillStyle = '#0a0a0a';
-                ctx.fillRect(cData.x, cData.y, cData.width, cData.height);
-
-                // 4. Logo centrado en el área seleccionada
-                const pad = Math.min(cData.width, cData.height) * 0.15;
-                ctx.drawImage(logo, cData.x + pad, cData.y + pad, cData.width - (pad * 2), cData.height - (pad * 2));
-
-                // 5. Guardar la nueva versión pero manteniendo la foto grande
-                uploadedImages[currentEditIndex].edited = canvas.toDataURL('image/jpeg', 0.9);
-
-                showToast('¡Identidad aplicada!', 'success');
-
-                // Limpiar selección y refrescar
-                currentCropper.clear();
-                renderImagePreviews();
-                openImageEditor(currentEditIndex);
-            };
-        });
 
         document.getElementById('editorClearCrop')?.addEventListener('click', () => {
             if (currentEditIndex < 0) return;
