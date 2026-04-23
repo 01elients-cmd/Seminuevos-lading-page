@@ -152,6 +152,18 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (section === 'porpedido') porpedidoPanel?.classList.add('active');
             else if (section === '0km') zerokmPanel?.classList.add('active');
             observeAnimations();
+
+            // Scroll down to catalog section
+            const target = document.getElementById('catalogo');
+            const navbar = document.getElementById('navbar');
+            if (target && navbar) {
+                const navHeight = navbar.offsetHeight;
+                const targetPos = target.offsetTop - navHeight - 20;
+                window.scrollTo({
+                    top: targetPos,
+                    behavior: 'smooth'
+                });
+            }
         });
     });
 
