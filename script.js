@@ -154,7 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
             observeAnimations();
 
             // Scroll down to the specific panel section (where the cars are)
-            const target = document.getElementById(`${section}-panel`);
+            const targetId = section === '0km' ? 'zerokm-panel' : `${section}-panel`;
+            const target = document.getElementById(targetId);
             const navbar = document.getElementById('navbar');
             if (target && navbar) {
                 const navHeight = navbar.offsetHeight;
