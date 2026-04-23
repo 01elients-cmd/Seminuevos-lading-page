@@ -153,8 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (section === '0km') zerokmPanel?.classList.add('active');
             observeAnimations();
 
-            // Scroll down to catalog section
-            const target = document.getElementById('catalogo');
+            // Scroll down to the specific panel section (where the cars are)
+            const target = document.getElementById(`${section}-panel`);
             const navbar = document.getElementById('navbar');
             if (target && navbar) {
                 const navHeight = navbar.offsetHeight;
