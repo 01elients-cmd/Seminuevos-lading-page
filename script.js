@@ -345,21 +345,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (map.social_tiktok && fTt) fTt.href = map.social_tiktok;
                 if (map.social_youtube && fYt) fYt.href = map.social_youtube;
             }
-            // CMS TEXTS
-            if (map.cms_texts) {
-                Object.entries(map.cms_texts).forEach(([key, val]) => {
-                    const el = document.querySelector(`[data-cms="${key}"]`);
-                    if (el) el.innerHTML = val;
-                });
+            if (map.hero1_img) {
+                const el = document.getElementById('heroSlide1');
+                if (el) el.style.backgroundImage = `url('${map.hero1_img}')`;
             }
-
-            // Visual Editor Logic
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('edit') === 'true') {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session) {
-                    enableVisualEditor();
-                }
+            if (map.hero2_img) {
+                const el = document.getElementById('heroSlide2');
+                if (el) el.style.backgroundImage = `url('${map.hero2_img}')`;
             }
 
         } catch (e) { console.error('Error fetching CMS data', e); }
@@ -368,113 +360,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initSupabaseData();
-
-    // ===== VISUAL EDITOR =====
-    function enableVisualEditor() {
-        const style = document.createElement('style');
-        style.innerHTML = `
-            [data-cms] { 
-                outline: 2px dashed rgba(39, 92, 234, 0.8) !important;
-                outline-offset: 4px;
-                cursor: text;
-                transition: all 0.2s;
-                position: relative;
-            }
-            [data-cms]:hover {
-                background: rgba(39, 92, 234, 0.2);
-            }
-            [data-cms]:focus {
-                outline: 3px solid var(--accent) !important;
-                background: rgba(39, 92, 234, 0.3);
-            }
-            #cmsSaveBtn {
-                position: fixed;
-                bottom: 30px;
-                right: 30px;
-                background: var(--accent);
-                color: #000;
-                border: none;
-                padding: 16px 28px;
-                border-radius: 40px;
-                font-family: 'Unbounded', sans-serif;
-                font-weight: 700;
-                font-size: 1.05rem;
-                z-index: 10000;
-                cursor: pointer;
-                box-shadow: 0 10px 25px rgba(39, 92, 234, 0.5);
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                transition: all 0.3s;
-            }
-            #cmsSaveBtn:hover {
-                transform: translateY(-4px) scale(1.02);
-                box-shadow: 0 15px 35px rgba(39, 92, 234, 0.7);
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Auto-assign data-cms to potential text elements if they don't have it
-        let counter = 0;
-        document.querySelectorAll('h1, h2, h3, h4, p, span.section-tag, .btn').forEach(el => {
-            if (!el.hasAttribute('data-cms') && !el.closest('#vehicleGrid') && !el.closest('.catalog-grid') && !el.closest('.modal') && !el.closest('footer')) {
-                // Ignore elements with no text or lots of HTML
-                if (el.children.length === 0 || el.tagName === 'SPAN' || el.tagName === 'H2') {
-                    // Give it a stable ID
-                    const hash = btoa(encodeURIComponent(el.textContent.trim().substring(0, 15))).replace(/=/g, '').substring(0, 10);
-                    el.setAttribute('data-cms', 'auto_' + el.tagName.toLowerCase() + '_' + hash + '_' + counter++);
-                }
-            }
-        });
-
-        document.querySelectorAll('[data-cms]').forEach(el => {
-            el.setAttribute('contenteditable', 'true');
-            if (el.tagName === 'A') {
-                el.addEventListener('click', e => e.preventDefault());
-            }
-        });
-
-        const btn = document.createElement('button');
-        btn.id = 'cmsSaveBtn';
-        btn.innerHTML = '<i class="fas fa-save"></i> Guardar Textos';
-        btn.onclick = async () => {
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-            btn.disabled = true;
-
-            const texts = {};
-            document.querySelectorAll('[data-cms]').forEach(el => {
-                texts[el.dataset.cms] = el.innerHTML;
-            });
-
-            try {
-                const { error } = await supabaseClient.from('site_settings').upsert({
-                    key: 'cms_texts',
-                    value: JSON.stringify(texts),
-                    updated_at: new Date().toISOString()
-                });
-
-                if (error) alert('Error: ' + error.message);
-                else {
-                    btn.innerHTML = '<i class="fas fa-check"></i> Textos Guardados';
-                    btn.style.background = 'var(--success)';
-                    setTimeout(() => {
-                        btn.innerHTML = '<i class="fas fa-save"></i> Guardar Textos';
-                        btn.style.background = 'var(--accent)';
-                    }, 3000);
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error en red al guardar.');
-            }
-            btn.disabled = false;
-        };
-        document.body.appendChild(btn);
-
-        // Toast indicator
-        const t = document.createElement('div');
-        t.innerHTML = '<div style="position:fixed;top:30px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:12px 24px;border-radius:30px;z-index:10000;font-weight:700;box-shadow:0 10px 20px rgba(0,0,0,0.5)"><i class="fas fa-edit"></i> Modo Edición Visual Activado. Haz clic en textos para editarlos.</div>';
-        document.body.appendChild(t);
-    }
 
     // ===== VEHICLE MODAL =====
     const modal = document.getElementById('vehicleModal');

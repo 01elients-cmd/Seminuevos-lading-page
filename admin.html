@@ -1454,16 +1454,23 @@
                         </div>
                     </div>
                     <div class="settings-section">
-                        <h3><i class="fas fa-magic"></i> Modo Edición Visual</h3>
+                        <h3><i class="fas fa-images"></i> Imágenes del Hero (Inicio)</h3>
                         <p style="color:var(--text2); font-size:0.9rem; margin-bottom: 15px;">
-                            Haz clic en el botón de abajo para ir a la página principal en <strong>Modo
-                                Edición</strong>. Allí podrás hacer clic en casi cualquier texto, título, o subtítulo de
-                            la página y editarlo en tiempo real.
+                            Ingresa las URLs de las imágenes que deseas mostrar en los banners principales de la página
+                            de inicio.
                         </p>
-                        <a href="index.html?edit=true" class="btn btn-primary" target="_blank"
-                            style="background: var(--accent); color: #000; font-weight: 700; width: 100%; display: flex; justify-content: center;">
-                            <i class="fas fa-edit"></i> Abrir Editor Visual de Textos
-                        </a>
+                        <div class="settings-grid">
+                            <div class="form-group full">
+                                <label class="form-label">Imagen Slide 1 (URL)</label>
+                                <input type="text" class="form-input" id="sHero1Img"
+                                    placeholder="Ej: https://.../imagen.jpg">
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">Imagen Slide 2 (URL)</label>
+                                <input type="text" class="form-input" id="sHero2Img"
+                                    placeholder="Ej: https://.../imagen.jpg">
+                            </div>
+                        </div>
                     </div>
                     <button class="btn btn-primary" id="saveSettingsBtn" style="margin-top: 10px;"><i
                             class="fas fa-save"></i> Guardar
@@ -2313,6 +2320,8 @@
             document.getElementById('sTiktok').value = map.social_tiktok || '';
             document.getElementById('sYoutube').value = map.social_youtube || '';
             document.getElementById('sProxyKey').value = map.scraper_proxy_key || '';
+            document.getElementById('sHero1Img').value = map.hero1_img || '';
+            document.getElementById('sHero2Img').value = map.hero2_img || '';
         }
         document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
             const settings = {
@@ -2325,7 +2334,9 @@
                 social_instagram: document.getElementById('sInstagram').value,
                 social_tiktok: document.getElementById('sTiktok').value,
                 social_youtube: document.getElementById('sYoutube').value,
-                scraper_proxy_key: document.getElementById('sProxyKey').value
+                scraper_proxy_key: document.getElementById('sProxyKey').value,
+                hero1_img: document.getElementById('sHero1Img').value,
+                hero2_img: document.getElementById('sHero2Img').value
             };
             for (const [key, val] of Object.entries(settings)) {
                 await supabaseClient.from('site_settings').upsert({ key, value: JSON.stringify(val), updated_at: new Date().toISOString() });
