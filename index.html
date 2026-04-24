@@ -662,19 +662,21 @@
 
                         <h4 style="margin-top:20px; margin-bottom:10px; font-size:1rem; color:var(--text1)">Traslado en
                             USA</h4>
-                        <div class="form-group">
-                            <label for="calcOriginState">Ubicación del vehículo (Condado / Estado)</label>
-                            <select id="calcOriginState" class="calc-select us-states-select">
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="calcDestState">Ubicación destino (Condado / Estado)</label>
-                            <select id="calcDestState" class="calc-select us-states-select">
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="calcTrasladoCost">Costo de Traslado / Grúa ($)</label>
-                            <input type="number" id="calcTrasladoCost" value="0" placeholder="Ej. 450">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                            <div class="form-group">
+                                <label for="calcOriginState" style="font-size: 0.8rem;">Origen</label>
+                                <select id="calcOriginState" class="calc-select us-states-select">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="calcDestState" style="font-size: 0.8rem;">Destino</label>
+                                <select id="calcDestState" class="calc-select us-states-select">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="calcTrasladoCost" style="font-size: 0.8rem;">Costo ($)</label>
+                                <input type="number" id="calcTrasladoCost" value="0" placeholder="0">
+                            </div>
                         </div>
 
                         <div class="form-group checkbox-group" style="margin-top: 20px;">
@@ -712,7 +714,7 @@
                             <span id="resTotalMax" class="text-accent-max">$0</span>
                         </span>
                     </div>
-                    <p class="calc-range-note"><i class="fas fa-info-circle"></i> Ya que los rangos del precio pueden
+                    <p class="calc-range-note"><i class="fas fa-info-circle"></i> Los rangos del precio pueden
                         variar por múltiples factores del proceso.</p>
                 </div>
             </div>
