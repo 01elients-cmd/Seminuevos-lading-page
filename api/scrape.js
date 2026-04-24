@@ -50,6 +50,8 @@ export default async function handler(req, res) {
         })();
 
         if (!html) throw new Error('Cargando página vacía. Verifica el link.');
+        if (html.includes('Unauthorized request')) throw new Error('Scraper API Proxy Key inválida o sin créditos.');
+        if (html.includes('concurrent limit') || html.includes('ran out of credits')) throw new Error('Te has quedado sin créditos en ScraperAPI o límite excedido.');
 
         let result;
         if (url.includes('copart.com')) {
