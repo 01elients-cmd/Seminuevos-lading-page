@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
         const html = providedHtml || await (async () => {
             if (providedKey) {
-                const sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&country_code=us&premium=true`;
+                const sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&country_code=us`;
                 const r = await fetch(sUrl);
                 return await r.text();
             } else {
