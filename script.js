@@ -344,20 +344,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (map.social_instagram && fIg) fIg.href = map.social_instagram;
                 if (map.social_tiktok && fTt) fTt.href = map.social_tiktok;
                 if (map.social_youtube && fYt) fYt.href = map.social_youtube;
-            }
-            if (map.hero1_img) {
-                const el = document.getElementById('heroSlide1');
-                if (el) el.style.backgroundImage = `url('${map.hero1_img}')`;
-            }
-            if (map.hero2_img) {
-                const el = document.getElementById('heroSlide2');
-                if (el) el.style.backgroundImage = `url('${map.hero2_img}')`;
-            }
-            if (map.hero3_img) {
-                const el = document.getElementById('heroSlide3');
-                if (el) el.style.backgroundImage = `url('${map.hero3_img}')`;
-            }
 
+                if (map.hero1_img) {
+                    const el = document.getElementById('heroSlide1');
+                    if (el) el.style.backgroundImage = `url('${map.hero1_img}')`;
+                }
+                if (map.hero2_img) {
+                    const el = document.getElementById('heroSlide2');
+                    if (el) el.style.backgroundImage = `url('${map.hero2_img}')`;
+                }
+                if (map.hero3_img) {
+                    const el = document.getElementById('heroSlide3');
+                    if (el) el.style.backgroundImage = `url('${map.hero3_img}')`;
+                }
+            }
         } catch (e) { console.error('Error fetching CMS data', e); }
 
         renderAllPanels();
