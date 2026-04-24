@@ -883,7 +883,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resTitleFee').textContent = fmt(titleFee);
         document.getElementById('resStateTax').textContent = fmt(stateTax);
         document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
-        document.getElementById('resTraslado').textContent = fmt(costTraslado);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
 
         document.getElementById('resTotal').textContent = fmt(total);

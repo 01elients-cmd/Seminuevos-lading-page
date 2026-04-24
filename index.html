@@ -662,7 +662,7 @@
 
                         <h4 style="margin-top:20px; margin-bottom:10px; font-size:1rem; color:var(--text1)">Traslado en
                             USA</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div class="form-group">
                                 <label for="calcOriginState" style="font-size: 0.8rem;">Origen</label>
                                 <select id="calcOriginState" class="calc-select us-states-select">
@@ -672,10 +672,6 @@
                                 <label for="calcDestState" style="font-size: 0.8rem;">Destino</label>
                                 <select id="calcDestState" class="calc-select us-states-select">
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="calcTrasladoCost" style="font-size: 0.8rem;">Costo ($)</label>
-                                <input type="number" id="calcTrasladoCost" value="0" placeholder="0">
                             </div>
                         </div>
 
@@ -703,7 +699,14 @@
                     <div class="calc-row"><span>Trámite de título en USA</span><span id="resTitleFee">$0</span></div>
                     <div class="calc-row"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
                     <div class="calc-row"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
-                    <div class="calc-row"><span>Traslado / Grúa (USA)</span><span id="resTraslado">$0</span></div>
+                    <div class="calc-row">
+                        <span>Traslado / Grúa (USA)</span>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="font-size: 0.8rem;">$</span>
+                            <input type="number" id="calcTrasladoCost" value="0"
+                                style="width: 70px; background: transparent; border: 1px solid var(--outline); color: var(--text1); text-align: right; border-radius: 4px; padding: 2px 5px; font-size: 0.9rem;">
+                        </div>
+                    </div>
                     <div class="calc-row"><span>Reparaciones</span><span id="resRepuesto">$0</span></div>
                     <div class="calc-divider"></div>
                     <div class="calc-row total-range">
