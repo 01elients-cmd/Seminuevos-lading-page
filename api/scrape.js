@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
         const html = providedHtml || await (async () => {
             if (providedKey) {
-                const sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&country_code=us`;
+                const sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&country_code=us&premium=true`;
                 const r = await fetch(sUrl);
                 return await r.text();
             } else {
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
 
     } catch (err) {
         console.error('Scrape Error:', err.message);
-        return res.status(500).json({ success: false, message: err.message });
+        return res.status(400).json({ success: false, message: err.message });
     }
 }
 
@@ -104,7 +104,7 @@ function scanForData(obj, data = {}) {
 }
 
 function parseIAAI(html, url) {
-    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva')) {
+    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula')) {
         throw new Error('IAAI Bloqueado. Usa Modo Manual.');
     }
     const stateStr = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});/i)?.[1];
@@ -127,7 +127,7 @@ function parseIAAI(html, url) {
 }
 
 function parseCopart(html, url) {
-    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva')) {
+    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula')) {
         throw new Error('Copart Bloqueado. Usa Modo Manual.');
     }
     const scripts = html.match(/<script[^>]*>([\s\S]*?)<\/script>/gi) || [];
