@@ -786,34 +786,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee', 'resFlete',
                 'resAduana', 'resDocVzla', 'resTraslado', 'resRepuesto', 'resKit', 'resWarranty',
                 'resTotal', 'resTotalMax'];
-            ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '$0'; });
+            document.querySelectorAll('#calcResults span[id^="res"]').forEach(el => el.textContent = '$0');
             return;
         }
 
-        // === TARIFAS DE SUBASTA ===
-        const buyFee = baseCost * 0.10;       // Tarifa de compra de subasta: 10%
-        const internetFee = 160;              // Tarifa de oferta por internet: $160
-        const auctionServiceFee = 95;         // Tarifa de servicio de subasta: $95
-        const envFee = 15;                    // Tarifas ambientales: $15
-        const titleFee = 20;                  // Trámite de título in USA: $20
-        const stateTax = baseCost * 0.07;     // Impuestos del estado: 7%
-        const brokerFee = 500;                // Tarifa broker: $500
-        const serviceFee = 900;               // Tarifa de servicio: $900
+        const isPL = document.getElementById('calcStatus').value === 'puerto_libre' || document.getElementById('calcStatus').value === 'estados_unidos';
+        if (!isPL) return; // Keep zeros if not PL
 
-        const flete = 3500;
-        const aduana = 3500;
-        const docVzla = 1000;
-        // costTraslado viene directo del select (ya incluye el costo base de la grúa por ubicación)
-        const costTraslado = parseFloat(document.getElementById('calcState').value) || 0;
+        let buyFee = 0;
+        let internetFee = 0;
+        let auctionServiceFee = 0;
+        let envFee = 0;
+        let titleFee = 0;
+        if (baseCost > 0) {
+            buyFee = baseCost * 0.10;
+            internetFee = 129;
+            auctionServiceFee = 60;
+            envFee = 10;
+            titleFee = 20;
+        }
+
+        const stateTax = baseCost * 0.07;
+        const brokerFee = 250;
+        const costTraslado = parseFloat(document.getElementById('calcTrasladoCost').value) || 0;
+
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
         const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
-        const includeKit = document.getElementById('calcMaintenanceKit').checked;
-        const kit = includeKit ? 300 : 0;
-        const includeWarranty = document.getElementById('calcWarranty') ? document.getElementById('calcWarranty').checked : false;
-        const warranty = includeWarranty ? 1500 : 0;
 
-        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + flete + aduana + docVzla + costTraslado + repuesto + kit + warranty;
+        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + costTraslado + repuesto;
         const totalMax = total * 1.10;
 
         document.getElementById('resBase').textContent = fmt(baseCost);
@@ -824,16 +825,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resTitleFee').textContent = fmt(titleFee);
         document.getElementById('resStateTax').textContent = fmt(stateTax);
         document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
-        document.getElementById('resServiceFee').textContent = fmt(serviceFee);
-        document.getElementById('resFlete').textContent = fmt(flete);
-        document.getElementById('resAduana').textContent = fmt(aduana);
-        document.getElementById('resDocVzla').textContent = fmt(docVzla);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
-        document.getElementById('resKit').textContent = fmt(kit);
-        document.getElementById('resWarranty').textContent = fmt(warranty);
+
         document.getElementById('resTotal').textContent = fmt(total);
-        document.getElementById('resTotalMax').textContent = fmt(totalMax);
+        if (document.getElementById('resTotalMax')) {
+            document.getElementById('resTotalMax').textContent = fmt(totalMax);
+        }
     }
 
     const btnCalculateCost = document.getElementById('btnCalculateCost');
