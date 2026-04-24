@@ -1456,19 +1456,32 @@
                     <div class="settings-section">
                         <h3><i class="fas fa-images"></i> Imágenes del Hero (Inicio)</h3>
                         <p style="color:var(--text2); font-size:0.9rem; margin-bottom: 15px;">
-                            Ingresa las URLs de las imágenes que deseas mostrar en los banners principales de la página
-                            de inicio.
+                            Sube las imágenes que deseas mostrar en los 3 banners principales.
                         </p>
                         <div class="settings-grid">
                             <div class="form-group full">
-                                <label class="form-label">Imagen Slide 1 (URL)</label>
-                                <input type="text" class="form-input" id="sHero1Img"
-                                    placeholder="Ej: https://.../imagen.jpg">
+                                <label class="form-label">Imagen Banner 1</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <img id="previewHero1" src=""
+                                        style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; display: none;">
+                                    <input type="file" class="form-input" id="sHero1File" accept="image/*">
+                                </div>
                             </div>
                             <div class="form-group full">
-                                <label class="form-label">Imagen Slide 2 (URL)</label>
-                                <input type="text" class="form-input" id="sHero2Img"
-                                    placeholder="Ej: https://.../imagen.jpg">
+                                <label class="form-label">Imagen Banner 2</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <img id="previewHero2" src=""
+                                        style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; display: none;">
+                                    <input type="file" class="form-input" id="sHero2File" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">Imagen Banner 3</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <img id="previewHero3" src=""
+                                        style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; display: none;">
+                                    <input type="file" class="form-input" id="sHero3File" accept="image/*">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2320,10 +2333,39 @@
             document.getElementById('sTiktok').value = map.social_tiktok || '';
             document.getElementById('sYoutube').value = map.social_youtube || '';
             document.getElementById('sProxyKey').value = map.scraper_proxy_key || '';
-            document.getElementById('sHero1Img').value = map.hero1_img || '';
-            document.getElementById('sHero2Img').value = map.hero2_img || '';
+
+            if (map.hero1_img) { document.getElementById('previewHero1').src = map.hero1_img; document.getElementById('previewHero1').style.display = 'block'; }
+            if (map.hero2_img) { document.getElementById('previewHero2').src = map.hero2_img; document.getElementById('previewHero2').style.display = 'block'; }
+            if (map.hero3_img) { document.getElementById('previewHero3').src = map.hero3_img; document.getElementById('previewHero3').style.display = 'block'; }
         }
         document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
+            const btn = document.getElementById('saveSettingsBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
+            let h1Url = document.getElementById('previewHero1').src;
+            let h2Url = document.getElementById('previewHero2').src;
+            let h3Url = document.getElementById('previewHero3').src;
+            if (h1Url === window.location.href) h1Url = '';
+            if (h2Url === window.location.href) h2Url = '';
+            if (h3Url === window.location.href) h3Url = '';
+
+            async function uploadHeroFile(inputId) {
+                const input = document.getElementById(inputId);
+                if (!input || !input.files || input.files.length === 0) return null;
+                const file = input.files[0];
+                const fname = `hero-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.jpg`;
+                const { error } = await supabaseClient.storage.from('vehicle-images').upload(fname, file);
+                if (error) return null;
+                const { data } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
+                return data.publicUrl;
+            }
+
+            const up1 = await uploadHeroFile('sHero1File'); if (up1) h1Url = up1;
+            const up2 = await uploadHeroFile('sHero2File'); if (up2) h2Url = up2;
+            const up3 = await uploadHeroFile('sHero3File'); if (up3) h3Url = up3;
+
             const settings = {
                 whatsapp_number: document.getElementById('sWhatsapp').value,
                 company_name: document.getElementById('sName').value,
@@ -2335,13 +2377,16 @@
                 social_tiktok: document.getElementById('sTiktok').value,
                 social_youtube: document.getElementById('sYoutube').value,
                 scraper_proxy_key: document.getElementById('sProxyKey').value,
-                hero1_img: document.getElementById('sHero1Img').value,
-                hero2_img: document.getElementById('sHero2Img').value
+                hero1_img: h1Url,
+                hero2_img: h2Url,
+                hero3_img: h3Url
             };
             for (const [key, val] of Object.entries(settings)) {
                 await supabaseClient.from('site_settings').upsert({ key, value: JSON.stringify(val), updated_at: new Date().toISOString() });
             }
-            showToast('Configuración guardada', 'success');
+            showToast('Configuración guardada exitosamente.', 'success');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
         });
 
         // ===== EXPORT =====

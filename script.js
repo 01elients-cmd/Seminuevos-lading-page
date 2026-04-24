@@ -353,6 +353,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById('heroSlide2');
                 if (el) el.style.backgroundImage = `url('${map.hero2_img}')`;
             }
+            if (map.hero3_img) {
+                const el = document.getElementById('heroSlide3');
+                if (el) el.style.backgroundImage = `url('${map.hero3_img}')`;
+            }
 
         } catch (e) { console.error('Error fetching CMS data', e); }
 
