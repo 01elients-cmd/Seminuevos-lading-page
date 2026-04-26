@@ -75,7 +75,7 @@
         <div class="hero-slider" id="heroSlider">
 
             <!-- SLIDE 1: 4Runner in Centered Layout -->
-            <div class="hero-slide active" id="heroSlide1" style="background-image: url('images/hero1.webp')">
+            <div class="hero-slide active" style="background-image: url('images/hero1.png')">
                 <div class="hero-overlay"
                     style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%);">
                 </div>
@@ -86,11 +86,10 @@
                         style="font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; color: var(--outline); margin-bottom: 8px; text-transform: uppercase;">
                         <i class="fas fa-bolt" style="color: var(--primary);"></i> ENTREGA INMEDIATA
                     </div>
-                    <h1 class="hero-title" data-cms="hero1_title"
+                    <h1 class="hero-title"
                         style="font-size: clamp(3rem, 5vw, 4rem); text-transform: none; margin-bottom: 8px; font-weight: 700;">
                         4Runner Trail 2021</h1>
-                    <p data-cms="hero1_sub" style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface);">
-                        Toyota • 4x4 • Puerto
+                    <p style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface);">Toyota • 4x4 • Puerto
                         Libre
                     </p>
 
@@ -128,28 +127,28 @@
                 </div>
             </div>
 
-            <!-- SLIDE 2: Stock Local Margarita Layout -->
-            <div class="hero-slide" id="heroSlide2" style="background-image: url('images/hero2.png')">
+            <!-- SLIDE 2: Generic 0KM Placeholder in Telluride Layout -->
+            <div class="hero-slide" style="background-image: url('images/hero2.png')">
                 <div class="hero-overlay"
                     style="background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);">
                 </div>
                 <div class="hero-content" style="bottom: 35%; left: 7%;">
                     <div
                         style="font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; color: #d1d1d1; margin-bottom: 12px; text-transform: uppercase;">
-                        <i class="fas fa-map-marker-alt"></i> Stock Local
+                        <i class="fas fa-star"></i> PRÓXIMAMENTE
                     </div>
                     <h1 class="hero-title"
                         style="font-size: clamp(3rem, 5.5vw, 4.5rem); line-height: 1.05; margin-bottom: 32px; text-transform: none; font-weight: 700;">
-                        Modelos de Stock<br><span class="text-accent"
-                            style="background: none; -webkit-text-fill-color: initial; color: var(--primary);">Margarita</span>
-                    </h1>
+                        Nuevos Modelos<br><span class="text-accent"
+                            style="background: none; -webkit-text-fill-color: initial; color: var(--primary);">0KM
+                            2025</span></h1>
 
                     <div class="hero-buttons">
                         <a href="#catalogo" class="btn"
-                            onclick="document.querySelector('[data-section=\'seminuevos\']').click()"
+                            onclick="document.querySelector('[data-section=\'0km\']').click()"
                             style="background: #fff; color: #000; border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border: none; box-shadow: none;">Ver
-                            Catálogo Local</a>
-                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20información%20sobre%20el%20Stock%20Local%20que%20tienen%20disponible%20en%20Margarita."
+                            Catálogo 0KM</a>
+                        <a href="https://wa.me/584147977832?text=Hola,%20quiero%20información%20sobre%20vehículos%200KM%20disponibles."
                             target="_blank" class="btn btn-outline"
                             style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border-color: #fff; color: #fff; background: transparent;">Consultar</a>
                     </div>
@@ -161,30 +160,6 @@
                         <span><i class="fas fa-ship"></i> Importación Directa</span>
                         <span><i class="fas fa-shield-halved"></i> Garantía 2 Años</span>
                         <span><i class="fas fa-file-circle-check"></i> Documentación USA</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SLIDE 3: Placeholder -->
-            <div class="hero-slide" id="heroSlide3" style="background-image: url('images/hero2.png')">
-                <div class="hero-overlay"
-                    style="background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);">
-                </div>
-                <div class="hero-content" style="bottom: 35%; left: 7%;">
-                    <div
-                        style="font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; color: #d1d1d1; margin-bottom: 12px; text-transform: uppercase;">
-                        <i class="fas fa-car"></i> Stock Limitado
-                    </div>
-                    <h1 class="hero-title"
-                        style="font-size: clamp(3rem, 5.5vw, 4.5rem); line-height: 1.05; margin-bottom: 32px; text-transform: none; font-weight: 700;">
-                        Subastas<br><span class="text-accent"
-                            style="background: none; -webkit-text-fill-color: initial; color: var(--primary);">Globales</span>
-                    </h1>
-
-                    <div class="hero-buttons">
-                        <a href="#subastas" class="btn"
-                            style="background: #fff; color: #000; border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border: none; box-shadow: none;">Ir
-                            a Subastas</a>
                     </div>
                 </div>
             </div>
@@ -316,24 +291,21 @@
                 </div>
                 <div class="about-content">
                     <div class="about-header-flow">
-                        <span class="section-tag" data-cms="about_tag">NUESTRA HISTORIA</span>
+                        <span class="section-tag">NUESTRA HISTORIA</span>
                         <div class="experience-pill">
                             <span class="pill-number">6</span>
                             <span class="pill-text">AÑOS DE EXPERIENCIA</span>
                         </div>
                     </div>
-                    <h2 class="section-title" data-cms="about_title">¿POR QUÉ NACE <span
-                            class="text-accent">SEMINUEVOS</span>?</h2>
-                    <p class="about-text" data-cms="about_text1">SemiNuevos Agency nace de una necesidad real: ofrecer
-                        opciones de compra
+                    <h2 class="section-title">¿POR QUÉ NACE <span class="text-accent">SEMINUEVOS</span>?</h2>
+                    <p class="about-text">SemiNuevos Agency nace de una necesidad real: ofrecer opciones de compra
                         de
                         vehículos con un soporte genuino de pre-venta y post-venta en un país con un parque
                         automotor
                         antiguo y detenido. Queríamos que cada cliente sepa exactamente qué carro compra, qué
                         esperar de
                         él, y que tenga precios y opciones reales para acceder a su vehículo.</p>
-                    <p class="about-text" data-cms="about_text2">Nuestra alianza con <strong>MT GROUP</strong> nos
-                        permite brindar un
+                    <p class="about-text">Nuestra alianza con <strong>MT GROUP</strong> nos permite brindar un
                         ecosistema integral que incluye soporte especializado de <strong>MasterTech</strong>,
                         acceso directo a repuestos con <strong>MT Parts</strong> y servicio estético premium en
                         <strong>MT Wash</strong>. A diferencia de un 0KM sin respaldo de marca, con SemiNuevos tu
@@ -644,7 +616,6 @@
                     <div class="form-group">
                         <label for="calcStatus">Estatus del vehículo</label>
                         <select id="calcStatus" class="calc-select">
-                            <option value="estados_unidos">Estados Unidos</option>
                             <option value="puerto_libre">Puerto Libre</option>
                             <option value="nacional">Nacional</option>
                         </select>
@@ -659,33 +630,38 @@
                             <label for="calcBaseCost">Costo de compra del vehículo ($)</label>
                             <input type="number" id="calcBaseCost" placeholder="Ej. 15000">
                         </div>
-
-                        <h4 style="margin-top:20px; margin-bottom:10px; font-size:1rem; color:var(--text1)">Traslado en
-                            USA</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div class="form-group">
-                                <label for="calcOriginState" style="font-size: 0.8rem;">Origen</label>
-                                <select id="calcOriginState" class="calc-select us-states-select">
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="calcDestState" style="font-size: 0.8rem;">Destino</label>
-                                <select id="calcDestState" class="calc-select us-states-select">
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label for="calcState">Ubicación del vehículo (USA)</label>
+                            <select id="calcState" class="calc-select">
+                                <option value="450">Florida (Local)</option>
+                                <option value="900">Georgia / South Carolina</option>
+                                <option value="1150">North Carolina / Alabama</option>
+                                <option value="1550">Texas / Illinois / Louisiana</option>
+                                <option value="1700">New York / New Jersey / Penn</option>
+                                <option value="2950">California / Washington / Oregon</option>
+                                <option value="1950">Otros Estados (Medio Oeste)</option>
+                            </select>
+                            <p style="font-size: 0.7rem; color: var(--outline); margin-top: 4px;">Selecciona el estado
+                                de origen. El sistema calcula $1 por milla aproximada hasta Florida.</p>
                         </div>
-
-                        <div class="form-group checkbox-group" style="margin-top: 20px;">
+                        <div class="form-group checkbox-group">
                             <input type="checkbox" id="calcRepairs1">
-                            <label for="calcRepairs1">Reparaciones grado 1</label>
+                            <label for="calcRepairs1">Estimación de reparaciones grado 1</label>
                         </div>
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="calcRepairs2">
-                            <label for="calcRepairs2">Reparaciones grado 2</label>
+                            <label for="calcRepairs2">Estimación de reparaciones grado 2</label>
                         </div>
-
-                        <button class="btn btn-primary" id="btnCalculateCost" style="margin-top: 15px;">Calcular Total
-                            <i class="fas fa-calculator"></i></button>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="calcMaintenanceKit">
+                            <label for="calcMaintenanceKit">Add-on: Kit de servicio de mantenimientos</label>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="calcWarranty">
+                            <label for="calcWarranty">Add-on: Soporte y extensión de garantía 1 año</label>
+                        </div>
+                        <button class="btn btn-primary" id="btnCalculateCost">Calcular Total <i
+                                class="fas fa-calculator"></i></button>
                     </div>
                 </div>
                 <div class="calculator-results" id="calcResults">
@@ -696,18 +672,18 @@
                     <div class="calc-row"><span>Tarifa de servicio de subasta</span><span
                             id="resAuctionServiceFee">$0</span></div>
                     <div class="calc-row"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
-                    <div class="calc-row"><span>Trámite de título en USA</span><span id="resTitleFee">$0</span></div>
+                    <div class="calc-row"><span>Trámite de título in USA</span><span id="resTitleFee">$0</span></div>
                     <div class="calc-row"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
                     <div class="calc-row"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
-                    <div class="calc-row">
-                        <span>Traslado / Grúa (USA)</span>
-                        <div style="display: flex; align-items: center; gap: 5px;">
-                            <span style="font-size: 0.8rem;">$</span>
-                            <input type="number" id="calcTrasladoCost" value="0"
-                                style="width: 70px; background: transparent; border: 1px solid var(--outline); color: var(--text1); text-align: right; border-radius: 4px; padding: 2px 5px; font-size: 0.9rem;">
-                        </div>
+                    <div class="calc-row"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
+                    <div class="calc-row"><span>Flete a Venezuela</span><span id="resFlete">$0</span></div>
+                    <div class="calc-row"><span>Gastos Aduanales</span><span id="resAduana">$0</span></div>
+                    <div class="calc-row"><span>Documentación legal en Vzla</span><span id="resDocVzla">$0</span></div>
+                    <div class="calc-row"><span>Traslado / Grúa (USA)</span><span id="resTraslado">$0</span></div>
+                    <div class="calc-row"><span>Reparaciones estimadas</span><span id="resRepuesto">$0</span>
                     </div>
-                    <div class="calc-row"><span>Reparaciones</span><span id="resRepuesto">$0</span></div>
+                    <div class="calc-row"><span>Kit de mantenimiento</span><span id="resKit">$0</span></div>
+                    <div class="calc-row"><span>Soporte y ext. de garantía</span><span id="resWarranty">$0</span></div>
                     <div class="calc-divider"></div>
                     <div class="calc-row total-range">
                         <span>ESTIMADO TOTAL</span>
@@ -717,9 +693,10 @@
                             <span id="resTotalMax" class="text-accent-max">$0</span>
                         </span>
                     </div>
-                    <p class="calc-range-note"><i class="fas fa-info-circle"></i> Los rangos del precio pueden
-                        variar por múltiples factores del proceso.</p>
+                    <p class="calc-range-note"><i class="fas fa-info-circle"></i> Ya que los rangos del precio pueden
+                        variar por múltiples factores; por eso se tiene esta variación.</p>
                 </div>
+
             </div>
             <p class="calculator-legal-notice">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -1238,7 +1215,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="data.js"></script>
-    <script src="script.js?v=2.6"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

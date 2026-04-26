@@ -1444,50 +1444,55 @@
                         <h3><i class="fas fa-key"></i> Configuración Avanzada</h3>
                         <div class="settings-grid">
                             <div class="form-group full">
-                                <label class="form-label">Scraper Proxy Key (ScraperAPI)</label>
-                                <input type="text" class="form-input" id="sProxyKey" autocomplete="off"
-                                    placeholder="Tu API Key de ScraperAPI para bypass de bloqueos">
+                                <label class="form-label">Apify API Token</label>
+                                <input type="password" class="form-input" id="sProxyKey"
+                                    placeholder="Tu API Token de Apify" value="">
                                 <p style="font-size: 0.75rem; color: var(--text3); margin-top: 4px;">Necesario para
-                                    importar links de IAAI/Copart en lote sin VPN. Consigue una gratis en scraperapi.com
+                                    importar links de IAAI/Copart en lote sin bloqueos usando Apify.
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <div class="settings-section">
-                        <h3><i class="fas fa-images"></i> Imágenes del Hero (Inicio)</h3>
-                        <p style="color:var(--text2); font-size:0.9rem; margin-bottom: 15px;">
-                            Sube las imágenes que deseas mostrar en los 3 banners principales.
-                        </p>
-                        <div class="settings-grid">
-                            <div class="form-group full">
-                                <label class="form-label">Imagen Banner 1</label>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <img id="previewHero1" src=""
-                                        style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; display: none;">
-                                    <input type="file" class="form-input" id="sHero1File" accept="image/*">
+                    <div class="settings-grid">
+                        <div class="settings-section">
+                            <h3><i class="fas fa-calculator"></i> Tarifas de Calculadora</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Flete Marítimo ($)</label>
+                                    <input type="number" class="form-input" id="sFlete" placeholder="3500">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Gastos Aduanales ($)</label>
+                                    <input type="number" class="form-input" id="sAduana" placeholder="3500">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Documentación Vzla ($)</label>
+                                    <input type="number" class="form-input" id="sDocVzla" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tarifa de Servicio ($)</label>
+                                    <input type="number" class="form-input" id="sServiceFeeSetting" placeholder="900">
                                 </div>
                             </div>
-                            <div class="form-group full">
-                                <label class="form-label">Imagen Banner 2</label>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <img id="previewHero2" src=""
-                                        style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; display: none;">
-                                    <input type="file" class="form-input" id="sHero2File" accept="image/*">
-                                </div>
+                            <p style="font-size: 0.7rem; color: var(--text3); margin-top: 8px;">
+                                <i class="fas fa-info-circle"></i> Estos valores se usarán en la calculadora de la
+                                página principal.
+                            </p>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3><i class="fas fa-images"></i> Gestión de Hero (Slider Principal)</h3>
+                            <div id="heroSlidesContainer" class="hero-slides-admin">
+                                <!-- Slides se cargarán dinámicamente -->
                             </div>
-                            <div class="form-group full">
-                                <label class="form-label">Imagen Banner 3</label>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <img id="previewHero3" src=""
-                                        style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; display: none;">
-                                    <input type="file" class="form-input" id="sHero3File" accept="image/*">
-                                </div>
-                            </div>
+                            <button class="btn btn-ghost btn-sm" id="addHeroSlideBtn" type="button"
+                                style="margin-top:10px;">
+                                <i class="fas fa-plus"></i> Agregar Slide
+                            </button>
                         </div>
                     </div>
-                    <button class="btn btn-primary" id="saveSettingsBtn" style="margin-top: 10px;"><i
-                            class="fas fa-save"></i> Guardar
-                        Configuración</button>
+                    <button class="btn btn-primary" id="saveSettingsBtn" style="margin-top:20px;"><i
+                            class="fas fa-save"></i> Guardar Configuración</button>
                 </div>
             </div>
 
@@ -1733,9 +1738,12 @@
                                             este recorte a todas las fotos</label>
                                     </div>
                                     <button class="btn btn-ghost btn-sm" id="editorClearCrop" type="button"><i
-                                            class="fas fa-eraser"></i> Quitar Recorte</button>
+                                            class="fas fa-eraser"></i> Quitar Edición</button>
                                     <button class="btn btn-ghost btn-sm" id="editorReset" type="button"><i
                                             class="fas fa-undo"></i> Reiniciar</button>
+                                    <button class="btn btn-primary btn-sm" id="editorBlur" type="button"
+                                        style="background:var(--success); color:#000;"><i class="fas fa-eye-slash"></i>
+                                        Censurar Placa</button>
                                     <button class="btn btn-primary btn-sm" id="editorApply" type="button"><i
                                             class="fas fa-check"></i> Aplicar Recorte</button>
                                 </div>
@@ -2196,9 +2204,7 @@
             document.getElementById('imageEditorSection').style.display = 'block';
             const editorImg = document.getElementById('editorImage');
             if (uploadedImages[i].src.startsWith('http')) {
-                editorImg.crossOrigin = "anonymous";
-                const sep = uploadedImages[i].src.includes('?') ? '&' : '?';
-                editorImg.src = uploadedImages[i].src + sep + 'cors=' + Date.now();
+                editorImg.src = `/api/scrape?proxy=${encodeURIComponent(uploadedImages[i].src)}`;
             } else {
                 editorImg.removeAttribute('crossOrigin');
                 editorImg.src = uploadedImages[i].src;
@@ -2213,7 +2219,7 @@
                 currentCropper = new Cropper(editorImg, {
                     viewMode: 2,
                     dragMode: 'crop',
-                    autoCropArea: 1,
+                    autoCropArea: 0.2,
                     restore: false,
                     modal: true,
                     guides: true,
@@ -2231,6 +2237,61 @@
             if (currentCropper) currentCropper.reset();
         });
 
+        document.getElementById('editorBlur')?.addEventListener('click', () => {
+            if (currentEditIndex < 0 || !currentCropper) return;
+            const cropData = currentCropper.getData(true);
+            const imgObj = uploadedImages[currentEditIndex];
+
+            let tempImg = new Image();
+            tempImg.onload = () => {
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+
+                // Draw original
+                ctx.drawImage(tempImg, 0, 0);
+
+                let w = cropData.width;
+                let h = cropData.height;
+                let x = cropData.x;
+                let y = cropData.y;
+
+                // Extract selected region
+                let regionCanvas = document.createElement('canvas');
+                regionCanvas.width = w;
+                regionCanvas.height = h;
+                let regionCtx = regionCanvas.getContext('2d');
+                regionCtx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+
+                // Pixelate by drawing very small and then scaling up
+                let pixelSize = 15;
+                let pxCanvas = document.createElement('canvas');
+                pxCanvas.width = Math.max(1, w / pixelSize);
+                pxCanvas.height = Math.max(1, h / pixelSize);
+                let pxCtx = pxCanvas.getContext('2d');
+                pxCtx.drawImage(regionCanvas, 0, 0, pxCanvas.width, pxCanvas.height);
+
+                regionCtx.imageSmoothingEnabled = false;
+                regionCtx.drawImage(pxCanvas, 0, 0, pxCanvas.width, pxCanvas.height, 0, 0, w, h);
+
+                // Draw pixelated region back onto main canvas
+                ctx.drawImage(regionCanvas, x, y);
+
+                imgObj.edited = canvas.toDataURL('image/jpeg', 0.85);
+                renderImagePreviews();
+
+                // Re-open cropper to show changes immediately
+                openImageEditor(currentEditIndex);
+                showToast('Placa censurada con mosaico', 'success');
+            };
+
+            if (imgObj.src.startsWith('http')) {
+                tempImg.src = `/api/scrape?proxy=${encodeURIComponent(imgObj.src)}`;
+            } else {
+                tempImg.src = imgObj.edited || imgObj.src;
+            }
+        });
 
         document.getElementById('editorClearCrop')?.addEventListener('click', () => {
             if (currentEditIndex < 0) return;
@@ -2285,9 +2346,7 @@
                     };
 
                     if (imgObj.src.startsWith('http')) {
-                        tempImg.crossOrigin = "anonymous";
-                        const sep = imgObj.src.includes('?') ? '&' : '?';
-                        tempImg.src = imgObj.src + sep + 'cors=' + Date.now();
+                        tempImg.src = `/api/scrape?proxy=${encodeURIComponent(imgObj.src)}`;
                     } else {
                         tempImg.src = imgObj.src;
                     }
@@ -2333,39 +2392,84 @@
             document.getElementById('sTiktok').value = map.social_tiktok || '';
             document.getElementById('sYoutube').value = map.social_youtube || '';
             document.getElementById('sProxyKey').value = map.scraper_proxy_key || '';
+            document.getElementById('sFlete').value = map.calc_flete || 3500;
+            document.getElementById('sAduana').value = map.calc_aduana || 3500;
+            document.getElementById('sDocVzla').value = map.calc_doc_vzla || 1000;
+            document.getElementById('sServiceFeeSetting').value = map.calc_service_fee || 900;
 
-            if (map.hero1_img) { document.getElementById('previewHero1').src = map.hero1_img; document.getElementById('previewHero1').style.display = 'block'; }
-            if (map.hero2_img) { document.getElementById('previewHero2').src = map.hero2_img; document.getElementById('previewHero2').style.display = 'block'; }
-            if (map.hero3_img) { document.getElementById('previewHero3').src = map.hero3_img; document.getElementById('previewHero3').style.display = 'block'; }
+            if (map.hero_slides) {
+                heroSlides = map.hero_slides;
+                renderHeroSlides();
+            } else {
+                // Fallback a los slides por defecto
+                heroSlides = [
+                    { tag: "STOCK LOCAL DISPONIBLE", title: "Toyota 4Runner Trail 2021", subtitle: "Mantenimiento al día en MasterTech. Lista para traspaso inmediato en Porlamar.", image: "images/hero1.png" },
+                    { tag: "ENTREGA INMEDIATA", title: "Nuevos Modelos 0KM 2025", subtitle: "Disponibilidad de stock físico para que conduzcas hoy mismo tu próximo vehículo.", image: "images/hero2.png" }
+                ];
+                renderHeroSlides();
+            }
         }
-        document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
-            const btn = document.getElementById('saveSettingsBtn');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-            btn.disabled = true;
 
-            let h1Url = document.getElementById('previewHero1').src;
-            let h2Url = document.getElementById('previewHero2').src;
-            let h3Url = document.getElementById('previewHero3').src;
-            if (h1Url === window.location.href) h1Url = '';
-            if (h2Url === window.location.href) h2Url = '';
-            if (h3Url === window.location.href) h3Url = '';
+        function renderHeroSlides() {
+            const container = document.getElementById('heroSlidesContainer');
+            if (!container) return;
+            container.innerHTML = heroSlides.map((s, i) => `
+                <div class="hero-slide-admin-item" style="background: var(--bg3); border-radius: var(--radius); padding: 15px; margin-bottom: 15px; border: 1px solid var(--border);">
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <div style="width: 120px; height: 80px; background: #000; border-radius: 4px; overflow: hidden; position: relative; flex-shrink: 0;">
+                            <img src="${s.image}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <button onclick="document.getElementById('heroFile-${i}').click()" style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); border: none; color: #fff; cursor: pointer; opacity: 0; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" id="heroFile-${i}" style="display:none" onchange="uploadHeroImage(${i}, this)" accept="image/*">
+                        </div>
+                        <div style="flex-grow: 1; display: grid; gap: 8px;">
+                            <input type="text" class="form-input" value="${s.tag}" placeholder="Tag (Ej: STOCK LOCAL)" onchange="updateHeroSlide(${i}, 'tag', this.value)" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--border-accent);">
+                            <input type="text" class="form-input" value="${s.title}" placeholder="Título" onchange="updateHeroSlide(${i}, 'title', this.value)" style="padding: 4px 8px; font-weight: 600;">
+                            <textarea class="form-textarea" placeholder="Subtítulo" onchange="updateHeroSlide(${i}, 'subtitle', this.value)" style="height: 50px; font-size: 0.85rem; padding: 4px 8px;">${s.subtitle}</textarea>
+                        </div>
+                        <button class="action-btn delete" onclick="removeHeroSlide(${i})" style="flex-shrink: 0;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-            async function uploadHeroFile(inputId) {
-                const input = document.getElementById(inputId);
-                if (!input || !input.files || input.files.length === 0) return null;
-                const file = input.files[0];
-                const fname = `hero-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.jpg`;
-                const { error } = await supabaseClient.storage.from('vehicle-images').upload(fname, file);
-                if (error) return null;
-                const { data } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
-                return data.publicUrl;
+        window.updateHeroSlide = (index, field, value) => {
+            heroSlides[index][field] = value;
+        };
+
+        window.removeHeroSlide = (index) => {
+            if (confirm('¿Eliminar este slide?')) {
+                heroSlides.splice(index, 1);
+                renderHeroSlides();
+            }
+        };
+
+        document.getElementById('addHeroSlideBtn')?.addEventListener('click', () => {
+            heroSlides.push({ tag: "NUEVO TAG", title: "Nuevo Título", subtitle: "Descripción del slide...", image: "images/hero1.png" });
+            renderHeroSlides();
+        });
+
+        window.uploadHeroImage = async (index, input) => {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const fname = `hero-${Date.now()}-${index}.jpg`;
+
+            showToast('Subiendo imagen de hero...', 'info');
+            const { data, error } = await supabaseClient.storage.from('vehicle-images').upload(fname, file);
+
+            if (error) {
+                showToast('Error subiendo imagen: ' + error.message, 'error');
+                return;
             }
 
-            const up1 = await uploadHeroFile('sHero1File'); if (up1) h1Url = up1;
-            const up2 = await uploadHeroFile('sHero2File'); if (up2) h2Url = up2;
-            const up3 = await uploadHeroFile('sHero3File'); if (up3) h3Url = up3;
+            const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
+            heroSlides[index].image = urlData.publicUrl;
+            renderHeroSlides();
+            showToast('Imagen de hero actualizada', 'success');
+        };
 
+        document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
             const settings = {
                 whatsapp_number: document.getElementById('sWhatsapp').value,
                 company_name: document.getElementById('sName').value,
@@ -2377,16 +2481,16 @@
                 social_tiktok: document.getElementById('sTiktok').value,
                 social_youtube: document.getElementById('sYoutube').value,
                 scraper_proxy_key: document.getElementById('sProxyKey').value,
-                hero1_img: h1Url,
-                hero2_img: h2Url,
-                hero3_img: h3Url
+                calc_flete: parseFloat(document.getElementById('sFlete').value),
+                calc_aduana: parseFloat(document.getElementById('sAduana').value),
+                calc_doc_vzla: parseFloat(document.getElementById('sDocVzla').value),
+                calc_service_fee: parseFloat(document.getElementById('sServiceFeeSetting').value),
+                hero_slides: heroSlides
             };
             for (const [key, val] of Object.entries(settings)) {
                 await supabaseClient.from('site_settings').upsert({ key, value: JSON.stringify(val), updated_at: new Date().toISOString() });
             }
-            showToast('Configuración guardada exitosamente.', 'success');
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
+            showToast('Configuración guardada', 'success');
         });
 
         // ===== EXPORT =====
@@ -2653,86 +2757,154 @@
             const statusBox = document.getElementById('bulkStatus');
             const proxyKey = document.getElementById('sProxyKey')?.value;
 
-            if (!proxyKey) { showToast('Se recomienda Scraper Proxy Key para procesos en lote', 'warning'); }
+            if (!proxyKey) { showToast('Se requiere Apify API Token para procesos en lote', 'error'); return; }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-            statusBox.innerHTML = `<div class="info-banner" style="background:var(--accent); color:#000; font-weight:700;">Iniciando importación de ${links.length} vehículos...</div>`;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando con Apify...';
+            statusBox.innerHTML = `<div class="info-banner" style="background:var(--accent); color:#000; font-weight:700;">Enviando ${links.length} vehículos a Apify...</div>`;
 
             let successCount = 0;
             let errorCount = 0;
 
-            for (let i = 0; i < links.length; i++) {
-                const url = links[i];
-                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8">[${i + 1}/${links.length}] Procesando: ${url.substring(0, 50)}...</div>`;
+            try {
+                // ==========================
+                // PROCESAR TODOS LOS ENLACES (IAAI Y COPART) CON SCRAPER UNIVERSAL + REINTENTOS
+                // ==========================
+                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; margin-top:10px;">Iniciando Scraper Universal para ${links.length} vehículos con Evasión Antibot...</div>`;
 
-                try {
-                    const response = await fetch('/api/scrape', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url, proxyKey })
-                    });
-                    const result = await response.json();
-
-                    if (result.success) {
-                        const data = result.data;
-                        if (!data.year || !data.title || data.title.includes('Vehículo')) {
-                            console.warn("Skipping garbage data:", data);
-                            errorCount++;
-                            continue;
+                const apifyPayload = {
+                    startUrls: links.map(url => ({ url })),
+                    useChrome: true,
+                    proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'] },
+                    pageFunction: `async function pageFunction(context) { 
+                        const { request, page } = context; 
+                        await new Promise(r => setTimeout(r, 8000)); 
+                        const html = await page.evaluate(() => document.documentElement.outerHTML); 
+                        if (html.includes('Pardon Our Interruption') || html.includes('Incapsula') || html.includes('captcha')) {
+                            // Al lanzar un error aquí, Apify rotará la IP y reintentará automáticamente
+                            throw new Error('Bloqueado por Imperva. Reintentando con nueva IP...');
                         }
-                        const finalImgs = [];
+                        return { pageUrl: request.loadedUrl || request.url, pageHtml: html }; 
+                    }`
+                };
 
-                        for (const src of (data.images || [])) {
-                            try {
-                                const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(src)}${proxyKey ? '&key=' + proxyKey : ''}`;
-                                const res = await fetch(proxyUrl);
-                                if (res.ok) {
-                                    const blob = await res.blob();
-                                    if (blob.size > 2000) { // check if it's a real image
-                                        const fname = `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
-                                        await supabaseClient.storage.from('vehicle-images').upload(fname, blob, { contentType: 'image/jpeg' });
-                                        const { data: urlData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fname);
-                                        finalImgs.push(urlData.publicUrl);
-                                    }
-                                }
-                            } catch (e) {
-                                console.error(e);
-                            }
-                        }
+                const startRun = await fetch(`https://api.apify.com/v2/acts/apify~puppeteer-scraper/runs?token=${proxyKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(apifyPayload)
+                });
 
-                        const vehicleData = {
-                            title: data.title || 'Vehículo Importado',
-                            price: data.price || '$0',
-                            year: parseInt(data.year) || new Date().getFullYear(),
-                            km: data.km || '0 KM',
-                            engine: data.engine || '',
-                            transmission: data.transmission || 'Automático',
-                            fuel: data.fuel || 'Gasolina',
-                            body_type: data.bodyType || 'suv',
-                            catalog: 'importados',
-                            availability: 'por_pedido',
-                            origin: 'importado',
-                            condition: 'seminuevo',
-                            status: 'active',
-                            description: data.description || '',
-                            images: finalImgs
-                        };
+                const runData = await startRun.json();
+                if (!runData.data || !runData.data.id) throw new Error('Error al iniciar Apify Scraper Antibot');
+                const runId = runData.data.id;
 
-                        const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
-                        if (!error) {
-                            successCount++;
-                            statusBox.innerHTML += `<div style="color:var(--accent); font-size:0.8rem; font-weight:600;">✓ Guardado: ${data.title}</div>`;
-                        } else { throw error; }
-                    } else {
-                        const msg = result.message || 'Bloqueado o sin datos';
-                        throw new Error(msg);
-                    }
-                } catch (err) {
-                    errorCount++;
-                    statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Error en lote ${i + 1}: ${err.message}</div>`;
+                let isFinished = false;
+                while (!isFinished) {
+                    await new Promise(r => setTimeout(r, 5000));
+                    const checkRun = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${proxyKey}`);
+                    const checkData = await checkRun.json();
+                    const status = checkData.data.status;
+                    if (status === 'SUCCEEDED') isFinished = true;
+                    else if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') throw new Error(`Apify falló con estado: ${status}`);
+                    else statusBox.innerHTML += `<div style="font-size:0.8rem; opacity:0.6">Estado Apify: ${status}... procesando lote.</div>`;
+                    statusBox.scrollTop = statusBox.scrollHeight;
                 }
-                statusBox.scrollTop = statusBox.scrollHeight;
+
+                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:var(--success);">Extracción completada. Evaluando HTML...</div>`;
+                const getDataset = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${proxyKey}`);
+                const datasetItems = await getDataset.json();
+
+                for (let i = 0; i < datasetItems.length; i++) {
+                    const item = datasetItems[i];
+                    const itemUrl = item.pageUrl || item.url || links[i] || 'Enlace Desconocido';
+                    const itemHtml = item.pageHtml || item.html || '';
+
+                    if (!itemHtml) {
+                        errorCount++;
+                        continue;
+                    }
+
+                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8">[${i + 1}/${datasetItems.length}] Guardando info + fotos...</div>`;
+
+                    try {
+                        const response = await fetch('/api/scrape', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: itemUrl, html: itemHtml })
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            const data = result.data;
+                            if (!data.year || !data.title) {
+                                errorCount++;
+                                statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Sin datos válidos encontrados.</div>`;
+                                continue;
+                            }
+
+                            // Subida secuencial con Proxy para evitar CORS (Access-Control-Allow-Origin)
+                            const finalImgs = [];
+                            for (const imgUrl of (data.images || [])) {
+                                try {
+                                    // USAR EL PROXY INTERNO PARA EVITAR BLOQUEO CORS
+                                    const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(imgUrl)}`;
+                                    const res = await fetch(proxyUrl);
+                                    if (!res.ok) throw new Error('Proxy failed');
+
+                                    const imgBlob = await res.blob();
+                                    const fileName = `auto-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
+                                    const { error: uploadError } = await supabaseClient.storage
+                                        .from('vehicle-images')
+                                        .upload(fileName, imgBlob);
+
+                                    if (!uploadError) {
+                                        const { data: publicData } = supabaseClient.storage
+                                            .from('vehicle-images')
+                                            .getPublicUrl(fileName);
+                                        finalImgs.push(publicData.publicUrl);
+                                    }
+                                } catch (e) {
+                                    console.error("Error subiendo imagen:", e);
+                                }
+                            }
+
+                            const vehicleData = {
+                                title: data.title,
+                                price: data.price || '$0',
+                                year: parseInt(data.year) || new Date().getFullYear(),
+                                km: data.km || '0 KM',
+                                engine: data.engine || '',
+                                transmission: data.transmission || 'Automático',
+                                fuel: data.fuel || 'Gasolina',
+                                body_type: data.bodyType || 'suv',
+                                catalog: 'importados',
+                                availability: 'por_pedido',
+                                origin: 'importado',
+                                condition: 'seminuevo',
+                                status: 'active',
+                                description: data.description || '',
+                                images: finalImgs
+                            };
+
+                            const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
+                            if (!error) {
+                                successCount++;
+                                statusBox.innerHTML += `<div style="color:var(--accent); font-size:0.8rem; font-weight:600;">✓ Guardado Completo: ${data.title}</div>`;
+                            } else { throw error; }
+                        } else {
+                            throw new Error(result.message || 'Sin datos');
+                        }
+                    } catch (err) {
+                        errorCount++;
+                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Error en lectura: ${err.message}</div>`;
+                    }
+                    statusBox.scrollTop = statusBox.scrollHeight;
+                }
+
+
+
+            } catch (err) {
+                statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem; margin-top:10px;">✗ Error General: ${err.message}</div>`;
             }
 
             btn.disabled = false;

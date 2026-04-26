@@ -8,64 +8,6 @@
 window.WHATSAPP_NUMBER = "584147977832"; // Default fallback
 
 document.addEventListener('DOMContentLoaded', () => {
-    const STATES_GEO = {
-        'Alabama': [32.806671, -86.791130], 'Alaska': [61.370716, -152.404419], 'Arizona': [33.729759, -111.431221], 'Arkansas': [34.969704, -92.373123],
-        'California': [36.116203, -119.681564], 'Colorado': [39.059811, -105.311104], 'Connecticut': [41.597782, -72.755371], 'Delaware': [39.318523, -75.507141],
-        'Florida': [27.766279, -81.686783], 'Georgia': [33.040619, -83.643074], 'Hawaii': [21.094318, -157.498337], 'Idaho': [44.240459, -114.478828],
-        'Illinois': [40.349457, -88.986137], 'Indiana': [39.849426, -86.258278], 'Iowa': [42.011539, -93.210526], 'Kansas': [38.526600, -96.726486],
-        'Kentucky': [37.668140, -84.670067], 'Louisiana': [31.169546, -91.867805], 'Maine': [44.693947, -69.381927], 'Maryland': [39.063946, -76.802101],
-        'Massachusetts': [42.230171, -71.530106], 'Michigan': [43.326618, -84.536095], 'Minnesota': [45.694454, -93.900192], 'Mississippi': [32.741646, -89.678696],
-        'Missouri': [38.456085, -92.288368], 'Montana': [46.921925, -110.454353], 'Nebraska': [41.125370, -98.268082], 'Nevada': [38.313515, -117.055374],
-        'New Hampshire': [43.452492, -71.563896], 'New Jersey': [40.298904, -74.521011], 'New Mexico': [34.840515, -106.248482], 'New York': [42.165726, -74.948051],
-        'North Carolina': [35.630066, -79.806419], 'North Dakota': [47.528912, -99.784012], 'Ohio': [40.388783, -82.764915], 'Oklahoma': [35.565342, -96.928917],
-        'Oregon': [44.572021, -122.070938], 'Pennsylvania': [40.590752, -77.209755], 'Rhode Island': [41.680893, -71.511780], 'South Carolina': [33.836082, -81.163727],
-        'South Dakota': [44.299782, -99.438828], 'Tennessee': [35.747845, -86.692345], 'Texas': [31.054487, -97.563461], 'Utah': [40.150032, -111.862434],
-        'Vermont': [44.045876, -72.710686], 'Virginia': [37.769337, -78.169968], 'Washington': [47.382679, -121.977276], 'West Virginia': [38.491226, -80.954453],
-        'Wisconsin': [44.268543, -89.616508], 'Wyoming': [42.755966, -107.302490]
-    };
-
-    function calculateDistance() {
-        const origin = document.getElementById('calcOriginState')?.value;
-        const dest = document.getElementById('calcDestState')?.value;
-        if (!origin || !dest || origin === '--- Selecciona un Estado ---' || dest === '--- Selecciona un Estado ---') return;
-
-        // Base case: same state = local tow ~ $250 avg
-        if (origin === dest) {
-            document.getElementById('calcTrasladoCost').value = 250;
-            updateCalc();
-            return;
-        }
-
-        const oCoords = STATES_GEO[origin];
-        const dCoords = STATES_GEO[dest];
-        if (oCoords && dCoords) {
-            const R = 6371; // Earth radius in km
-            const dLat = (dCoords[0] - oCoords[0]) * Math.PI / 180;
-            const dLon = (dCoords[1] - oCoords[1]) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(oCoords[0] * Math.PI / 180) * Math.cos(dCoords[0] * Math.PI / 180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const km = Math.round(R * c * 1.3); // 1.3 modifier for roads
-            // $1 per km approximation
-            document.getElementById('calcTrasladoCost').value = km;
-            updateCalc();
-        }
-    }
-
-    const stateNames = ['--- Selecciona un Estado ---', ...Object.keys(STATES_GEO).sort()];
-    document.querySelectorAll('.us-states-select').forEach(select => {
-        stateNames.forEach(st => {
-            const opt = document.createElement('option');
-            opt.value = st;
-            opt.textContent = st;
-            if (st === '--- Selecciona un Estado ---') { opt.value = ''; opt.disabled = true; opt.selected = true; }
-            if (select.id === 'calcDestState' && st === 'Florida') { opt.selected = true; }
-            select.appendChild(opt);
-        });
-        select.addEventListener('change', calculateDistance);
-    });
-
     // ===== ANALYTICS TRACKING =====
     let modalStartTime = 0;
     let currentVehicleId = null;
@@ -211,17 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (section === '0km') zerokmPanel?.classList.add('active');
             observeAnimations();
 
-            // Scroll down to the specific panel section (where the cars are)
+            // === RESTAURAR SCROLL SUAVE AL PANEL ===
             const targetId = section === '0km' ? 'zerokm-panel' : `${section}-panel`;
             const target = document.getElementById(targetId);
             const navbar = document.getElementById('navbar');
             if (target && navbar) {
                 const navHeight = navbar.offsetHeight;
                 const targetPos = target.offsetTop - navHeight - 20;
-                window.scrollTo({
-                    top: targetPos,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top: targetPos, behavior: 'smooth' });
             }
         });
     });
@@ -403,22 +342,84 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (map.social_tiktok && fTt) fTt.href = map.social_tiktok;
                 if (map.social_youtube && fYt) fYt.href = map.social_youtube;
 
-                if (map.hero1_img) {
-                    const el = document.getElementById('heroSlide1');
-                    if (el) el.style.backgroundImage = `url('${map.hero1_img}')`;
-                }
-                if (map.hero2_img) {
-                    const el = document.getElementById('heroSlide2');
-                    if (el) el.style.backgroundImage = `url('${map.hero2_img}')`;
-                }
-                if (map.hero3_img) {
-                    const el = document.getElementById('heroSlide3');
-                    if (el) el.style.backgroundImage = `url('${map.hero3_img}')`;
+                // Load Calculator rates
+                window.CALC_FLETE = map.calc_flete || 3500;
+                window.CALC_ADUANA = map.calc_aduana || 3500;
+                window.CALC_DOC_VZLA = map.calc_doc_vzla || 1000;
+                window.CALC_SERVICE_FEE = map.calc_service_fee || 900;
+
+                // Load Hero Slides
+                if (map.hero_slides && map.hero_slides.length > 0) {
+                    renderDynamicHero(map.hero_slides);
                 }
             }
         } catch (e) { console.error('Error fetching CMS data', e); }
 
         renderAllPanels();
+    }
+
+    function renderDynamicHero(slidesData) {
+        const slider = document.querySelector('.hero-slider');
+        const dotsContainer = document.getElementById('heroDots');
+        if (!slider) return;
+
+        let html = '';
+        slidesData.forEach((s, i) => {
+            const isFirst = i === 0;
+            const isSecond = i === 1;
+
+            // Re-crear el diseño premium exacto
+            html += `
+                <div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${s.image}')">
+                    <div class="hero-overlay" style="background: ${isFirst ? 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%)' : 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)'};"></div>
+                    <div class="container">
+                        <div class="hero-content" style="${isFirst ? 'text-align:center; bottom:15%; left:50%; transform:translateX(-50%);' : 'bottom: 35%; left: 7%;'}">
+                            <div style="font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; color: var(--outline); margin-bottom: 8px; text-transform: uppercase;">
+                                <i class="fas ${isFirst ? 'fa-bolt' : (isSecond ? 'fa-star' : 'fa-car')}" style="color: var(--primary);"></i> ${s.tag}
+                            </div>
+                            <h1 class="hero-title" style="font-size: clamp(3rem, 5vw, 4.5rem); text-transform: none; margin-bottom: 8px; font-weight: 700;">
+                                ${s.title.includes('<span') ? s.title : s.title.replace('0KM', '<span class="text-accent" style="background: none; -webkit-text-fill-color: initial; color: var(--primary);">0KM</span>')}
+                            </h1>
+                            <p class="hero-subtitle" style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface-variant); max-width: 600px; ${isFirst ? 'margin-left:auto; margin-right:auto;' : ''}">
+                                ${s.subtitle}
+                            </p>
+                            <div class="hero-buttons">
+                                <a href="#catalogo" class="btn btn-primary" onclick="window.scrollTo({top: document.getElementById('catalogo').offsetTop - 80, behavior: 'smooth'})" 
+                                   style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
+                                   Ver Inventario
+                                </a>
+                                <a href="https://wa.me/${window.WHATSAPP_NUMBER}" class="btn btn-outline" 
+                                   style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
+                                   Consultar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Mantener las flechas de control
+        const controls = slider.querySelector('.hero-controls');
+        slider.innerHTML = html;
+        if (controls) slider.appendChild(controls);
+
+        // Re-iniciar el objeto heroSlider para que use los nuevos slides
+        setTimeout(() => {
+            heroSlider.slides = document.querySelectorAll('.hero-slide');
+            heroSlider.currentIndex = 0;
+            // Re-crear dots si es necesario
+            if (dotsContainer) {
+                dotsContainer.innerHTML = '';
+                heroSlider.slides.forEach((_, i) => {
+                    const dot = document.createElement('div');
+                    dot.classList.add('hero-dot');
+                    if (i === 0) dot.classList.add('active');
+                    dot.addEventListener('click', () => heroSlider.goTo(i));
+                    dotsContainer.appendChild(dot);
+                });
+            }
+        }, 100);
     }
 
     initSupabaseData();
@@ -844,35 +845,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee', 'resFlete',
                 'resAduana', 'resDocVzla', 'resTraslado', 'resRepuesto', 'resKit', 'resWarranty',
                 'resTotal', 'resTotalMax'];
-            document.querySelectorAll('#calcResults span[id^="res"]').forEach(el => el.textContent = '$0');
+            ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '$0'; });
             return;
         }
 
-        const isPL = document.getElementById('calcStatus').value === 'puerto_libre' || document.getElementById('calcStatus').value === 'estados_unidos';
-        if (!isPL) return; // Keep zeros if not PL
+        // === TARIFAS DE SUBASTA ===
+        const buyFee = baseCost * 0.10;       // Tarifa de compra de subasta: 10%
+        const internetFee = 160;              // Tarifa de oferta por internet: $160
+        const auctionServiceFee = 95;         // Tarifa de servicio de subasta: $95
+        const envFee = 15;                    // Tarifas ambientales: $15
+        const titleFee = 20;                  // Trámite de título in USA: $20
+        const stateTax = baseCost * 0.07;     // Impuestos del estado: 7%
+        const brokerFee = 500;                // Tarifa broker: $500
+        const serviceFee = window.CALC_SERVICE_FEE || 900;
 
-        let buyFee = 0;
-        let internetFee = 0;
-        let auctionServiceFee = 0;
-        let envFee = 0;
-        let titleFee = 0;
-        if (baseCost > 0) {
-            buyFee = baseCost * 0.10;
-            internetFee = 129;
-            auctionServiceFee = 60;
-            envFee = 10;
-            titleFee = 20;
-        }
-
-        const stateTax = baseCost * 0.07;
-        const brokerFee = 250;
-        const costTraslado = parseFloat(document.getElementById('calcTrasladoCost').value) || 0;
-
+        const flete = window.CALC_FLETE || 3500;
+        const aduana = window.CALC_ADUANA || 3500;
+        const docVzla = window.CALC_DOC_VZLA || 1000;
+        // costTraslado viene directo del select (ya incluye el costo base de la grúa por ubicación)
+        const costTraslado = parseFloat(document.getElementById('calcState').value) || 0;
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
         const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
+        const includeKit = document.getElementById('calcMaintenanceKit').checked;
+        const kit = includeKit ? 300 : 0;
+        const includeWarranty = document.getElementById('calcWarranty') ? document.getElementById('calcWarranty').checked : false;
+        const warranty = includeWarranty ? 1500 : 0;
 
-        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + costTraslado + repuesto;
+        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + flete + aduana + docVzla + costTraslado + repuesto + kit + warranty;
         const totalMax = total * 1.10;
 
         document.getElementById('resBase').textContent = fmt(baseCost);
@@ -883,12 +883,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resTitleFee').textContent = fmt(titleFee);
         document.getElementById('resStateTax').textContent = fmt(stateTax);
         document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
+        document.getElementById('resServiceFee').textContent = fmt(serviceFee);
+        document.getElementById('resFlete').textContent = fmt(flete);
+        document.getElementById('resAduana').textContent = fmt(aduana);
+        document.getElementById('resDocVzla').textContent = fmt(docVzla);
+        document.getElementById('resTraslado').textContent = fmt(costTraslado);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
-
+        document.getElementById('resKit').textContent = fmt(kit);
+        document.getElementById('resWarranty').textContent = fmt(warranty);
         document.getElementById('resTotal').textContent = fmt(total);
-        if (document.getElementById('resTotalMax')) {
-            document.getElementById('resTotalMax').textContent = fmt(totalMax);
-        }
+        document.getElementById('resTotalMax').textContent = fmt(totalMax);
     }
 
     const btnCalculateCost = document.getElementById('btnCalculateCost');
@@ -899,7 +903,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calcMaintenanceKit')?.addEventListener('change', updateCalc);
     document.getElementById('calcWarranty')?.addEventListener('change', updateCalc);
     document.getElementById('calcBaseCost')?.addEventListener('input', updateCalc);
-    document.getElementById('calcTrasladoCost')?.addEventListener('input', updateCalc);
     document.getElementById('calcState')?.addEventListener('change', updateCalc);
 
     // ===== TESTIMONIALS CAROUSEL =====
@@ -999,4 +1002,3 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-
