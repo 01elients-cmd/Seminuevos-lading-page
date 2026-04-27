@@ -632,23 +632,72 @@
                             <input type="number" id="calcBaseCost" placeholder="Ej. 15000">
                         </div>
                         <div class="form-group">
-                            <label for="calcState">Ubicación del vehículo (USA)</label>
-                            <select id="calcState" class="calc-select">
-                                <option value="450">Florida (Local)</option>
-                                <option value="900">Georgia / South Carolina</option>
-                                <option value="1150">North Carolina / Alabama</option>
-                                <option value="1550">Texas / Illinois / Louisiana</option>
-                                <option value="1700">New York / New Jersey / Penn</option>
-                                <option value="2950">California / Washington / Oregon</option>
-                                <option value="1950">Otros Estados (Medio Oeste)</option>
-                                <option value="custom">Otro (Manual)</option>
+                            <label for="calcOrigin">Ubicación del vehículo (Estado Origin)</label>
+                            <select id="calcOrigin" class="calc-select">
+                                <option value="0">Florida (Warehouse)</option>
+                                <option value="1200">Alabama</option>
+                                <option value="5000">Alaska</option>
+                                <option value="3500">Arizona</option>
+                                <option value="1800">Arkansas</option>
+                                <option value="4200">California</option>
+                                <option value="3000">Colorado</option>
+                                <option value="2000">Connecticut</option>
+                                <option value="1600">Delaware</option>
+                                <option value="800">Georgia</option>
+                                <option value="7500">Hawaii</option>
+                                <option value="3800">Idaho</option>
+                                <option value="1900">Illinois</option>
+                                <option value="1700">Indiana</option>
+                                <option value="2100">Iowa</option>
+                                <option value="2400">Kansas</option>
+                                <option value="1400">Kentucky</option>
+                                <option value="1200">Louisiana</option>
+                                <option value="2500">Maine</option>
+                                <option value="1600">Maryland</option>
+                                <option value="2300">Massachusetts</option>
+                                <option value="2000">Michigan</option>
+                                <option value="2600">Minnesota</option>
+                                <option value="1000">Mississippi</option>
+                                <option value="1900">Missouri</option>
+                                <option value="3600">Montana</option>
+                                <option value="2400">Nebraska</option>
+                                <option value="4000">Nevada</option>
+                                <option value="2200">New Hampshire</option>
+                                <option value="1800">New Jersey</option>
+                                <option value="2800">New Mexico</option>
+                                <option value="2000">New York</option>
+                                <option value="1200">North Carolina</option>
+                                <option value="3000">North Dakota</option>
+                                <option value="1700">Ohio</option>
+                                <option value="2300">Oklahoma</option>
+                                <option value="4500">Oregon</option>
+                                <option value="1700">Pennsylvania</option>
+                                <option value="2200">Rhode Island</option>
+                                <option value="1000">South Carolina</option>
+                                <option value="3000">South Dakota</option>
+                                <option value="1300">Tennessee</option>
+                                <option value="1900">Texas</option>
+                                <option value="3500">Utah</option>
+                                <option value="2300">Vermont</option>
+                                <option value="1400">Virginia</option>
+                                <option value="4800">Washington</option>
+                                <option value="1600">West Virginia</option>
+                                <option value="2100">Wisconsin</option>
+                                <option value="3400">Wyoming</option>
+                                <option value="custom">Otro (Costo Manual)</option>
                             </select>
-                            <p style="font-size: 0.7rem; color: var(--outline); margin-top: 4px;">Selecciona el estado
-                                de origen. El sistema calcula el costo de grúa aproximado hasta Florida.</p>
                         </div>
                         <div class="form-group" id="customTransportGroup" style="display:none;">
                             <label for="calcCustomTransport">Costo de grúa manual ($)</label>
                             <input type="number" id="calcCustomTransport" placeholder="Ej. 1200">
+                        </div>
+                        <div class="form-group">
+                            <label for="calcDestination">Destino (Puerto/Warehouse)</label>
+                            <select id="calcDestination" class="calc-select">
+                                <option value="0">Florida / Miami Warehouse</option>
+                            </select>
+                            <p style="font-size: 0.7rem; color: var(--outline); margin-top: 4px;">El sistema calcula $1
+                                por milla aproximada hasta el destino.</p>
                         </div>
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="calcRepairs1">
@@ -675,18 +724,19 @@
                     <div class="calc-row"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
                     <div class="calc-row"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
                     <div class="calc-row"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
-                    <div class="calc-row"><span>Flete a Venezuela</span><span id="resFlete">$0</span></div>
-                    <div class="calc-row"><span>Gastos Aduanales</span><span id="resAduana">$0</span></div>
-                    <div class="calc-row"><span>Documentación legal en Vzla</span><span id="resDocVzla">$0</span></div>
                     <div class="calc-row"><span>Traslado / Grúa (USA)</span><span id="resTraslado">$0</span></div>
                     <div class="calc-row"><span>Reparaciones (Est.)</span><span id="resRepuesto">$0</span></div>
                     <div class="calc-divider"></div>
-                    <div class="calc-row total">
-                        <span>TOTAL ESTIMADO</span>
-                        <span id="resTotal" class="text-accent">$0</span>
+                    <div class="calc-row total-range">
+                        <span>ESTIMADO TOTAL</span>
+                        <span class="total-range-values">
+                            <span id="resTotal" class="text-accent">$0</span>
+                            <span class="range-separator"> – </span>
+                            <span id="resTotalMax" class="text-accent-max">$0</span>
+                        </span>
                     </div>
-                    <p class="calc-range-note"><i class="fas fa-info-circle"></i> Este es un estimado referencial basado
-                        en los datos proporcionados.</p>
+                    <p class="calc-range-note"><i class="fas fa-info-circle"></i> Los rangos del precio pueden variar
+                        por múltiples factores del proceso.</p>
                 </div>
 
             </div>

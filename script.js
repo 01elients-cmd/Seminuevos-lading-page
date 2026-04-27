@@ -835,12 +835,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCalc();
     });
 
-    const calcState = document.getElementById('calcState');
+    const calcOrigin = document.getElementById('calcOrigin');
+    const calcDestination = document.getElementById('calcDestination');
     const customTransportGroup = document.getElementById('customTransportGroup');
     const calcCustomTransport = document.getElementById('calcCustomTransport');
 
-    calcState?.addEventListener('change', () => {
-        if (calcState.value === 'custom') {
+    calcOrigin?.addEventListener('change', () => {
+        if (calcOrigin.value === 'custom') {
             customTransportGroup.style.display = 'block';
         } else {
             customTransportGroup.style.display = 'none';
@@ -848,6 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCalc();
     });
 
+    calcDestination?.addEventListener('change', updateCalc);
     calcCustomTransport?.addEventListener('input', updateCalc);
 
     function updateCalc() {
@@ -857,8 +859,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset all to $0 if no base cost
         if (baseCost <= 0) {
             const ids = ['resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee', 'resEnvFee',
-                'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee', 'resFlete',
-                'resAduana', 'resDocVzla', 'resTraslado', 'resRepuesto', 'resTotal'];
+                'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee',
+                'resTraslado', 'resRepuesto', 'resTotal', 'resTotalMax'];
             ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '$0'; });
             return;
         }
@@ -873,22 +875,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const brokerFee = 500;                // Tarifa broker: $500
         const serviceFee = window.CALC_SERVICE_FEE || 900;
 
-        const flete = window.CALC_FLETE || 3500;
-        const aduana = window.CALC_ADUANA || 3500;
-        const docVzla = window.CALC_DOC_VZLA || 1000;
-
         let costTraslado = 0;
-        if (calcState.value === 'custom') {
+        if (calcOrigin.value === 'custom') {
             costTraslado = parseFloat(calcCustomTransport.value) || 0;
         } else {
-            costTraslado = parseFloat(calcState.value) || 0;
+            costTraslado = parseFloat(calcOrigin.value) || 0;
         }
 
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
         const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
 
-        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + flete + aduana + docVzla + costTraslado + repuesto;
+        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + costTraslado + repuesto;
+        const totalMax = total * 1.10;
 
         document.getElementById('resBase').textContent = fmt(baseCost);
         document.getElementById('resBuyFee').textContent = fmt(buyFee);
@@ -899,12 +898,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resStateTax').textContent = fmt(stateTax);
         document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
         document.getElementById('resServiceFee').textContent = fmt(serviceFee);
-        document.getElementById('resFlete').textContent = fmt(flete);
-        document.getElementById('resAduana').textContent = fmt(aduana);
-        document.getElementById('resDocVzla').textContent = fmt(docVzla);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
         document.getElementById('resTotal').textContent = fmt(total);
+        if (document.getElementById('resTotalMax')) {
+            document.getElementById('resTotalMax').textContent = fmt(totalMax);
+        }
     }
 
     const btnCalculateCost = document.getElementById('btnCalculateCost');
@@ -913,7 +912,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calcRepairs1')?.addEventListener('change', updateCalc);
     document.getElementById('calcRepairs2')?.addEventListener('change', updateCalc);
     document.getElementById('calcBaseCost')?.addEventListener('input', updateCalc);
-    document.getElementById('calcState')?.addEventListener('change', updateCalc);
+    document.getElementById('calcOrigin')?.addEventListener('change', updateCalc);
+    document.getElementById('calcDestination')?.addEventListener('change', updateCalc);
 
     // ===== TESTIMONIALS CAROUSEL =====
     const testimonialTrack = document.getElementById('testimonialTrack');
