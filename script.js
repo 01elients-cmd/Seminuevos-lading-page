@@ -896,6 +896,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const status = document.getElementById('calcStatus').value;
         const isPL = status === 'puerto_libre';
 
+        // Show/Hide VZLA rows and Detailed entries always
+        document.querySelectorAll('.vzla-fee-row').forEach(row => {
+            row.style.display = isPL ? 'flex' : 'none';
+        });
+        document.querySelectorAll('.detailed-fee').forEach(row => {
+            row.style.display = isPL ? 'flex' : 'none';
+        });
+
         // Reset all to $0 if no base cost
         if (baseCost <= 0) {
             const ids = ['resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee', 'resEnvFee',
@@ -928,15 +936,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const flete = isPL ? (window.CALC_FLETE || 3500) : 0;
         const aduana = isPL ? (window.CALC_ADUANA || 3500) : 0;
         const docVzla = isPL ? (window.CALC_DOC_VZLA || 1000) : 0;
-
-        // Show/Hide VZLA rows
-        document.querySelectorAll('.vzla-fee-row').forEach(row => {
-            row.style.display = isPL ? 'flex' : 'none';
-        });
-        // Show/Hide Detailed entries
-        document.querySelectorAll('.detailed-fee').forEach(row => {
-            row.style.display = isPL ? 'flex' : 'none';
-        });
 
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
