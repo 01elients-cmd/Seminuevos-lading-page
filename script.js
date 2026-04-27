@@ -893,24 +893,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCalc() {
         const baseCost = parseFloat(document.getElementById('calcBaseCost').value) || 0;
         const fmt = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.round(val));
+        const status = document.getElementById('calcStatus').value;
+        const isPL = status === 'puerto_libre';
 
         // Reset all to $0 if no base cost
         if (baseCost <= 0) {
             const ids = ['resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee', 'resEnvFee',
                 'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee',
-                'resTraslado', 'resRepuesto', 'resTotal', 'resTotalMax'];
+                'resTraslado', 'resFlete', 'resAduana', 'resDocVzla', 'resRepuesto', 'resTotal', 'resTotalMax'];
             ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '$0'; });
             return;
         }
 
         // === TARIFAS DE SUBASTA ===
         const buyFee = baseCost * 0.10;       // Tarifa de compra de subasta: 10%
-        const internetFee = 160;              // Tarifa de oferta por internet: $160
-        const auctionServiceFee = 95;         // Tarifa de servicio de subasta: $95
-        const envFee = 15;                    // Tarifas ambientales: $15
-        const titleFee = 20;                  // Trámite de título in USA: $20
-        const stateTax = baseCost * 0.07;     // Impuestos del estado: 7%
-        const brokerFee = 500;                // Tarifa broker: $500
+
+        // Granular fees (Only for Puerto Libre, Reduced for EEUU)
+        const internetFee = isPL ? 160 : 0;
+        const auctionServiceFee = isPL ? 95 : 0;
+        const envFee = isPL ? 15 : 0;
+        const titleFee = isPL ? 20 : 0;
+        const stateTax = isPL ? (baseCost * 0.07) : 0;
+        const brokerFee = isPL ? 500 : 0;
         const serviceFee = window.CALC_SERVICE_FEE || 900;
 
         let costTraslado = 0;
@@ -920,23 +924,48 @@ document.addEventListener('DOMContentLoaded', () => {
             costTraslado = parseFloat(calcOrigin.value) || 0;
         }
 
+        // === TARIFAS VENEZUELA (Solo Puerto Libre) ===
+        const flete = isPL ? (window.CALC_FLETE || 3500) : 0;
+        const aduana = isPL ? (window.CALC_ADUANA || 3500) : 0;
+        const docVzla = isPL ? (window.CALC_DOC_VZLA || 1000) : 0;
+
+        // Show/Hide VZLA rows
+        document.querySelectorAll('.vzla-fee-row').forEach(row => {
+            row.style.display = isPL ? 'flex' : 'none';
+        });
+        // Show/Hide Detailed entries
+        document.querySelectorAll('.detailed-fee').forEach(row => {
+            row.style.display = isPL ? 'flex' : 'none';
+        });
+
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
         const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
 
-        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + costTraslado + repuesto;
+        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + costTraslado + repuesto + flete + aduana + docVzla;
         const totalMax = total * 1.10;
 
         document.getElementById('resBase').textContent = fmt(baseCost);
         document.getElementById('resBuyFee').textContent = fmt(buyFee);
-        document.getElementById('resInternetFee').textContent = fmt(internetFee);
-        document.getElementById('resAuctionServiceFee').textContent = fmt(auctionServiceFee);
-        document.getElementById('resEnvFee').textContent = fmt(envFee);
-        document.getElementById('resTitleFee').textContent = fmt(titleFee);
-        document.getElementById('resStateTax').textContent = fmt(stateTax);
-        document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
+
+        if (isPL) {
+            document.getElementById('resInternetFee').textContent = fmt(internetFee);
+            document.getElementById('resAuctionServiceFee').textContent = fmt(auctionServiceFee);
+            document.getElementById('resEnvFee').textContent = fmt(envFee);
+            document.getElementById('resTitleFee').textContent = fmt(titleFee);
+            document.getElementById('resStateTax').textContent = fmt(stateTax);
+            document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
+        }
+
         document.getElementById('resServiceFee').textContent = fmt(serviceFee);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
+
+        if (isPL) {
+            document.getElementById('resFlete').textContent = fmt(flete);
+            document.getElementById('resAduana').textContent = fmt(aduana);
+            document.getElementById('resDocVzla').textContent = fmt(docVzla);
+        }
+
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
         document.getElementById('resTotal').textContent = fmt(total);
         if (document.getElementById('resTotalMax')) {
