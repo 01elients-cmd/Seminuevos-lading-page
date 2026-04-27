@@ -832,7 +832,23 @@ document.addEventListener('DOMContentLoaded', () => {
             calcNacionalNotice.style.display = 'none';
             calcResults.style.display = 'block';
         }
+        updateCalc();
     });
+
+    const calcState = document.getElementById('calcState');
+    const customTransportGroup = document.getElementById('customTransportGroup');
+    const calcCustomTransport = document.getElementById('calcCustomTransport');
+
+    calcState?.addEventListener('change', () => {
+        if (calcState.value === 'custom') {
+            customTransportGroup.style.display = 'block';
+        } else {
+            customTransportGroup.style.display = 'none';
+        }
+        updateCalc();
+    });
+
+    calcCustomTransport?.addEventListener('input', updateCalc);
 
     function updateCalc() {
         const baseCost = parseFloat(document.getElementById('calcBaseCost').value) || 0;
@@ -860,8 +876,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const flete = window.CALC_FLETE || 3500;
         const aduana = window.CALC_ADUANA || 3500;
         const docVzla = window.CALC_DOC_VZLA || 1000;
-        // costTraslado viene directo del select (ya incluye el costo base de la grúa por ubicación)
-        const costTraslado = parseFloat(document.getElementById('calcState').value) || 0;
+
+        let costTraslado = 0;
+        if (calcState.value === 'custom') {
+            costTraslado = parseFloat(calcCustomTransport.value) || 0;
+        } else {
+            costTraslado = parseFloat(calcState.value) || 0;
+        }
+
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
         const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
@@ -890,8 +912,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('calcRepairs1')?.addEventListener('change', updateCalc);
     document.getElementById('calcRepairs2')?.addEventListener('change', updateCalc);
-    document.getElementById('calcMaintenanceKit')?.addEventListener('change', updateCalc);
-    document.getElementById('calcWarranty')?.addEventListener('change', updateCalc);
     document.getElementById('calcBaseCost')?.addEventListener('input', updateCalc);
     document.getElementById('calcState')?.addEventListener('change', updateCalc);
 

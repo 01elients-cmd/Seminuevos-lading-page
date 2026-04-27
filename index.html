@@ -618,6 +618,7 @@
                         <select id="calcStatus" class="calc-select">
                             <option value="puerto_libre">Puerto Libre</option>
                             <option value="nacional">Nacional</option>
+                            <option value="eeuu">Estados Unidos</option>
                         </select>
                     </div>
                     <div id="calcNacionalNotice" class="calc-nacional-notice" style="display:none;">
@@ -640,17 +641,22 @@
                                 <option value="1700">New York / New Jersey / Penn</option>
                                 <option value="2950">California / Washington / Oregon</option>
                                 <option value="1950">Otros Estados (Medio Oeste)</option>
+                                <option value="custom">Otro (Manual)</option>
                             </select>
                             <p style="font-size: 0.7rem; color: var(--outline); margin-top: 4px;">Selecciona el estado
-                                de origen. El sistema calcula $1 por milla aproximada hasta Florida.</p>
+                                de origen. El sistema calcula el costo de grúa aproximado hasta Florida.</p>
+                        </div>
+                        <div class="form-group" id="customTransportGroup" style="display:none;">
+                            <label for="calcCustomTransport">Costo de grúa manual ($)</label>
+                            <input type="number" id="calcCustomTransport" placeholder="Ej. 1200">
                         </div>
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="calcRepairs1">
-                            <label for="calcRepairs1">Estimación de reparaciones grado 1</label>
+                            <label for="calcRepairs1">Reparaciones grado 1</label>
                         </div>
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="calcRepairs2">
-                            <label for="calcRepairs2">Estimación de reparaciones grado 2</label>
+                            <label for="calcRepairs2">Reparaciones grado 2</label>
                         </div>
                         <button class="btn btn-primary btn-block" id="btnCalculateCost" style="margin-top: 20px;">
                             Calcular Total <i class="fas fa-calculator"></i>
