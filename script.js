@@ -372,8 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `
                 <div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${s.image}')">
                     <div class="hero-overlay" style="background: ${isFirst ? 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%)' : 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)'};"></div>
-                    <div class="container">
-                        <div class="hero-content" style="${isFirst ? 'text-align:center; bottom:15%; left:50%; transform:translateX(-50%);' : 'bottom: 35%; left: 7%;'}">
+                        <div class="hero-content" style="${isFirst ? 'display:flex; flex-direction:column; align-items:center; text-align:center; bottom:15%; left:0; right:0; margin:0 auto; max-width:800px; width:100%;' : 'bottom: 35%; left: 7%;'}">
                             <div style="font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; color: var(--outline); margin-bottom: 8px; text-transform: uppercase;">
                                 <i class="fas ${isFirst ? 'fa-bolt' : (isSecond ? 'fa-star' : 'fa-car')}" style="color: var(--primary);"></i> ${s.tag}
                             </div>
@@ -383,13 +382,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p class="hero-subtitle" style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface-variant); max-width: 600px; ${isFirst ? 'margin-left:auto; margin-right:auto;' : ''}">
                                 ${s.subtitle}
                             </p>
-                            <div class="hero-buttons">
+                            <div class="hero-buttons" style="${isFirst ? 'justify-content: center;' : ''}">
                                 <a href="#catalogo" class="btn btn-primary" onclick="window.scrollTo({top: document.getElementById('catalogo').offsetTop - 80, behavior: 'smooth'})" 
-                                   style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
+                                   style="padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
                                    Ver Inventario
                                 </a>
                                 <a href="https://wa.me/${window.WHATSAPP_NUMBER}" class="btn btn-outline" 
-                                   style="border-radius: 0; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
+                                   style="padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
                                    Consultar
                                 </a>
                             </div>
@@ -843,8 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (baseCost <= 0) {
             const ids = ['resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee', 'resEnvFee',
                 'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee', 'resFlete',
-                'resAduana', 'resDocVzla', 'resTraslado', 'resRepuesto', 'resKit', 'resWarranty',
-                'resTotal', 'resTotalMax'];
+                'resAduana', 'resDocVzla', 'resTraslado', 'resRepuesto', 'resTotal'];
             ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '$0'; });
             return;
         }
@@ -867,13 +865,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
         const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
-        const includeKit = document.getElementById('calcMaintenanceKit').checked;
-        const kit = includeKit ? 300 : 0;
-        const includeWarranty = document.getElementById('calcWarranty') ? document.getElementById('calcWarranty').checked : false;
-        const warranty = includeWarranty ? 1500 : 0;
 
-        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + flete + aduana + docVzla + costTraslado + repuesto + kit + warranty;
-        const totalMax = total * 1.10;
+        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + flete + aduana + docVzla + costTraslado + repuesto;
 
         document.getElementById('resBase').textContent = fmt(baseCost);
         document.getElementById('resBuyFee').textContent = fmt(buyFee);
@@ -889,10 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resDocVzla').textContent = fmt(docVzla);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
-        document.getElementById('resKit').textContent = fmt(kit);
-        document.getElementById('resWarranty').textContent = fmt(warranty);
         document.getElementById('resTotal').textContent = fmt(total);
-        document.getElementById('resTotalMax').textContent = fmt(totalMax);
     }
 
     const btnCalculateCost = document.getElementById('btnCalculateCost');
