@@ -3725,28 +3725,95 @@ body::after {
         padding: 6px 12px;
     }
 }
+
 @media print {
-    body * { visibility: hidden; }
-    #calcResults, #calcResults * { visibility: visible; }
-    #calcResults { 
-        position: absolute; 
-        left: 0; 
-        top: 0; 
-        width: 100%; 
-        background: white !important; 
-        color: black !important;
-        padding: 40px !important;
+
+    /* Ocultar todo en el nivel raíz */
+    body>* {
+        display: none !important;
+    }
+
+    /* Mostrar SOLO la sección de la calculadora */
+    body>#calculadora {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
+        min-height: auto !important;
+    }
+
+    #calculadora .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Ocultar formulario y avisos legales en la impresión */
+    #calculadora .section-header,
+    #calculadora .calculator-inputs,
+    #calculadora .calculator-legal-notice {
+        display: none !important;
+    }
+
+    /* Formatear resultados para que ocupen la página */
+    #calculadora .calculator-results {
+        display: block !important;
+        width: 100% !important;
+        background: #fff !important;
+        color: #000 !important;
         border: none !important;
         box-shadow: none !important;
+        padding: 30px !important;
     }
-    .print-header { display: block !important; }
-    #btnDownloadQuote { display: none !important; }
-    .calc-row { 
-        border-bottom: 1px solid #eee !important; 
-        padding: 12px 0 !important; 
+
+    #calculadora .print-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    #calculadora .print-header img {
+        filter: brightness(0) !important;
+        /* Asegura logo negro para impresión */
+        max-width: 200px;
+    }
+
+    #btnDownloadQuote {
+        display: none !important;
+    }
+
+    /* Ajuste de filas para impresión */
+    .calc-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        border-bottom: 1px solid #eee !important;
+        padding: 10px 0 !important;
+        color: #333 !important;
         font-size: 11pt !important;
     }
-    .calc-divider { border-color: #000 !important; }
-    .text-accent, .text-accent-max { color: #000 !important; font-weight: bold !important; }
-    .calc-range-note { margin-top: 30px !important; font-size: 9pt !important; color: #666 !important; }
+
+    .calc-divider {
+        border-color: #000 !important;
+        margin: 20px 0 !important;
+    }
+
+    .text-accent,
+    .text-accent-max {
+        color: #000 !important;
+        font-weight: bold !important;
+    }
+
+    .calc-range-note {
+        margin-top: 30px !important;
+        font-size: 9pt !important;
+        color: #666 !important;
+    }
+
+    .total-range {
+        background: #f9f9f9 !important;
+        padding: 15px !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }
