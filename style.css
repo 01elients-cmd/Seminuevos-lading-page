@@ -3725,3 +3725,28 @@ body::after {
         padding: 6px 12px;
     }
 }
+@media print {
+    body * { visibility: hidden; }
+    #calcResults, #calcResults * { visibility: visible; }
+    #calcResults { 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 100%; 
+        background: white !important; 
+        color: black !important;
+        padding: 40px !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .print-header { display: block !important; }
+    #btnDownloadQuote { display: none !important; }
+    .calc-row { 
+        border-bottom: 1px solid #eee !important; 
+        padding: 12px 0 !important; 
+        font-size: 11pt !important;
+    }
+    .calc-divider { border-color: #000 !important; }
+    .text-accent, .text-accent-max { color: #000 !important; font-weight: bold !important; }
+    .calc-range-note { margin-top: 30px !important; font-size: 9pt !important; color: #666 !important; }
+}

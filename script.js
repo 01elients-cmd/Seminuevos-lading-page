@@ -198,6 +198,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderVehicles(dataSource, gridElement, typeConditionFilter = 'todos', brandFilter = 'todos') {
         if (!gridElement) return;
         let filtered = dataSource;
+
+        // Search Filter
+        const searchTerm = document.getElementById('catalogSearch')?.value?.toLowerCase() || '';
+        if (searchTerm) {
+            filtered = filtered.filter(v =>
+                v.title.toLowerCase().includes(searchTerm) ||
+                v.year.toString().includes(searchTerm) ||
+                (v.bodyType && v.bodyType.toLowerCase().includes(searchTerm))
+            );
+        }
+
         if (typeConditionFilter !== 'todos') {
             filtered = filtered.filter(v => v.condition === typeConditionFilter || v.bodyType === typeConditionFilter);
         }
@@ -242,9 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="spec-item"><i class="fas fa-gears"></i> ${car.transmission}</span>
                     </div>
                 </div>
-                <div class="vehicle-card-footer">
-                    <a href="#" class="view-details" data-id="${car.id}"><i class="fas fa-eye"></i> Ver detalles</a>
-                    <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${car.availability === 'por_pedido' ? 'Por Pedido' : car.price}. ¿Me pueden cotizar?`)}" class="track-whatsapp" data-title="${car.title}" target="_blank"><i class="fab fa-whatsapp"></i> Cotiza</a>
+                <div class="vehicle-card-footer" style="padding-top: 10px;">
+                    <a href="#" class="view-details" data-id="${car.id}" style="flex: 1;"><i class="fas fa-eye"></i> Ver detalles</a>
+                    <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}).`)}" class="track-whatsapp" style="flex: 1;" target="_blank"><i class="fab fa-whatsapp"></i> Cotiza</a>
+                    <a href="#" class="share-vehicle" data-id="${car.id}" data-title="${car.title}" style="padding: 10px; color: var(--primary);"><i class="fas fa-share-nodes"></i></a>
                 </div>
             `;
             gridElement.appendChild(card);
@@ -252,9 +264,19 @@ document.addEventListener('DOMContentLoaded', () => {
         observeAnimations();
     }
 
-    // Sort dropdown listener
+    // Sort and Search listeners
     const catalogSort = document.getElementById('catalogSort');
-    catalogSort?.addEventListener('change', () => renderAllPanels());
+    const catalogSearch = document.getElementById('catalogSearch');
+
+    function renderAllWithSearch() {
+        const query = catalogSearch?.value || '';
+        renderVehicles(sortVehicles(appVehiclesSeminuevos, catalogSort?.value), 'seminuevos-grid', query);
+        renderVehicles(sortVehicles(appVehiclesPorPedido, catalogSort?.value), 'pedido-grid', query);
+        renderVehicles(sortVehicles(appVehicles0km, catalogSort?.value), 'okm-grid', query);
+    }
+
+    catalogSort?.addEventListener('change', renderAllWithSearch);
+    catalogSearch?.addEventListener('input', renderAllWithSearch);
 
     let appVehiclesSeminuevos = [];
     let appVehiclesPorPedido = [];
@@ -565,6 +587,22 @@ document.addEventListener('DOMContentLoaded', () => {
         whatsappLink.classList.add('track-whatsapp');
         whatsappLink.dataset.title = car.title;
         whatsappLink.innerHTML = '<i class="fab fa-whatsapp"></i> Cotiza tu vehículo';
+
+        // Add Share button in modal if not exists
+        let shareModal = document.getElementById('modalShare');
+        if (!shareModal) {
+            shareModal = document.createElement('a');
+            shareModal.id = 'modalShare';
+            shareModal.href = '#';
+            shareModal.className = 'btn btn-outline share-vehicle';
+            shareModal.style.marginTop = '10px';
+            shareModal.style.width = '100%';
+            shareModal.style.borderRadius = 'var(--radius-full)';
+            shareModal.innerHTML = '<i class="fas fa-share-nodes"></i> Compartir Vehículo';
+            whatsappLink.parentNode.appendChild(shareModal);
+        }
+        shareModal.dataset.id = car.id;
+        shareModal.dataset.title = car.title;
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -909,6 +947,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCalculateCost = document.getElementById('btnCalculateCost');
     btnCalculateCost?.addEventListener('click', updateCalc);
 
+    const btnDownloadQuote = document.getElementById('btnDownloadQuote');
+    btnDownloadQuote?.addEventListener('click', () => {
+        const baseCost = document.getElementById('calcBaseCost').value;
+        if (!baseCost || baseCost <= 0) {
+            alert('Por favor calcula una cotización primero.');
+            return;
+        }
+        window.print();
+    });
+
     document.getElementById('calcRepairs1')?.addEventListener('change', updateCalc);
     document.getElementById('calcRepairs2')?.addEventListener('change', updateCalc);
     document.getElementById('calcBaseCost')?.addEventListener('input', updateCalc);
@@ -984,6 +1032,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== SEARCH LISTENER =====
+    // Uses the existing listener defined earlier in the script
+    if (catalogSearch) {
+        catalogSearch.addEventListener('input', () => {
+            if (typeof renderAllPanels === 'function') renderAllPanels();
+        });
+    }
+
+    // ===== SHARE LOGIC =====
+    document.addEventListener('click', (e) => {
+        const shareBtn = e.target.closest('.share-vehicle');
+        if (shareBtn) {
+            e.preventDefault();
+            const id = shareBtn.getAttribute('data-id');
+            const url = `${window.location.origin}${window.location.pathname}?v=${id}`;
+
+            navigator.clipboard.writeText(url).then(() => {
+                alert('¡Enlace de vehículo copiado al portapapeles!');
+            }).catch(err => {
+                const dummy = document.createElement('input');
+                document.body.appendChild(dummy);
+                dummy.value = url;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+                alert('¡Enlace de vehículo copiado!');
+            });
+        }
+    });
+
+    // ===== DEEP LINKING =====
+    const urlParams = new URLSearchParams(window.location.search);
+    const vId = urlParams.get('v');
+    if (vId) {
+        setTimeout(() => {
+            if (typeof openModal === 'function') openModal(vId);
+            document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+        }, 2000);
+    }
+
+    window.openVehicleModal = function (id) {
+        if (typeof openModal === 'function') openModal(id);
+    };
 });
 
 // ===== 0KM HERO VEHICLE INFO MODAL =====

@@ -38,6 +38,7 @@
             <ul class="nav-menu" id="navMenu">
                 <li><a href="#inicio" class="nav-link active">INICIO</a></li>
                 <li><a href="#catalogo" class="nav-link">CATÁLOGO</a></li>
+                <li><a href="#calculadora" class="nav-link">CALCULADORA</a></li>
                 <li><a href="#beneficios" class="nav-link">BENEFICIOS</a></li>
                 <li><a href="#nosotros" class="nav-link">NOSOTROS</a></li>
                 <li><a href="#contacto" class="nav-link">CONTACTO</a></li>
@@ -420,8 +421,15 @@
                 </button>
             </div>
             <!-- Sort dropdown -->
-            <div class="catalog-sort-bar">
-                <select id="catalogSort" class="sort-select">
+            <div class="catalog-sort-bar"
+                style="display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                <div class="search-container" style="position: relative; flex: 1; min-width: 280px;">
+                    <i class="fas fa-search"
+                        style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--primary);"></i>
+                    <input type="text" id="catalogSearch" placeholder="Buscar vehículo..."
+                        style="width: 100%; padding: 12px 12px 12px 45px; border-radius: var(--radius-full); background: var(--surface-container); border: 1px solid var(--ghost-border); color: var(--on-surface); font-family: var(--font-body); font-size: 0.95rem;">
+                </div>
+                <select id="catalogSort" class="sort-select" style="min-width: 200px;">
                     <option value="default">Ordenar por...</option>
                     <option value="price_asc">Precio: Menor a Mayor</option>
                     <option value="price_desc">Precio: Mayor a Menor</option>
@@ -602,7 +610,7 @@
     </section>
 
     <!-- ===== COST CALCULATOR SECTION ===== -->
-    <section class="calculator-section">
+    <section class="calculator-section" id="calculadora">
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">ESTIMADOR DE COSTOS</span>
@@ -713,6 +721,14 @@
                     </div>
                 </div>
                 <div class="calculator-results" id="calcResults">
+                    <!-- Print Header -->
+                    <div class="print-header"
+                        style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 20px;">
+                        <img src="images/logo-white.png" alt="Logo"
+                            style="height: 50px; filter: brightness(0); margin-bottom: 10px;">
+                        <h2 style="color: #000; margin: 0;">COTIZACIÓN DE IMPORTACIÓN</h2>
+                        <p style="color: #666; font-size: 0.9rem;">SemiNuevos Agency - Tu aliado automotriz</p>
+                    </div>
                     <div class="calc-row"><span>Costo de Compra</span><span id="resBase">$0</span></div>
                     <div class="calc-row"><span>Tarifa de compra de subasta</span><span id="resBuyFee">$0</span></div>
                     <div class="calc-row"><span>Tarifa de oferta por internet</span><span id="resInternetFee">$0</span>
@@ -737,6 +753,10 @@
                     </div>
                     <p class="calc-range-note"><i class="fas fa-info-circle"></i> Los rangos del precio pueden variar
                         por múltiples factores del proceso.</p>
+                    <button class="btn btn-outline btn-block" id="btnDownloadQuote"
+                        style="margin-top: 15px; font-size: 0.85rem; padding: 12px;">
+                        <i class="fas fa-file-pdf"></i> Descargar Cotización
+                    </button>
                 </div>
 
             </div>
