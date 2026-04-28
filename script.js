@@ -891,38 +891,55 @@ document.addEventListener('DOMContentLoaded', () => {
     calcCustomTransport?.addEventListener('input', updateCalc);
 
     function updateCalc() {
-        const baseCost = parseFloat(document.getElementById('calcBaseCost').value) || 0;
-        const fmt = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.round(val));
-        const status = document.getElementById('calcStatus').value;
-        const isPL = status === 'puerto_libre';
-        const isEEUU = status === 'eeuu';
+        const val = document.getElementById('calcBaseCost').value;
+        const baseCost = parseFloat(val) || 0;
+        const fmt = (v) => {
+            const rounded = Math.round(v || 0);
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0
+            }).format(rounded);
+        };
 
-        // Always show all factors for PL and EEUU to match user images
-        const shouldShowAll = isPL || isEEUU;
+        const status = calcStatus.value; // Using the persistent reference
+        const isPL = (status === 'puerto_libre');
+        const isEEUU = (status === 'eeuu');
+
+        // Always show breakdown for PL and EEUU
+        const showBreakdown = isPL || isEEUU;
         document.querySelectorAll('.vzla-fee-row, .detailed-fee').forEach(row => {
-            row.style.display = shouldShowAll ? 'flex' : 'none';
+            row.style.display = showBreakdown ? 'flex' : 'none';
         });
 
-        // Reset all to $0 if no base cost
+        // If no cost entered, reset labels but keep rows visible if needed
         if (baseCost <= 0) {
-            const ids = ['resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee', 'resEnvFee',
-                'resTitleFee', 'resStateTax', 'resBrokerFee', 'resServiceFee',
-                'resTraslado', 'resFlete', 'resAduana', 'resDocVzla', 'resRepuesto', 'resTotal', 'resTotalMax'];
-            ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '$0'; });
+            const resetIds = [
+                'resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee',
+                'resEnvFee', 'resTitleFee', 'resStateTax', 'resBrokerFee',
+                'resServiceFee', 'resTraslado', 'resFlete', 'resAduana',
+                'resDocVzla', 'resRepuesto', 'resTotal'
+            ];
+            resetIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '$0';
+            });
+            if (document.getElementById('resTotalMax')) {
+                document.getElementById('resTotalMax').textContent = '$0';
+            }
             return;
         }
 
-        // === TARIFAS DE SUBASTA ===
-        const buyFee = baseCost * 0.10;       // Tarifa de compra de subasta: 10%
+        // === CALCULATION LOGIC ===
+        const buyFee = baseCost * 0.10;
 
-        // Granular fees (Apply to both Puerto Libre and EEUU)
-        const auctionFeesApply = isPL || isEEUU;
-        const internetFee = auctionFeesApply ? 160 : 0;
-        const auctionServiceFee = auctionFeesApply ? 95 : 0;
-        const envFee = auctionFeesApply ? 15 : 0;
-        const titleFee = auctionFeesApply ? 20 : 0;
-        const stateTax = auctionFeesApply ? (baseCost * 0.07) : 0;
-        const brokerFee = auctionFeesApply ? 500 : 0;
+        // Auction fees apply to both PL and EEUU
+        const internetFee = 160;
+        const auctionServiceFee = 95;
+        const envFee = 15;
+        const titleFee = 20;
+        const stateTax = baseCost * 0.07;
+        const brokerFee = 500;
         const serviceFee = window.CALC_SERVICE_FEE || 900;
 
         let costTraslado = 0;
@@ -932,7 +949,8 @@ document.addEventListener('DOMContentLoaded', () => {
             costTraslado = parseFloat(calcOrigin.value) || 0;
         }
 
-        // === TARIFAS VENEZUELA (Solo Puerto Libre) ===
+        // Venezuela Factors (ONLY for Puerto Libre)
+        // Ensure they are exactly 0 if NOT isPL
         const flete = isPL ? (window.CALC_FLETE || 3500) : 0;
         const aduana = isPL ? (window.CALC_ADUANA || 3500) : 0;
         const docVzla = isPL ? (window.CALC_DOC_VZLA || 1000) : 0;
@@ -941,10 +959,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
         const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
 
-        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + costTraslado + repuesto + flete + aduana + docVzla;
+        const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee +
+            titleFee + stateTax + brokerFee + serviceFee +
+            costTraslado + repuesto + flete + aduana + docVzla;
         const totalMax = total * 1.10;
 
-        // Update all fields (Always, to avoid stale data when switching)
+        // UI Updates
         document.getElementById('resBase').textContent = fmt(baseCost);
         document.getElementById('resBuyFee').textContent = fmt(buyFee);
         document.getElementById('resInternetFee').textContent = fmt(internetFee);
