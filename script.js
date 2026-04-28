@@ -906,10 +906,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPL = (status === 'puerto_libre');
         const isEEUU = (status === 'eeuu');
 
-        // Always show breakdown for PL and EEUU
-        const showBreakdown = isPL || isEEUU;
-        document.querySelectorAll('.vzla-fee-row, .detailed-fee').forEach(row => {
-            row.style.display = showBreakdown ? 'flex' : 'none';
+        // Show detailed fees (auction related) for both PL and EEUU
+        document.querySelectorAll('.detailed-fee').forEach(row => {
+            row.style.display = (isPL || isEEUU) ? 'flex' : 'none';
+        });
+
+        // Show VZLA-specific fees ONLY for Puerto Libre
+        document.querySelectorAll('.vzla-fee-row').forEach(row => {
+            row.style.display = isPL ? 'flex' : 'none';
         });
 
         // If no cost entered, reset labels but keep rows visible if needed
