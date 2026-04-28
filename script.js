@@ -895,13 +895,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const fmt = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.round(val));
         const status = document.getElementById('calcStatus').value;
         const isPL = status === 'puerto_libre';
+        const isEEUU = status === 'eeuu';
 
-        // Show/Hide VZLA rows and Detailed entries always
-        document.querySelectorAll('.vzla-fee-row').forEach(row => {
-            row.style.display = isPL ? 'flex' : 'none';
-        });
-        document.querySelectorAll('.detailed-fee').forEach(row => {
-            row.style.display = isPL ? 'flex' : 'none';
+        // Always show all factors for PL and EEUU to match user images
+        const shouldShowAll = isPL || isEEUU;
+        document.querySelectorAll('.vzla-fee-row, .detailed-fee').forEach(row => {
+            row.style.display = shouldShowAll ? 'flex' : 'none';
         });
 
         // Reset all to $0 if no base cost
@@ -916,13 +915,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // === TARIFAS DE SUBASTA ===
         const buyFee = baseCost * 0.10;       // Tarifa de compra de subasta: 10%
 
-        // Granular fees (Only for Puerto Libre, Reduced for EEUU)
-        const internetFee = isPL ? 160 : 0;
-        const auctionServiceFee = isPL ? 95 : 0;
-        const envFee = isPL ? 15 : 0;
-        const titleFee = isPL ? 20 : 0;
-        const stateTax = isPL ? (baseCost * 0.07) : 0;
-        const brokerFee = isPL ? 500 : 0;
+        // Granular fees (Apply to both Puerto Libre and EEUU)
+        const auctionFeesApply = isPL || isEEUU;
+        const internetFee = auctionFeesApply ? 160 : 0;
+        const auctionServiceFee = auctionFeesApply ? 95 : 0;
+        const envFee = auctionFeesApply ? 15 : 0;
+        const titleFee = auctionFeesApply ? 20 : 0;
+        const stateTax = auctionFeesApply ? (baseCost * 0.07) : 0;
+        const brokerFee = auctionFeesApply ? 500 : 0;
         const serviceFee = window.CALC_SERVICE_FEE || 900;
 
         let costTraslado = 0;
@@ -944,27 +944,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax + brokerFee + serviceFee + costTraslado + repuesto + flete + aduana + docVzla;
         const totalMax = total * 1.10;
 
+        // Update all fields (Always, to avoid stale data when switching)
         document.getElementById('resBase').textContent = fmt(baseCost);
         document.getElementById('resBuyFee').textContent = fmt(buyFee);
-
-        if (isPL) {
-            document.getElementById('resInternetFee').textContent = fmt(internetFee);
-            document.getElementById('resAuctionServiceFee').textContent = fmt(auctionServiceFee);
-            document.getElementById('resEnvFee').textContent = fmt(envFee);
-            document.getElementById('resTitleFee').textContent = fmt(titleFee);
-            document.getElementById('resStateTax').textContent = fmt(stateTax);
-            document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
-        }
-
+        document.getElementById('resInternetFee').textContent = fmt(internetFee);
+        document.getElementById('resAuctionServiceFee').textContent = fmt(auctionServiceFee);
+        document.getElementById('resEnvFee').textContent = fmt(envFee);
+        document.getElementById('resTitleFee').textContent = fmt(titleFee);
+        document.getElementById('resStateTax').textContent = fmt(stateTax);
+        document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
         document.getElementById('resServiceFee').textContent = fmt(serviceFee);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
-
-        if (isPL) {
-            document.getElementById('resFlete').textContent = fmt(flete);
-            document.getElementById('resAduana').textContent = fmt(aduana);
-            document.getElementById('resDocVzla').textContent = fmt(docVzla);
-        }
-
+        document.getElementById('resFlete').textContent = fmt(flete);
+        document.getElementById('resAduana').textContent = fmt(aduana);
+        document.getElementById('resDocVzla').textContent = fmt(docVzla);
         document.getElementById('resRepuesto').textContent = fmt(repuesto);
         document.getElementById('resTotal').textContent = fmt(total);
         if (document.getElementById('resTotalMax')) {
