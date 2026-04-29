@@ -1270,6 +1270,7 @@
                 <button class="sidebar-link" data-tab="bulk"><i class="fas fa-layer-group"></i> Importar en
                     Lote</button>
                 <button class="sidebar-link" data-tab="analytics"><i class="fas fa-chart-line"></i> Análisis</button>
+                <button class="sidebar-link" data-tab="crm"><i class="fas fa-users-gear"></i> CRM & Leads</button>
                 <button class="sidebar-link" data-tab="inquiries"><i class="fas fa-envelope"></i> Consultas</button>
                 <button class="sidebar-link" data-tab="settings"><i class="fas fa-cog"></i> Configuración</button>
                 <div class="sidebar-divider"></div>
@@ -1408,6 +1409,52 @@
                 </div>
             </div>
 
+            <!-- CRM TAB -->
+            <div class="tab-content" id="tab-crm">
+                <div class="page-header">
+                    <h1 class="page-title">CRM & <span>Leads</span></h1>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-outline" onclick="loadLeads()"><i class="fas fa-sync"></i> Actualizar</button>
+                    </div>
+                </div>
+
+                <div class="stats-row" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-card-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-card-value" id="totalLeads">0</div>
+                        <div class="stat-card-label">Leads Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon"><i class="fas fa-bullhorn"></i></div>
+                        <div class="stat-card-value" id="activeLeads">0</div>
+                        <div class="stat-card-label">Activos hoy</div>
+                    </div>
+                </div>
+
+                <div class="card" style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+                    <div class="card-header" style="display:flex; justify-content: space-between; align-items:center; padding: 20px; border-bottom: 1px solid var(--border);">
+                        <h3 style="font-family:'Unbounded'; font-size:1rem; font-weight:700;">Lista de Clientes Potenciales</h3>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="crmSearch" class="form-input" placeholder="Buscar por email o nombre..." style="margin-bottom:0; width:250px;">
+                        </div>
+                    </div>
+                    <div class="card-body" id="crmListContainer" style="padding: 20px;">
+                        <div class="empty-state"><i class="fas fa-users"></i><p>Cargando leads...</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRM LEAD DETAILS MODAL (HIDDEN) -->
+            <div class="modal-overlay" id="leadModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+                <div class="modal" style="max-width: 800px; width:90%; background:var(--bg2); border-radius:var(--radius); padding:30px; position:relative;">
+                    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2 id="leadModalTitle" style="font-family:'Unbounded'; font-size:1.2rem;">Detalles del Lead</h2>
+                        <button class="modal-close" onclick="closeLeadModal()" style="background:none; border:none; color:var(--text); cursor:pointer; font-size:1.5rem;"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body" id="leadModalContent" style="max-height:70vh; overflow-y:auto;"></div>
+                </div>
+            </div>
+
             <!-- SETTINGS TAB -->
             <div class="tab-content" id="tab-settings">
                 <div class="page-header">
@@ -1449,6 +1496,14 @@
                                     placeholder="Tu API Token de Apify" value="">
                                 <p style="font-size: 0.75rem; color: var(--text3); margin-top: 4px;">Necesario para
                                     importar links de IAAI/Copart en lote sin bloqueos usando Apify.
+                                </p>
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">Resend API Key</label>
+                                <input type="password" class="form-input" id="sResendKey"
+                                    placeholder="re_..." value="">
+                                <p style="font-size: 0.75rem; color: var(--text3); margin-top: 4px;">
+                                    Necesario para el <strong>Email Marketing</strong>. Consíguela en resend.com.
                                 </p>
                             </div>
                         </div>
@@ -2392,6 +2447,7 @@
             document.getElementById('sTiktok').value = map.social_tiktok || '';
             document.getElementById('sYoutube').value = map.social_youtube || '';
             document.getElementById('sProxyKey').value = map.scraper_proxy_key || '';
+            document.getElementById('sResendKey').value = map.resend_api_key || '';
             document.getElementById('sFlete').value = map.calc_flete || 3500;
             document.getElementById('sAduana').value = map.calc_aduana || 3500;
             document.getElementById('sDocVzla').value = map.calc_doc_vzla || 1000;
@@ -2481,6 +2537,7 @@
                 social_tiktok: document.getElementById('sTiktok').value,
                 social_youtube: document.getElementById('sYoutube').value,
                 scraper_proxy_key: document.getElementById('sProxyKey').value,
+                resend_api_key: document.getElementById('sResendKey').value,
                 calc_flete: parseFloat(document.getElementById('sFlete').value),
                 calc_aduana: parseFloat(document.getElementById('sAduana').value),
                 calc_doc_vzla: parseFloat(document.getElementById('sDocVzla').value),
@@ -2516,6 +2573,7 @@
                 if (btn.dataset.tab === 'inquiries') loadInquiries();
                 if (btn.dataset.tab === 'settings') loadSettings();
                 if (btn.dataset.tab === 'analytics') loadAnalyticsData();
+                if (btn.dataset.tab === 'crm') loadLeads();
             });
         });
 
@@ -3049,6 +3107,229 @@
             }
             showToast('Limpieza completada', 'success');
             loadVehicles();
+        }
+
+        // ===== CRM & LEADS =====
+        let allLeads = [];
+        async function loadLeads() {
+            try {
+                // 1. Obtener leads de la tabla site_leads
+                const { data: leadsData, error: leadsError } = await supabaseClient
+                    .from('site_leads')
+                    .select('*')
+                    .order('last_active', { ascending: false });
+
+                if (leadsError) throw leadsError;
+                allLeads = leadsData || [];
+
+                // 2. Obtener estadísticas básicas
+                const total = allLeads.length;
+                const today = new Date().toISOString().split('T')[0];
+                const activeToday = allLeads.filter(l => l.last_active?.startsWith(today)).length;
+
+                document.getElementById('totalLeads').textContent = total;
+                document.getElementById('activeLeads').textContent = activeToday;
+
+                renderLeads();
+            } catch (e) {
+                console.error('Error cargando leads:', e);
+                document.getElementById('crmListContainer').innerHTML = `<div class="info-banner"><i class="fas fa-info-circle"></i><p>Error cargando CRM. Asegúrate de ejecutar la migración SQL.</p></div>`;
+            }
+        }
+
+        function renderLeads(filter = '') {
+            const container = document.getElementById('crmListContainer');
+            const search = document.getElementById('crmSearch').value.toLowerCase();
+            
+            const filtered = allLeads.filter(l => 
+                (l.name && l.name.toLowerCase().includes(search)) || 
+                (l.email && l.email.toLowerCase().includes(search)) ||
+                l.visitor_id.includes(search)
+            );
+
+            if (!filtered.length) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-users-slash"></i><p>No se encontraron leads</p></div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="text-align:left; border-bottom:1px solid var(--border);">
+                            <th style="padding:12px;">Lead / Visitante</th>
+                            <th style="padding:12px;">Email / Contacto</th>
+                            <th style="padding:12px;">Última Actividad</th>
+                            <th style="padding:12px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.map(l => `
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:12px;">
+                                    <div style="font-weight:600;">${l.name || 'Visitante Anónimo'}</div>
+                                    <div style="font-size:0.7rem; color:var(--text3); font-family:monospace;">${l.visitor_id}</div>
+                                </td>
+                                <td style="padding:12px;">
+                                    ${l.email ? `<div><i class="fas fa-envelope"></i> ${l.email}</div>` : '<span style="color:var(--text3)">Desconocido</span>'}
+                                    ${l.phone ? `<div style="font-size:0.8rem;"><i class="fas fa-phone"></i> ${l.phone}</div>` : ''}
+                                </td>
+                                <td style="padding:12px; font-size:0.85rem;">
+                                    ${new Date(l.last_active).toLocaleString('es')}
+                                </td>
+                                <td style="padding:12px;">
+                                    <div class="action-btns">
+                                        <button class="action-btn" onclick="viewLeadDetails('${l.visitor_id}')" title="Ver Historial"><i class="fas fa-history"></i></button>
+                                        ${l.email ? `<button class="action-btn" onclick="openMarketingEmail('${l.email}', '${l.name || ''}')" title="Enviar Email Marketing" style="color:var(--primary)"><i class="fas fa-paper-plane"></i></button>` : ''}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        document.getElementById('crmSearch')?.addEventListener('input', () => renderLeads());
+
+        async function viewLeadDetails(visitorId) {
+            const modal = document.getElementById('leadModal');
+            const content = document.getElementById('leadModalContent');
+            const lead = allLeads.find(l => l.visitor_id === visitorId);
+            
+            content.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando historial...</div>';
+            modal.style.display = 'flex';
+
+            try {
+                // Obtener historial de analytics
+                const { data: history, error } = await supabaseClient
+                    .from('site_analytics')
+                    .select('*')
+                    .eq('visitor_id', visitorId)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) throw error;
+
+                let html = `
+                    <div style="background:var(--bg3); padding:15px; border-radius:var(--radius); margin-bottom:20px;">
+                        <h4 style="margin-bottom:10px; color:var(--accent);">Información del Perfil</h4>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
+                            <div><strong>Nombre:</strong> ${lead.name || 'N/A'}</div>
+                            <div><strong>Email:</strong> ${lead.email || 'N/A'}</div>
+                            <div><strong>ID Visitante:</strong> <span style="font-family:monospace; font-size:0.7rem;">${lead.visitor_id}</span></div>
+                            <div><strong>Creado:</strong> ${new Date(lead.created_at).toLocaleDateString('es')}</div>
+                        </div>
+                    </div>
+                    <h4 style="margin-bottom:10px;"><i class="fas fa-shoe-prints"></i> Recorrido del Cliente</h4>
+                `;
+
+                if (!history?.length) {
+                    html += '<p style="color:var(--text3); text-align:center;">No hay historial registrado aún.</p>';
+                } else {
+                    html += '<div style="display:flex; flex-direction:column; gap:8px;">';
+                    history.forEach(ev => {
+                        let detail = '';
+                        let icon = 'fa-info-circle';
+                        if (ev.event_type === 'vehicle_view') {
+                            detail = `Vio el vehículo: <strong>${ev.event_data.title}</strong>`;
+                            icon = 'fa-car';
+                        } else if (ev.event_type === 'time_spent') {
+                            detail = `Pasó ${ev.event_data.duration_seconds}s viendo <strong>${ev.event_data.title}</strong>`;
+                            icon = 'fa-clock';
+                        } else if (ev.event_type === 'page_view') {
+                            detail = `Entró a la página principal`;
+                            icon = 'fa-eye';
+                        } else if (ev.event_type === 'whatsapp_click') {
+                            detail = `Hizo clic en WhatsApp para: <strong>${ev.event_data.vehicle}</strong>`;
+                            icon = 'fa-whatsapp';
+                            icon = 'fa-brands fa-whatsapp';
+                        }
+
+                        html += `
+                            <div style="display:flex; gap:12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:0.85rem; align-items:center;">
+                                <i class="fas ${icon}" style="width:20px; text-align:center; color:var(--accent);"></i>
+                                <div style="flex:1;">${detail}</div>
+                                <div style="font-size:0.7rem; color:var(--text3);">${new Date(ev.created_at).toLocaleString('es')}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                content.innerHTML = html;
+            } catch (e) {
+                content.innerHTML = `<div class="info-banner"><p>Error: ${e.message}</p></div>`;
+            }
+        }
+
+        window.closeLeadModal = () => {
+            document.getElementById('leadModal').style.display = 'none';
+        }
+
+        window.openMarketingEmail = (email, name) => {
+            const modal = document.getElementById('leadModal');
+            const content = document.getElementById('leadModalContent');
+            modal.style.display = 'flex';
+            document.getElementById('leadModalTitle').textContent = 'Enviar Email Marketing';
+
+            content.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    <div class="form-group">
+                        <label class="form-label">Para:</label>
+                        <input type="text" class="form-input" value="${email}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Asunto:</label>
+                        <input type="text" id="mailSubject" class="form-input" value="¡Mira este vehículo que te puede interesar!">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mensaje (Personalizado para ${name}):</label>
+                        <textarea id="mailMessage" class="form-textarea" style="height:150px;">Hola ${name},\n\nHe visto que has estado interesado en algunos de nuestros vehículos. ¡Tenemos nuevas ofertas que podrían gustarte!\n\nSaludos,\nEl equipo de SemiNuevo</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="sendMarketingEmail('${email}')" id="btnSendMail">
+                        <i class="fas fa-paper-plane"></i> Enviar Ahora
+                    </button>
+                </div>
+            `;
+        }
+
+        async function sendMarketingEmail(email) {
+            const subject = document.getElementById('mailSubject').value;
+            const message = document.getElementById('mailMessage').value;
+            const btn = document.getElementById('btnSendMail');
+            
+            // Obtener Resend Key de los settings locales (en el DOM)
+            const resendKey = document.getElementById('sResendKey').value;
+            if (!resendKey) { showToast('Configura tu Resend API Key primero', 'error'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                const res = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: email,
+                        subject,
+                        text: message,
+                        apiKey: resendKey
+                    })
+                });
+
+                if (res.ok) {
+                    showToast('Email enviado con éxito!', 'success');
+                    closeLeadModal();
+                } else {
+                    const err = await res.text();
+                    showToast('Error: ' + err, 'error');
+                }
+            } catch (e) {
+                showToast('Fallo de conexión', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Ahora';
+            }
         }
 
         checkAuth().then(ok => { if (ok) loadDashboard(); });

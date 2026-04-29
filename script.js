@@ -8,17 +8,24 @@
 window.WHATSAPP_NUMBER = "584147977832"; // Default fallback
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ===== ANALYTICS TRACKING =====
-    let modalStartTime = 0;
-    let currentVehicleId = null;
-    let currentVehicleTitle = '';
+    // ===== VISITOR IDENTIFICATION (CRM) =====
+    function getVisitorId() {
+        let vid = localStorage.getItem('sn_visitor_id');
+        if (!vid) {
+            vid = 'v-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('sn_visitor_id', vid);
+        }
+        return vid;
+    }
+    const visitorId = getVisitorId();
 
     async function logAnalyticsEvent(type, data = {}) {
         try {
             await supabaseClient.from('site_analytics').insert([{
                 event_type: type,
                 event_data: data,
-                url: window.location.pathname
+                url: window.location.pathname,
+                visitor_id: visitorId
             }]);
         } catch (e) {
             console.warn('Analytics error:', e);
@@ -796,7 +803,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = {
             name, phone, email, service,
             message: message || 'Interesado en ' + service,
-            status: 'new'
+            status: 'new',
+            visitor_id: visitorId
         };
 
         try {
