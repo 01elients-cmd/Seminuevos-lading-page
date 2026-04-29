@@ -2847,7 +2847,7 @@
                             for (const imgUrl of (data.images || [])) {
                                 try {
                                     // USAR EL PROXY INTERNO PARA EVITAR BLOQUEO CORS
-                                    const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(imgUrl)}`;
+                                    const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(imgUrl)}&key=${encodeURIComponent(proxyKey)}`;
                                     const res = await fetch(proxyUrl);
                                     if (!res.ok) throw new Error('Proxy failed');
 
@@ -2865,6 +2865,8 @@
                                     }
                                 } catch (e) {
                                     console.error("Error subiendo imagen:", e);
+                                    // Fallback: intentar usar la URL original si el proxy falla (aunque puede dar error CORS en el navegador)
+                                    // pero aquí ya estamos en el servidor de Vercel/Proxy, así que el fallo es real.
                                 }
                             }
 
