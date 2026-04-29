@@ -71,36 +71,57 @@ export default async function handler(req, res) {
 }
 
 /**
- * Unified Scanner
+ * Unified Scanner - Now case-insensitive and more robust
  */
 function scanForData(obj, data = {}) {
     if (!obj || typeof obj !== 'object') return data;
 
-    // IAAI
-    if (obj.Year && !data.year) data.year = obj.Year;
-    if (obj.Make && !data.make) data.make = obj.Make;
-    if (obj.Model && !data.model) data.model = obj.Model;
-    if (obj.Series && !data.series) data.series = obj.Series;
-    if (obj.VIN && !data.vin) data.vin = obj.VIN;
-    if (obj.ODOValue && !data.km) data.km = `${obj.ODOValue} ${obj.ODOUoM || ''}`.trim();
-    if (obj.EngineSize && !data.engine) data.engine = obj.EngineSize;
-    if (obj.Transmission && !data.transmission) data.transmission = obj.Transmission;
-    if (obj.buyNowPrice && !data.price) data.price = `$${parseInt(obj.buyNowPrice).toLocaleString()}`;
-    if (obj.highBidAmount && !data.price) data.price = `$${parseInt(obj.highBidAmount).toLocaleString()}`;
+    const keys = Object.keys(obj);
+    const getVal = (k) => {
+        const found = keys.find(key => key.toLowerCase() === k.toLowerCase());
+        return found ? obj[found] : null;
+    };
 
-    // Copart
-    if (obj.lcy && !data.year) data.year = obj.lcy;
-    if (obj.mkn && !data.make) data.make = obj.mkn;
-    if (obj.lm && !data.model) data.model = obj.lm;
-    if (obj.orr && !data.km) data.km = `${parseInt(obj.orr).toLocaleString()} mi`;
-    if (obj.fv && !data.vin) data.vin = obj.fv;
-    if (obj.egn && !data.engine) data.engine = obj.egn;
-    if (obj.tsmn && !data.transmission) data.transmission = obj.tsmn;
-    if (obj.bnp && !data.price) data.price = `$${parseInt(obj.bnp).toLocaleString()}`;
-    if (obj.curm && !data.price) data.price = `$${parseInt(obj.curm).toLocaleString()}`;
+    // Mapping fields
+    const year = getVal('Year') || getVal('lcy');
+    if (year && !data.year) data.year = String(year);
+    
+    const make = getVal('Make') || getVal('mkn');
+    if (make && !data.make) data.make = String(make);
+    
+    const model = getVal('Model') || getVal('lm');
+    if (model && !data.model) data.model = String(model);
+    
+    const series = getVal('Series') || getVal('srs');
+    if (series && !data.series) data.series = String(series);
+    
+    const vin = getVal('VIN') || getVal('fv') || getVal('vin');
+    if (vin && !data.vin) data.vin = String(vin);
+    
+    const odo = getVal('ODOValue') || getVal('orr') || getVal('odometer');
+    if (odo && !data.km) {
+        const uom = getVal('ODOUoM') || getVal('uom') || '';
+        data.km = `${odo} ${uom}`.trim();
+        if (!uom && String(odo).length > 3) data.km += " mi";
+    }
+    
+    const engine = getVal('EngineSize') || getVal('egn') || getVal('engine');
+    if (engine && !data.engine) data.engine = String(engine);
+    
+    const trans = getVal('Transmission') || getVal('tsmn') || getVal('transmission');
+    if (trans && !data.transmission) data.transmission = String(trans);
+    
+    const bnp = getVal('buyNowPrice') || getVal('bnp') || getVal('buyItNowPrice');
+    if (bnp && !data.price) data.price = `$${parseInt(bnp).toLocaleString()}`;
+    
+    const bid = getVal('highBidAmount') || getVal('curm') || getVal('currentBid');
+    if (bid && !data.price) data.price = `$${parseInt(bid).toLocaleString()}`;
 
+    // Recursive search
     for (let k in obj) {
-        if (typeof obj[k] === 'object') scanForData(obj[k], data);
+        if (obj[k] && typeof obj[k] === 'object' && k !== 'ancestors') {
+            scanForData(obj[k], data);
+        }
     }
     return data;
 }
@@ -109,21 +130,47 @@ function parseIAAI(html, url) {
     if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula')) {
         throw new Error('IAAI Bloqueado. Usa Modo Manual.');
     }
-    const stateStr = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});/i)?.[1];
-    let rawData = {};
-    if (stateStr) { try { rawData = scanForData(JSON.parse(stateStr)); } catch (e) { } }
 
-    if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados. Usa Modo Manual.');
+    // Improved regex for __PRELOADED_STATE__
+    const stateStr = html.match(/(?:window\.)?__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\})(?:[;<\n]|$)/i)?.[1];
+    let rawData = {};
+    if (stateStr) { 
+        try { 
+            rawData = scanForData(JSON.parse(stateStr)); 
+        } catch (e) { 
+            console.error("IAAI JSON Parse Error");
+        } 
+    }
+
+    // Text Fallback if JSON fails
+    if (!rawData.year || !rawData.make) {
+        const titleTag = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").toUpperCase();
+        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").toUpperCase();
+        const combined = titleTag + " " + h1Tag;
+
+        const yearMatch = combined.match(/\b(20\d{2}|19\d{2})\b/);
+        if (yearMatch) rawData.year = yearMatch[0];
+
+        const commonMakes = ['TOYOTA', 'FORD', 'CHEVROLET', 'CHEVY', 'HONDA', 'NISSAN', 'HYUNDAI', 'KIA', 'BMW', 'MERCEDES', 'JEEP', 'DODGE', 'RAM', 'LEXUS', 'MAZDA', 'VOLKSWAGEN', 'VW', 'AUDI', 'SUBARU', 'GMC', 'BUICK', 'CADILLAC', 'CHRYSLER', 'MITSUBISHI', 'LAND ROVER', 'PORSCHE'];
+        for (const m of commonMakes) {
+            if (combined.includes(m)) {
+                rawData.make = m;
+                break;
+            }
+        }
+    }
+
+    if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en IAAI. Usa Modo Manual.');
 
     return {
         title: `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim(),
         year: rawData.year,
         price: rawData.price || "Consultar",
         km: rawData.km || "0 KM",
-        engine: rawData.engine,
-        transmission: rawData.transmission,
-        vin: rawData.vin,
-        images: (html.match(/https?:\/\/(vis|images|an-cdn)\.iaai\.com\/inventory\/[^"']*?(1024|800)[^"']*/gi) || []),
+        engine: rawData.engine || "N/A",
+        transmission: rawData.transmission || "N/A",
+        vin: rawData.vin || "N/A",
+        images: [...new Set(html.match(/https?:\/\/(vis|images|an-cdn)\.iaai\.com\/inventory\/[^"']*?(1024|800)[^"']*/gi) || [])],
         description: `Importado vía subasta IAAI. VIN: ${rawData.vin || 'N/A'}`
     };
 }
@@ -132,12 +179,35 @@ function parseCopart(html, url) {
     if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula')) {
         throw new Error('Copart Bloqueado. Usa Modo Manual.');
     }
+
     const scripts = html.match(/<script[^>]*>([\s\S]*?)<\/script>/gi) || [];
     let rawData = {};
     for (const s of scripts) {
-        if (s.includes('lcy') || s.includes('mkn')) {
-            const m = s.match(/\{"lcy"[\s\S]*?\}/g);
-            if (m) { for (const j of m) { try { scanForData(JSON.parse(j), rawData); } catch (e) { } } }
+        if (s.includes('lcy') || s.includes('mkn') || s.includes('lotDetails')) {
+            const m = s.match(/\{"[a-z0-9]+"[\s\S]*?\}/g);
+            if (m) { 
+                for (const j of m) { 
+                    try { 
+                        const obj = JSON.parse(j);
+                        scanForData(obj, rawData); 
+                    } catch (e) { } 
+                } 
+            }
+        }
+    }
+
+    // Text Fallback
+    if (!rawData.year || !rawData.make) {
+        const titleTag = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").toUpperCase();
+        const yearMatch = titleTag.match(/\b(20\d{2}|19\d{2})\b/);
+        if (yearMatch) rawData.year = yearMatch[0];
+        
+        const commonMakes = ['TOYOTA', 'FORD', 'CHEVROLET', 'HONDA', 'NISSAN', 'HYUNDAI', 'KIA', 'BMW', 'MERCEDES', 'JEEP', 'DODGE', 'RAM', 'LEXUS', 'MAZDA'];
+        for (const m of commonMakes) {
+            if (titleTag.includes(m)) {
+                rawData.make = m;
+                break;
+            }
         }
     }
 
@@ -151,9 +221,9 @@ function parseCopart(html, url) {
         year: rawData.year,
         price: rawData.price || "Consultar",
         km: rawData.km || "0 KM",
-        engine: rawData.engine,
-        transmission: rawData.transmission,
-        vin: rawData.vin,
+        engine: rawData.engine || "N/A",
+        transmission: rawData.transmission || "N/A",
+        vin: rawData.vin || "N/A",
         images: [...new Set(matches || [])].map(img => img.replace(/_[a-z]\.jpg/i, '_full.jpg')),
         description: `Importado vía subasta Copart. VIN: ${rawData.vin || 'N/A'}`
     };
