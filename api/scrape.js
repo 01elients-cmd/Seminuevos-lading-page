@@ -209,15 +209,29 @@ function parseCopart(html, url) {
 
     // Text Fallback
     if (!rawData.year || !rawData.make) {
-        const titleTag = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").toUpperCase();
+        const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+        const titleTag = (titleMatch?.[1] || "").toUpperCase();
+        
         const yearMatch = titleTag.match(/\b(20\d{2}|19\d{2})\b/);
         if (yearMatch) rawData.year = yearMatch[0];
         
+        if (titleMatch) {
+            let cleanTitle = titleMatch[1].split(/\||Copart/i)[0].trim().replace(/\s+/g, ' ');
+            const titleParts = cleanTitle.split(' ');
+            if (titleParts.length >= 2) {
+                if (!rawData.year && titleParts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = titleParts[0];
+                if (!rawData.make) rawData.make = titleParts[1].toUpperCase();
+                if (!rawData.model) rawData.model = titleParts.slice(2).join(' ').toUpperCase();
+            }
+        }
+
         const commonMakes = ['TOYOTA', 'FORD', 'CHEVROLET', 'HONDA', 'NISSAN', 'HYUNDAI', 'KIA', 'BMW', 'MERCEDES', 'JEEP', 'DODGE', 'RAM', 'LEXUS', 'MAZDA'];
-        for (const m of commonMakes) {
-            if (titleTag.includes(m)) {
-                rawData.make = m;
-                break;
+        if (!rawData.make) {
+            for (const m of commonMakes) {
+                if (titleTag.includes(m)) {
+                    rawData.make = m;
+                    break;
+                }
             }
         }
     }

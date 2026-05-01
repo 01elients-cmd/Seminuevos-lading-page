@@ -2833,7 +2833,7 @@
                 const apifyPayload = {
                     startUrls: links.map(url => ({ url })),
                     useChrome: true,
-                    proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'] },
+                    proxyConfiguration: { useApifyProxy: true },
                     pageFunction: `async function pageFunction(context) { 
                         const { request, page } = context; 
                         await new Promise(r => setTimeout(r, 8000)); 
