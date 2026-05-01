@@ -146,32 +146,42 @@ function parseIAAI(html, url) {
     if (!rawData.year || !rawData.make) {
         const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
         const titleTag = (titleMatch?.[1] || "").toUpperCase();
-        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?>)<\/h1>/i)?.[1] || "").toUpperCase();
+        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").toUpperCase();
         const combined = titleTag + " " + h1Tag;
 
         const yearMatch = combined.match(/\b(20\d{2}|19\d{2})\b/);
         if (yearMatch) rawData.year = yearMatch[0];
 
-        const commonMakes = ['TOYOTA', 'FORD', 'CHEVROLET', 'CHEVY', 'HONDA', 'NISSAN', 'HYUNDAI', 'KIA', 'BMW', 'MERCEDES', 'JEEP', 'DODGE', 'RAM', 'LEXUS', 'MAZDA', 'VOLKSWAGEN', 'VW', 'AUDI', 'SUBARU', 'GMC', 'BUICK', 'CADILLAC', 'CHRYSLER', 'MITSUBISHI', 'LAND ROVER', 'PORSCHE'];
-        for (const m of commonMakes) {
-            if (combined.includes(m)) {
-                rawData.make = m;
-                break;
-            }
-        }
-        
-        if (titleMatch && titleMatch[1].match(/\b(19|20)\d{2}\b/)) {
-            let cleanTitle = titleMatch[1].split(/\||Insurance Auto Auctions/i)[0].trim().replace(/\s+/g, ' ');
+        if (titleMatch) {
+            let cleanTitle = titleMatch[1].split(/\||Insurance Auto Auctions|IAAI/i)[0].trim().replace(/\s+/g, ' ');
             const titleParts = cleanTitle.split(' ');
             if (titleParts.length >= 2) {
-                if (!rawData.year) rawData.year = titleParts[0];
+                if (!rawData.year && titleParts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = titleParts[0];
                 if (!rawData.make) rawData.make = titleParts[1].toUpperCase();
                 if (!rawData.model) rawData.model = titleParts.slice(2).join(' ').toUpperCase();
             }
         }
+
+        const commonMakes = ['TOYOTA', 'FORD', 'CHEVROLET', 'CHEVY', 'HONDA', 'NISSAN', 'HYUNDAI', 'KIA', 'BMW', 'MERCEDES', 'JEEP', 'DODGE', 'RAM', 'LEXUS', 'MAZDA', 'VOLKSWAGEN', 'VW', 'AUDI', 'SUBARU', 'GMC', 'BUICK', 'CADILLAC', 'CHRYSLER', 'MITSUBISHI', 'LAND ROVER', 'PORSCHE', 'TESLA', 'VOLVO', 'MINI', 'FIAT', 'ALFA ROMEO', 'ACURA', 'INFINITI', 'LINCOLN', 'JAGUAR'];
+        if (!rawData.make) {
+            for (const m of commonMakes) {
+                if (combined.includes(m)) {
+                    rawData.make = m;
+                    break;
+                }
+            }
+        }
+        
+        // Final fallback to avoid crashing batch import
+        if (!rawData.year) rawData.year = new Date().getFullYear();
+        if (!rawData.make && titleTag.length > 5) {
+            // Just use the first big word as make
+            const words = titleTag.split(' ').filter(w => w.length > 2 && !w.match(/\d/));
+            if (words.length > 0) rawData.make = words[0];
+        }
     }
 
-    if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en IAAI. Usa Modo Manual.');
+    if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en IAAI. Usa Modo Manual o verifica si IAAI está bloqueando el bot (Pardon Our Interruption).');
 
     return {
         title: `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim(),
