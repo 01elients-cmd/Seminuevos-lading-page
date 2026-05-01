@@ -144,8 +144,9 @@ function parseIAAI(html, url) {
 
     // Text Fallback if JSON fails
     if (!rawData.year || !rawData.make) {
-        const titleTag = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").toUpperCase();
-        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").toUpperCase();
+        const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+        const titleTag = (titleMatch?.[1] || "").toUpperCase();
+        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?>)<\/h1>/i)?.[1] || "").toUpperCase();
         const combined = titleTag + " " + h1Tag;
 
         const yearMatch = combined.match(/\b(20\d{2}|19\d{2})\b/);
@@ -156,6 +157,16 @@ function parseIAAI(html, url) {
             if (combined.includes(m)) {
                 rawData.make = m;
                 break;
+            }
+        }
+        
+        if (titleMatch && titleMatch[1].match(/\b(19|20)\d{2}\b/)) {
+            let cleanTitle = titleMatch[1].split(/\||Insurance Auto Auctions/i)[0].trim().replace(/\s+/g, ' ');
+            const titleParts = cleanTitle.split(' ');
+            if (titleParts.length >= 2) {
+                if (!rawData.year) rawData.year = titleParts[0];
+                if (!rawData.make) rawData.make = titleParts[1].toUpperCase();
+                if (!rawData.model) rawData.model = titleParts.slice(2).join(' ').toUpperCase();
             }
         }
     }
