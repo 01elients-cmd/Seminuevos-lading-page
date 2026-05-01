@@ -536,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalStartTime = performance.now();
         currentVehicleId = car.id;
         currentVehicleTitle = car.title;
+        window.currentCarForPrint = car;
         logAnalyticsEvent('vehicle_view', { vehicle_id: car.id, title: car.title });
 
         // === INCREMENT VIEW COUNT (via RPC para evitar problemas de RLS) ===
@@ -1007,7 +1008,52 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Por favor calcula una cotización primero.');
             return;
         }
+        document.body.classList.add('print-mode-quote');
         window.print();
+    });
+
+    const btnDownloadSheet = document.getElementById('modalDownloadSheet');
+    btnDownloadSheet?.addEventListener('click', () => {
+        const car = window.currentCarForPrint;
+        if (!car) return;
+        
+        const fallbackBodyType = typeof BODY_TYPE_LABELS !== 'undefined' && BODY_TYPE_LABELS[car.bodyType] ? BODY_TYPE_LABELS[car.bodyType] : car.bodyType || 'Vehículo';
+        const fallbackOrigin = typeof ORIGIN_LABELS !== 'undefined' && ORIGIN_LABELS[car.origin] ? ORIGIN_LABELS[car.origin] : car.origin || 'N/A';
+        
+        const sheetContent = document.getElementById('printSheetContent');
+        if (sheetContent) {
+            // Usa solo la primera foto
+            const firstImg = (car.images && car.images.length > 0) ? car.images[0] : '';
+            sheetContent.innerHTML = `
+                ${firstImg ? `<div style="text-align: center; margin-bottom: 20px;">
+                    <img src="${firstImg}" alt="${car.title}" style="max-width: 100%; max-height: 400px; border-radius: 8px; object-fit: cover;">
+                </div>` : ''}
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 5px 0; font-size: 1.5rem;">${car.title}</h3>
+                    <p style="margin: 0; font-size: 1.2rem; font-weight: bold; color: #4d7aef;">Precio: ${car.price === 'Consultar' ? 'Consultar Precio' : car.price}</p>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; font-size: 0.95rem;">
+                    <div><strong>Año:</strong> ${car.year}</div>
+                    <div><strong>Kilometraje:</strong> ${car.km}</div>
+                    <div><strong>Motor:</strong> ${car.engine}</div>
+                    <div><strong>Transmisión:</strong> ${car.transmission}</div>
+                    <div><strong>Combustible:</strong> ${car.fuel}</div>
+                    <div><strong>Tipo:</strong> ${fallbackBodyType}</div>
+                    <div><strong>Origen:</strong> ${fallbackOrigin}</div>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px;">Descripción</h4>
+                    <p style="white-space: pre-line; line-height: 1.5; font-size: 0.9rem;">${car.description}</p>
+                </div>
+            `;
+        }
+        
+        document.body.classList.add('print-mode-sheet');
+        window.print();
+    });
+
+    window.addEventListener('afterprint', () => {
+        document.body.classList.remove('print-mode-quote', 'print-mode-sheet');
     });
 
     document.getElementById('calcRepairs1')?.addEventListener('change', updateCalc);

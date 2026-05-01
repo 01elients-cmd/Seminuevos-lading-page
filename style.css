@@ -3729,12 +3729,21 @@ body::after {
 @media print {
 
     /* Ocultar todo en el nivel raíz */
-    body>* {
+    body > * {
         display: none !important;
     }
 
-    /* Mostrar SOLO la sección de la calculadora */
-    body>#calculadora {
+    /* === QUOTE MODE === */
+    body.print-mode-quote > #calculadora {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
+        min-height: auto !important;
+    }
+
+    /* === SHEET MODE === */
+    body.print-mode-sheet > #printSheet {
         display: block !important;
         padding: 0 !important;
         margin: 0 !important;
