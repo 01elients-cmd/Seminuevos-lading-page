@@ -640,60 +640,13 @@
                             <input type="number" id="calcBaseCost" placeholder="Ej. 15000">
                         </div>
                         <div class="form-group">
-                            <label for="calcOrigin">Ubicación del vehículo (Estado Origin)</label>
-                            <select id="calcOrigin" class="calc-select">
-                                <option value="0">Florida (Warehouse)</option>
-                                <option value="1200">Alabama</option>
-                                <option value="5000">Alaska</option>
-                                <option value="3500">Arizona</option>
-                                <option value="1800">Arkansas</option>
-                                <option value="4200">California</option>
-                                <option value="3000">Colorado</option>
-                                <option value="2000">Connecticut</option>
-                                <option value="1600">Delaware</option>
-                                <option value="800">Georgia</option>
-                                <option value="7500">Hawaii</option>
-                                <option value="3800">Idaho</option>
-                                <option value="1900">Illinois</option>
-                                <option value="1700">Indiana</option>
-                                <option value="2100">Iowa</option>
-                                <option value="2400">Kansas</option>
-                                <option value="1400">Kentucky</option>
-                                <option value="1200">Louisiana</option>
-                                <option value="2500">Maine</option>
-                                <option value="1600">Maryland</option>
-                                <option value="2300">Massachusetts</option>
-                                <option value="2000">Michigan</option>
-                                <option value="2600">Minnesota</option>
-                                <option value="1000">Mississippi</option>
-                                <option value="1900">Missouri</option>
-                                <option value="3600">Montana</option>
-                                <option value="2400">Nebraska</option>
-                                <option value="4000">Nevada</option>
-                                <option value="2200">New Hampshire</option>
-                                <option value="1800">New Jersey</option>
-                                <option value="2800">New Mexico</option>
-                                <option value="2000">New York</option>
-                                <option value="1200">North Carolina</option>
-                                <option value="3000">North Dakota</option>
-                                <option value="1700">Ohio</option>
-                                <option value="2300">Oklahoma</option>
-                                <option value="4500">Oregon</option>
-                                <option value="1700">Pennsylvania</option>
-                                <option value="2200">Rhode Island</option>
-                                <option value="1000">South Carolina</option>
-                                <option value="3000">South Dakota</option>
-                                <option value="1300">Tennessee</option>
-                                <option value="1900">Texas</option>
-                                <option value="3500">Utah</option>
-                                <option value="2300">Vermont</option>
-                                <option value="1400">Virginia</option>
-                                <option value="4800">Washington</option>
-                                <option value="1600">West Virginia</option>
-                                <option value="2100">Wisconsin</option>
-                                <option value="3400">Wyoming</option>
-                                <option value="custom">Otro (Costo Manual)</option>
-                            </select>
+                            <label for="calcOriginZip">Ubicación del vehículo (ZIP Code Origen)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="calcOriginZip" class="calc-input" placeholder="Ej. 90210" style="flex-grow: 1;">
+                                <button id="btnCalcDistance" type="button" class="action-btn" style="padding: 0 15px; background:var(--primary); color:#fff; border-radius:var(--radius);"><i class="fas fa-route"></i> Calcular</button>
+                            </div>
+                            <small id="distanceResultText" style="display:block; margin-top:5px; color:var(--text3); font-size:0.8rem;">Costo de Grúa: $1 por milla hacia Florida</small>
+                            <input type="hidden" id="calcOrigin" value="0">
                         </div>
                         <div class="form-group" id="customTransportGroup" style="display:none;">
                             <label for="calcCustomTransport">Costo de grúa manual ($)</label>
