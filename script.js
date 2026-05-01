@@ -955,11 +955,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const brokerFee = 500;
         const serviceFee = window.CALC_SERVICE_FEE || 900;
 
+        const stateCoords = {
+            AL: [32.8066, -86.7911], AK: [61.3707, -152.4044], AZ: [33.7297, -111.4312], AR: [34.9697, -92.3731],
+            CA: [36.1162, -119.6815], CO: [39.0598, -105.3111], CT: [41.5977, -72.7553], DE: [39.3185, -75.5071],
+            FL: [27.7662, -81.6867], GA: [33.0406, -83.6430], HI: [21.0943, -157.4983], ID: [44.2404, -114.4788],
+            IL: [40.3494, -88.9861], IN: [39.8494, -86.2582], IA: [42.0115, -93.2105], KS: [38.5266, -96.7264],
+            KY: [37.6681, -84.6700], LA: [31.1695, -91.8678], ME: [44.6939, -69.3819], MD: [39.0639, -76.8021],
+            MA: [42.2301, -71.5301], MI: [43.3266, -84.5360], MN: [45.6944, -93.9001], MS: [32.7416, -89.6786],
+            MO: [38.4560, -92.2883], MT: [46.9219, -110.4543], NE: [41.1253, -98.2680], NV: [38.3135, -117.0553],
+            NH: [43.4524, -71.5638], NJ: [40.2989, -74.5210], NM: [34.8405, -106.2484], NY: [42.1657, -74.9480],
+            NC: [35.6300, -79.8064], ND: [47.5289, -99.7840], OH: [40.3887, -82.7649], OK: [35.5653, -96.9289],
+            OR: [44.5720, -122.0709], PA: [40.5907, -77.2097], RI: [41.6808, -71.5117], SC: [33.8568, -80.9450],
+            SD: [44.2997, -99.4388], TN: [35.7478, -86.6923], TX: [31.0544, -97.5634], UT: [40.1500, -111.8624],
+            VT: [44.0458, -72.7106], VA: [37.7693, -78.1699], WA: [47.4009, -121.4904], WV: [38.4912, -80.9544],
+            WI: [44.2685, -89.6165], WY: [42.7559, -107.3024]
+        };
+
+        function getDist(stateA, stateB) {
+            if (!stateCoords[stateA] || !stateCoords[stateB]) return 0;
+            if (stateA === stateB && stateA === 'FL') return 450;
+            if (stateA === stateB) return 250; // Local charge for other states
+            
+            const [lat1, lon1] = stateCoords[stateA];
+            const [lat2, lon2] = stateCoords[stateB];
+            const R = 3958.8; // Radius of Earth in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const miles = R * c;
+            // Applying a 1.25 factor to convert straight-line distance to approximate driving distance
+            return Math.round(miles * 1.25);
+        }
+
         let costTraslado = 0;
         if (calcOrigin.value === 'custom') {
             costTraslado = parseFloat(calcCustomTransport.value) || 0;
         } else {
-            costTraslado = parseFloat(calcOrigin.value) || 0;
+            const origin = calcOrigin.value;
+            const dest = calcDestination.value;
+            const distMiles = getDist(origin, dest);
+            costTraslado = distMiles * 1; // $1 por milla
+            
+            // Re-apply the Florida special case
+            if (origin === 'FL' && dest === 'FL') costTraslado = 450;
         }
 
         // Venezuela Factors (ONLY for Puerto Libre)
