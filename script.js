@@ -887,68 +887,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const customTransportGroup = document.getElementById('customTransportGroup');
     const calcCustomTransport = document.getElementById('calcCustomTransport');
 
-    document.getElementById('btnCalcDistance')?.addEventListener('click', async () => {
-        const zipInput = document.getElementById('calcOriginZip');
-        const zip = zipInput.value.trim();
-        const resultText = document.getElementById('distanceResultText');
-        const calcOrigin = document.getElementById('calcOrigin');
-        const customGroup = document.getElementById('customTransportGroup');
-        
-        if (zip.toLowerCase() === 'custom' || zip === '') {
-            calcOrigin.value = 'custom';
-            customGroup.style.display = 'block';
-            resultText.textContent = 'Modo manual activado.';
-            updateCalc();
-            return;
+    calcOrigin?.addEventListener('change', () => {
+        if (calcOrigin.value === 'custom') {
+            customTransportGroup.style.display = 'block';
+        } else {
+            customTransportGroup.style.display = 'none';
         }
-
-        customGroup.style.display = 'none';
-        
-        if (zip.length < 5) {
-            resultText.textContent = 'Error: Ingresa un ZIP válido o "custom" para manual.';
-            resultText.style.color = '#ff6b6b';
-            return;
-        }
-
-        resultText.style.color = 'var(--text3)';
-        resultText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculando...';
-        
-        try {
-            const zRes = await fetch(`https://api.zippopotam.us/us/${zip}`);
-            if (!zRes.ok) throw new Error('ZIP no encontrado');
-            const zData = await zRes.json();
-            
-            const lat = parseFloat(zData.places[0].latitude);
-            const lon = parseFloat(zData.places[0].longitude);
-            const state = zData.places[0]['state abbreviation'];
-            
-            // Si es Florida, el costo fijo mínimo es $450 según lo solicitado
-            if (state === 'FL') {
-                calcOrigin.value = 450;
-                resultText.innerHTML = `<span style="color:var(--success)"><i class="fas fa-check-circle"></i> Ubicación: ${zData.places[0]['place name']}, FL. Costo Fijo Local: $450</span>`;
-                updateCalc();
-                return;
-            }
-
-            // Coordenadas de Miami, FL (Destino central de importación)
-            const miamiLat = 25.7617;
-            const miamiLon = -80.1918;
-
-            const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${lon},${lat};${miamiLon},${miamiLat}?overview=false`);
-            const routeData = await routeRes.json();
-            
-            if (routeData.code !== 'Ok') throw new Error('No se pudo rutear');
-            
-            const distanceMiles = Math.round(routeData.routes[0].distance / 1609.34);
-            const cost = distanceMiles * 1; // $1 por milla
-            
-            calcOrigin.value = cost;
-            resultText.innerHTML = `<span style="color:var(--success)"><i class="fas fa-check-circle"></i> ${zData.places[0]['place name']}, ${state}. Distancia: ${distanceMiles} mi. Grúa: $${cost}</span>`;
-            updateCalc();
-        } catch (e) {
-            resultText.textContent = 'Error: ' + e.message + '. Intenta usar "custom".';
-            resultText.style.color = '#ff6b6b';
-        }
+        updateCalc();
     });
 
     calcDestination?.addEventListener('change', updateCalc);
