@@ -1025,25 +1025,87 @@ document.addEventListener('DOMContentLoaded', () => {
             // Usa solo la primera foto
             const firstImg = (car.images && car.images.length > 0) ? car.images[0] : '';
             sheetContent.innerHTML = `
-                ${firstImg ? `<div style="text-align: center; margin-bottom: 20px;">
-                    <img src="${firstImg}" alt="${car.title}" style="max-width: 100%; max-height: 400px; border-radius: 8px; object-fit: cover;">
-                </div>` : ''}
-                <div style="margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 5px 0; font-size: 1.5rem;">${car.title}</h3>
-                    <p style="margin: 0; font-size: 1.2rem; font-weight: bold; color: #4d7aef;">Precio: ${car.price === 'Consultar' ? 'Consultar Precio' : car.price}</p>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; font-size: 0.95rem;">
-                    <div><strong>Año:</strong> ${car.year}</div>
-                    <div><strong>Kilometraje:</strong> ${car.km}</div>
-                    <div><strong>Motor:</strong> ${car.engine}</div>
-                    <div><strong>Transmisión:</strong> ${car.transmission}</div>
-                    <div><strong>Combustible:</strong> ${car.fuel}</div>
-                    <div><strong>Tipo:</strong> ${fallbackBodyType}</div>
-                    <div><strong>Origen:</strong> ${fallbackOrigin}</div>
-                </div>
-                <div>
-                    <h4 style="margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px;">Descripción</h4>
-                    <p style="white-space: pre-line; line-height: 1.5; font-size: 0.9rem;">${car.description}</p>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                
+                    <!-- Image & Hero Section -->
+                    <div style="display: flex; gap: 25px; margin-bottom: 30px;">
+                        
+                        <!-- Left Column: Photo -->
+                        <div style="flex: 1.2;">
+                            ${firstImg ? `<img src="${firstImg}" style="width: 100%; height: 280px; object-fit: cover; border-radius: 12px; border: 1px solid #eaeaea;" alt="${car.title}">` : `<div style="width:100%; height:280px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; color:#999; border-radius: 12px; border: 1px solid #eaeaea;">Sin imagen</div>`}
+                        </div>
+
+                        <!-- Right Column: Title & Price -->
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                            <div style="display: inline-block; padding: 4px 10px; background: #eef2ff; color: #275cea; font-size: 0.75rem; font-weight: bold; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; width: fit-content; border: 1px solid #c7d2fe;">
+                                ${car.condition === '0km' ? '0KM' : 'Seminuevo'}
+                            </div>
+                            <h3 style="margin: 0 0 10px 0; font-size: 1.8rem; color: #111; line-height: 1.2;">${car.title}</h3>
+                            <p style="margin: 0 0 20px 0; font-size: 1.5rem; font-weight: 800; color: #275cea;">
+                                ${car.price === 'Consultar' ? 'Consultar Precio' : car.price}
+                            </p>
+                            
+                            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #275cea; border-top: 1px solid #eaeaea; border-right: 1px solid #eaeaea; border-bottom: 1px solid #eaeaea;">
+                                <p style="margin: 0; font-size: 0.85rem; color: #555; line-height: 1.6;">
+                                    <strong>Disponibilidad:</strong> ${car.availability === 'entrega_inmediata' ? 'Entrega Inmediata' : 'Por Pedido'}<br>
+                                    <strong>Estatus Legal:</strong> ${fallbackOrigin}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Specifications Grid -->
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="margin: 0 0 15px 0; font-size: 1.1rem; color: #111; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                            Especificaciones Técnicas
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            
+                            <div style="padding: 12px; border: 1px solid #eaeaea; border-radius: 8px; background: #fff;">
+                                <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Año</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: #111;">${car.year}</div>
+                            </div>
+                            
+                            <div style="padding: 12px; border: 1px solid #eaeaea; border-radius: 8px; background: #fff;">
+                                <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Kilometraje</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: #111;">${car.km}</div>
+                            </div>
+                            
+                            <div style="padding: 12px; border: 1px solid #eaeaea; border-radius: 8px; background: #fff;">
+                                <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Motor</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: #111;">${car.engine}</div>
+                            </div>
+                            
+                            <div style="padding: 12px; border: 1px solid #eaeaea; border-radius: 8px; background: #fff;">
+                                <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Transmisión</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: #111;">${car.transmission}</div>
+                            </div>
+                            
+                            <div style="padding: 12px; border: 1px solid #eaeaea; border-radius: 8px; background: #fff;">
+                                <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Combustible</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: #111;">${car.fuel}</div>
+                            </div>
+                            
+                            <div style="padding: 12px; border: 1px solid #eaeaea; border-radius: 8px; background: #fff;">
+                                <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Tipo de Carrocería</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: #111;">${fallbackBodyType}</div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    ${car.description ? `
+                    <div>
+                        <h4 style="margin: 0 0 15px 0; font-size: 1.1rem; color: #111; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                            Descripción del Vehículo
+                        </h4>
+                        <div style="padding: 20px; background: #fcfcfc; border: 1px solid #eaeaea; border-radius: 8px;">
+                            <p style="margin: 0; white-space: pre-line; line-height: 1.6; font-size: 0.95rem; color: #444;">${car.description}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+
                 </div>
             `;
         }

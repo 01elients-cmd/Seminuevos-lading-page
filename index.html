@@ -1286,19 +1286,32 @@
     </div>
 
     <!-- ===== PRINTABLE VEHICLE SHEET ===== -->
-    <div id="printSheet" style="display: none;">
-        <div class="print-header" style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 20px;">
-            <img src="images/logo-white.png" alt="Logo" style="height: 50px; filter: brightness(0); margin-bottom: 10px;">
-            <h2 style="color: #000; margin: 0; font-family: sans-serif;">FICHA TÉCNICA DE VEHÍCULO</h2>
-            <p style="color: #666; font-size: 0.9rem; font-family: sans-serif;">SemiNuevos Agency - Tu aliado automotriz</p>
+    <div id="printSheet" style="display: none; background: #fff; padding: 20px; box-sizing: border-box; width: 100%;">
+        <div class="print-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 3px solid #275cea; padding-bottom: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+            <div>
+                <!-- filter to make logo black if it's white -->
+                <img src="images/logo-white.png" alt="Logo" style="height: 45px; filter: invert(1) brightness(0); display: block;">
+            </div>
+            <div style="text-align: right;">
+                <h2 style="color: #111; margin: 0 0 5px 0; font-size: 1.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Ficha Técnica</h2>
+                <p style="color: #666; font-size: 0.85rem; margin: 0;">SemiNuevos Agency - Tu aliado automotriz</p>
+            </div>
         </div>
-        <div id="printSheetContent" style="color: #000; font-family: sans-serif;">
+        
+        <div id="printSheetContent">
             <!-- Content injected here -->
         </div>
-        <div style="margin-top: 40px; text-align: center; font-size: 0.8rem; color: #666; border-top: 1px solid #ccc; padding-top: 20px; font-family: sans-serif;">
-            <p>Para más información o para cotizar este vehículo, contáctanos:</p>
-            <p>Teléfono / WhatsApp: +58 414-797-7832 | Email: info@seminuevosagency.com</p>
-            <p>www.seminuevosagency.com</p>
+        
+        <div style="margin-top: 50px; background: #f8f9fa; border-radius: 12px; padding: 25px; display: flex; justify-content: space-between; align-items: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; border: 1px solid #eaeaea;">
+            <div>
+                <h4 style="margin: 0 0 8px 0; color: #111; font-size: 1rem;">¿Te interesa este vehículo?</h4>
+                <p style="margin: 0; color: #555; font-size: 0.85rem;">Contáctanos para agendar una cita o solicitar una cotización formal.</p>
+            </div>
+            <div style="text-align: right; font-size: 0.85rem; color: #333;">
+                <p style="margin: 0 0 5px 0;"><strong>WhatsApp:</strong> +58 414-797-7832</p>
+                <p style="margin: 0 0 5px 0;"><strong>Email:</strong> info@seminuevosagency.com</p>
+                <p style="margin: 0; color: #275cea; font-weight: bold;">www.seminuevosagency.com</p>
+            </div>
         </div>
     </div>
 
