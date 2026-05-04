@@ -183,6 +183,14 @@ function parseIAAI(html, url) {
 
     if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en IAAI. Usa Modo Manual o verifica si IAAI está bloqueando el bot (Pardon Our Interruption).');
 
+    // Extract images with a broader regex to catch all IAAI variations
+    const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/inventory\/[^"']*?(?:width=\d+|[0-9]{3,4}x[0-9]{3,4}|[0-9]{3,4})/gi) || [];
+    const cleanImages = [...new Set(imgMatches)].map(img => {
+        // Ensure high resolution
+        if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
+        return img;
+    });
+
     return {
         title: `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim(),
         year: rawData.year,
@@ -191,7 +199,7 @@ function parseIAAI(html, url) {
         engine: rawData.engine || "N/A",
         transmission: rawData.transmission || "N/A",
         vin: rawData.vin || "N/A",
-        images: [...new Set(html.match(/https?:\/\/(vis|images|an-cdn)\.iaai\.com\/inventory\/[^"']*?(1024|800)[^"']*/gi) || [])],
+        images: cleanImages,
         description: `Importado vía subasta IAAI. VIN: ${rawData.vin || 'N/A'}`
     };
 }
