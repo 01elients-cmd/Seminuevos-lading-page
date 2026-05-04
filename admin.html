@@ -3002,7 +3002,9 @@
                         }
                     } catch (err) {
                         errorCount++;
-                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Error en lectura: ${err.message}</div>`;
+                        const errorMsg = err.message || 'Error desconocido';
+                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Error en lectura: ${errorMsg}</div>`;
+                        console.error('Batch Item Error:', err);
                     }
                     statusBox.scrollTop = statusBox.scrollHeight;
                 }
