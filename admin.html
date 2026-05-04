@@ -1352,41 +1352,53 @@
             <div class="tab-content" id="tab-analytics">
                 <div class="page-header">
                     <h1 class="page-title">Análisis de <span>Consumidor</span></h1>
-                    <button class="btn btn-ghost" onclick="loadAnalyticsData()"><i class="fas fa-sync-alt"></i>
-                        Actualizar</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-ghost" onclick="loadAnalyticsData()"><i class="fas fa-sync-alt"></i>
+                            Actualizar</button>
+                    </div>
                 </div>
 
+                <!-- Resumen Ejecutivo -->
                 <div class="stats-row">
                     <div class="stat-card">
-                        <div class="stat-card-icon"><i class="fas fa-eye"></i></div>
-                        <div class="stat-card-value" id="totalViews">0</div>
-                        <div class="stat-card-label">Vistas Totales</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-icon"><i class="fas fa-door-open"></i></div>
+                        <div class="stat-card-icon"><i class="fas fa-users"></i></div>
                         <div class="stat-card-value" id="totalSessions">0</div>
-                        <div class="stat-card-label">Sesiones</div>
+                        <div class="stat-card-label">Sesiones Totales</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-card-icon"><i class="fas fa-clock"></i></div>
-                        <div class="stat-card-value" id="avgTime">0s</div>
-                        <div class="stat-card-label">Tiempo Promedio</div>
+                        <div class="stat-card-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <div class="stat-card-value" id="topDevice">N/A</div>
+                        <div class="stat-card-label">Dispositivo Principal</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon"><i class="fas fa-bullseye"></i></div>
+                        <div class="stat-card-value" id="topIntent">N/A</div>
+                        <div class="stat-card-label">Intención Predominante</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon"><i class="fas fa-share-nodes"></i></div>
+                        <div class="stat-card-value" id="topReferrer">N/A</div>
+                        <div class="stat-card-label">Origen Principal</div>
                     </div>
                 </div>
 
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <!-- Gráficas Avanzadas -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <div class="table-container" style="padding: 20px;">
-                        <h3 style="margin-bottom:15px;"><i class="fas fa-car" style="color:var(--accent)"></i> Top
-                            Vehículos Vistos</h3>
-                        <div style="height: 300px; position: relative;">
+                        <h3 style="margin-bottom:15px;"><i class="fas fa-chart-pie" style="color:var(--accent)"></i> Distribución de Intención</h3>
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="intentChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="table-container" style="padding: 20px;">
+                        <h3 style="margin-bottom:15px;"><i class="fas fa-car" style="color:var(--accent)"></i> Top Vehículos</h3>
+                        <div style="height: 250px; position: relative;">
                             <canvas id="topVehiclesChart"></canvas>
                         </div>
                     </div>
                     <div class="table-container" style="padding: 20px;">
-                        <h3 style="margin-bottom:15px;"><i class="fas fa-history" style="color:var(--accent)"></i>
-                            Actividad Reciente</h3>
-                        <div style="height: 300px; position: relative;">
+                        <h3 style="margin-bottom:15px;"><i class="fas fa-history" style="color:var(--accent)"></i> Actividad (10 días)</h3>
+                        <div style="height: 250px; position: relative;">
                             <canvas id="activityChart"></canvas>
                         </div>
                     </div>
@@ -1394,18 +1406,22 @@
 
                 <div class="table-container">
                     <div class="table-header">
-                        <h3><i class="fas fa-mouse-pointer"></i> Últimos Eventos</h3>
+                        <h3><i class="fas fa-list-check"></i> Registro Detallado de Comportamiento</h3>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Evento</th>
-                                <th>Detalle</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody id="analyticsTableBody"></tbody>
-                    </table>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Evento</th>
+                                    <th>Detalle / Intención</th>
+                                    <th>Dispositivo</th>
+                                    <th>Origen</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analyticsTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -2580,6 +2596,7 @@
         // ===== ANALYTICS =====
         let topVehiclesChart = null;
         let activityChart = null;
+        let intentChart = null;
 
         async function loadAnalyticsData() {
             try {
@@ -2588,33 +2605,77 @@
 
                 const events = data || [];
 
-                // Stats
-                const views = events.filter(e => e.event_type === 'vehicle_view');
-                const sessions = events.filter(e => e.event_type === 'page_view').length;
-                const timeEvents = events.filter(e => e.event_type === 'time_spent');
-                const totalTime = timeEvents.reduce((acc, e) => acc + (e.event_data.duration_seconds || 0), 0);
-                const avgTime = timeEvents.length ? Math.round(totalTime / timeEvents.length) : 0;
+                // 1. Métricas Principales
+                const sessions = events.filter(e => e.event_type === 'page_view' || e.event_type === 'session_start').length;
+                
+                // Device Stats
+                const devices = {};
+                const intents = {};
+                const referrers = {};
+                const vehicleViews = {};
+                const activity = {};
 
-                document.getElementById('totalViews').textContent = views.length;
+                events.forEach(e => {
+                    const meta = e.event_data || {};
+                    
+                    // Device
+                    if (meta.deviceType) devices[meta.deviceType] = (devices[meta.deviceType] || 0) + 1;
+                    
+                    // Intent
+                    if (meta.intent_category) intents[meta.intent_category] = (intents[meta.intent_category] || 0) + 1;
+                    
+                    // Referrer
+                    if (meta.referrer) {
+                        let ref = meta.referrer.replace('https://', '').replace('http://', '').split('/')[0] || 'Directo';
+                        if (ref === window.location.host) ref = 'Directo';
+                        referrers[ref] = (referrers[ref] || 0) + 1;
+                    }
+
+                    // Vehicle Views
+                    if (e.event_type === 'vehicle_view') {
+                        const title = meta.title || 'Desconocido';
+                        vehicleViews[title] = (vehicleViews[title] || 0) + 1;
+                    }
+
+                    // Activity by Day
+                    const day = new Date(e.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+                    activity[day] = (activity[day] || 0) + 1;
+                });
+
+                // Top stats calculation
+                const getTop = obj => Object.keys(obj).sort((a,b) => obj[b] - obj[a])[0] || 'N/A';
+                
                 document.getElementById('totalSessions').textContent = sessions;
-                document.getElementById('avgTime').textContent = avgTime + 's';
+                document.getElementById('topDevice').textContent = getTop(devices).toUpperCase();
+                document.getElementById('topIntent').textContent = getTop(intents);
+                document.getElementById('topReferrer').textContent = getTop(referrers);
 
-                // Charts config
+                // 2. Charts Configuration
                 Chart.defaults.color = 'rgba(255,255,255,0.6)';
                 Chart.defaults.font.family = 'Mina';
 
-                // Top Vehicles Chart
-                const vehicleViews = {};
-                views.forEach(e => {
-                    const title = e.event_data.title || 'Desconocido';
-                    vehicleViews[title] = (vehicleViews[title] || 0) + 1;
+                // Chart: Intent Distribution (Pie)
+                const intentLabels = Object.keys(intents);
+                const intentData = intentLabels.map(l => intents[l]);
+                if (intentChart) intentChart.destroy();
+                intentChart = new Chart(document.getElementById('intentChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: intentLabels,
+                        datasets: [{
+                            data: intentData,
+                            backgroundColor: ['#275CEA', '#4d7aef', '#1b45b8', '#ff5252', '#25D366'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
                 });
+
+                // Chart: Top Vehicles (Bar)
                 const topLabels = Object.keys(vehicleViews).sort((a, b) => vehicleViews[b] - vehicleViews[a]).slice(0, 5);
                 const topData = topLabels.map(l => vehicleViews[l]);
-
                 if (topVehiclesChart) topVehiclesChart.destroy();
-                const ctxTop = document.getElementById('topVehiclesChart').getContext('2d');
-                topVehiclesChart = new Chart(ctxTop, {
+                topVehiclesChart = new Chart(document.getElementById('topVehiclesChart'), {
                     type: 'bar',
                     data: {
                         labels: topLabels,
@@ -2626,30 +2687,14 @@
                             borderRadius: 5
                         }]
                     },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            y: { grid: { display: false } }
-                        }
-                    }
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } } }
                 });
 
-                // Activity Chart
-                const activity = {};
-                events.forEach(e => {
-                    const day = new Date(e.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
-                    activity[day] = (activity[day] || 0) + 1;
-                });
-                const dateLabels = Object.keys(activity).reverse().slice(-10);
+                // Chart: Activity (Line)
+                const dateLabels = Object.keys(activity).reverse().slice(-10).reverse();
                 const dateData = dateLabels.map(l => activity[l]);
-
                 if (activityChart) activityChart.destroy();
-                const ctxAct = document.getElementById('activityChart').getContext('2d');
-                activityChart = new Chart(ctxAct, {
+                activityChart = new Chart(document.getElementById('activityChart'), {
                     type: 'line',
                     data: {
                         labels: dateLabels,
@@ -2659,35 +2704,36 @@
                             backgroundColor: 'rgba(39, 92, 234, 0.1)',
                             borderWidth: 3,
                             fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: '#275CEA'
+                            tension: 0.4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            x: { grid: { display: false } }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
                 });
 
-                // Table
-                document.getElementById('analyticsTableBody').innerHTML = events.slice(0, 15).map(e => {
-                    const label = e.event_type === 'vehicle_view' ? 'VISTA VEHICULO' : e.event_type === 'time_spent' ? 'TIEMPO' : 'SESION';
-                    const badge = e.event_type === 'vehicle_view' ? 'badge-gold' : e.event_type === 'time_spent' ? 'badge-green' : 'badge-blue';
-                    const detail = e.event_data.title || e.event_data.url || (e.event_data.duration_seconds ? e.event_data.duration_seconds + 's' : '-');
+                // 3. Detailed Table
+                document.getElementById('analyticsTableBody').innerHTML = events.slice(0, 30).map(e => {
+                    const meta = e.event_data || {};
+                    const label = e.event_type.replace('_', ' ').toUpperCase();
+                    const intent = meta.intent_category || '-';
+                    const device = meta.deviceType === 'mobile' ? '<i class="fas fa-mobile-alt"></i>' : '<i class="fas fa-desktop"></i>';
+                    const ref = meta.referrer ? meta.referrer.split('/')[2] || 'Directo' : 'Directo';
+                    const detail = meta.title || meta.section || meta.url || (meta.duration_seconds ? meta.duration_seconds + 's' : '-');
+                    
                     return `
                     <tr>
-                        <td><span class="badge ${badge}">${label}</span></td>
-                        <td>${detail}</td>
-                        <td style="font-size: 0.8rem; color: var(--text3)">${new Date(e.created_at).toLocaleString()}</td>
+                        <td><span class="badge badge-blue" style="font-size:0.6rem">${label}</span></td>
+                        <td>
+                            <div style="font-weight:600">${detail}</div>
+                            <div style="font-size:0.7rem; color:var(--accent)">${intent}</div>
+                        </td>
+                        <td style="text-align:center">${device}</td>
+                        <td style="font-size:0.75rem">${ref}</td>
+                        <td style="font-size:0.75rem; color:var(--text3)">${new Date(e.created_at).toLocaleString()}</td>
                     </tr>`;
                 }).join('');
             } catch (e) {
-                console.error(e);
+                console.error("Analytics Error:", e);
+                showToast('Error cargando análisis avanzado', 'error');
             }
         }
 

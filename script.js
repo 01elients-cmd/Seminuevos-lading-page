@@ -21,9 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function logAnalyticsEvent(type, data = {}) {
         try {
+            const enrichedData = {
+                ...data,
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                screenRes: `${window.screen.width}x${window.screen.height}`,
+                deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+                referrer: document.referrer || 'direct',
+                intent_category: data.intent || detectIntent(data.section || window.location.hash || 'home')
+            };
+
             await supabaseClient.from('site_analytics').insert([{
                 event_type: type,
-                event_data: data,
+                event_data: enrichedData,
                 url: window.location.pathname,
                 visitor_id: visitorId
             }]);
@@ -31,6 +41,39 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Analytics error:', e);
         }
     }
+
+    function detectIntent(key) {
+        const k = String(key).toLowerCase();
+        if (k.includes('calculadora') || k.includes('calc')) return 'Importación / Logística';
+        if (k.includes('subasta') || k.includes('auction')) return 'Compra en Subasta';
+        if (k.includes('catalogo') || k.includes('pedido') || k.includes('stock')) return 'Inventario Físico';
+        if (k.includes('beneficio') || k.includes('taller') || k.includes('mastertech')) return 'Servicio / Postventa';
+        if (k.includes('contacto') || k.includes('whatsapp')) return 'Conversión Directa';
+        return 'Navegación General';
+    }
+
+    // Auto-track Section Interest
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+                logAnalyticsEvent('section_view', { section: entry.target.id });
+            }
+        });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('section[id]').forEach(s => sectionObserver.observe(s));
+
+    // Auto-track Scroll Depth
+    let scrollMarkers = [25, 50, 75, 90];
+    window.addEventListener('scroll', () => {
+        const scrollPercent = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100;
+        scrollMarkers = scrollMarkers.filter(marker => {
+            if (scrollPercent >= marker) {
+                logAnalyticsEvent('scroll_depth', { depth: marker + '%' });
+                return false;
+            }
+            return true;
+        });
+    }, { passive: true });
 
     // Initial page view
     logAnalyticsEvent('page_view', { referrer: document.referrer });
