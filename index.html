@@ -76,9 +76,8 @@
         <div class="hero-slider" id="heroSlider">
 
             <!-- SLIDE 1: 4Runner in Centered Layout -->
-            <div class="hero-slide active" style="background-image: url('images/hero1.png')">
-                <div class="hero-overlay"
-                    style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%);">
+            <div class="hero-slide active" style="background-image: url('images/hero1.webp')">
+                <div class="hero-overlay">
                 </div>
                 <div class="hero-content"
                     style="left: 0; right: 0; margin: 0 auto; text-align: center; bottom: 8%; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center;">
@@ -167,90 +166,10 @@
 
         </div>
 
-        <!-- Hero Controls -->
-        <div class="hero-dots-container" style="display:none;">
-            <!-- Hidden dots if they want it exact as mockup, but we'll leave it in DOM to avoid JS errors -->
-            <div class="hero-dots" id="heroDots"></div>
-        </div>
 
-        <button class="hero-arrow hero-prev" id="heroPrev"
-            style="position: absolute; left: clamp(10px, 4vw, 40px); top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
-                class="fas fa-chevron-left" style="color:#fff;"></i></button>
-        <button class="hero-arrow hero-next" id="heroNext"
-            style="position: absolute; right: clamp(10px, 4vw, 40px); top: 50%; transform: translateY(-50%); z-index: 20; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;"><i
-                class="fas fa-chevron-right" style="color:#fff;"></i></button>
-
-        <div class="hero-scroll-indicator" style="display:none;">
-            <span>Desliza</span>
-            <div class="scroll-line"></div>
-        </div>
     </section>
 
-    <!-- ===== VEHICLE INFO MODAL (0KM) ===== -->
-    <div class="vehicle-info-modal-overlay" id="vehicleInfoModal"
-        onclick="if(event.target===this)closeVehicleInfoModal()">
-        <div class="vehicle-info-modal">
-            <button class="vehicle-modal-close" onclick="closeVehicleInfoModal()"><i class="fas fa-times"></i></button>
-            <div class="vehicle-modal-img-wrap">
-                <img id="vehicleModalImg" src="images/4runner-trail-2021.jpg" alt="Vehículo 0KM">
-                <div class="vehicle-modal-badge"><i class="fas fa-star"></i> 0 KM</div>
-            </div>
-            <div class="vehicle-modal-body">
-                <div class="vehicle-modal-header">
-                    <span class="vehicle-modal-brand" id="vehicleModalBrand">TOYOTA</span>
-                    <h2 class="vehicle-modal-name" id="vehicleModalName">4Runner Trail 2021</h2>
-                    <span class="vehicle-modal-status available"><i class="fas fa-circle"></i> Disponible</span>
-                </div>
-                <div class="vehicle-modal-specs-grid" id="vehicleModalSpecs">
-                    <div class="v-spec"><i class="fas fa-tachometer-alt"></i>
-                        <div><strong>Motor</strong><span>4.0L V6 270 hp</span></div>
-                    </div>
-                    <div class="v-spec"><i class="fas fa-road"></i>
-                        <div><strong>Tracción</strong><span>4x4 Trail Edition</span></div>
-                    </div>
-                    <div class="v-spec"><i class="fas fa-palette"></i>
-                        <div><strong>Color</strong><span>Cement Gray</span></div>
-                    </div>
-                    <div class="v-spec"><i class="fas fa-gas-pump"></i>
-                        <div><strong>Combustible</strong><span>Gasolina</span></div>
-                    </div>
-                    <div class="v-spec"><i class="fas fa-cog"></i>
-                        <div><strong>Transmisión</strong><span>Automática 5 vel.</span></div>
-                    </div>
-                    <div class="v-spec"><i class="fas fa-calendar"></i>
-                        <div><strong>Año</strong><span>2021</span></div>
-                    </div>
-                    <div class="v-spec"><i class="fas fa-gauge-high"></i>
-                        <div><strong>Kilometraje</strong><span>0 KM</span></div>
-                    </div>
-                    <div class="v-spec"><i class="fas fa-map-marker-alt"></i>
-                        <div><strong>Estatus</strong><span>Puerto Libre</span></div>
-                    </div>
-                </div>
-                <div class="vehicle-modal-features">
-                    <h4>Equipamiento Destacado</h4>
-                    <ul>
-                        <li><i class="fas fa-check"></i> TRD Off-Road Package</li>
-                        <li><i class="fas fa-check"></i> Llantas BBS 17" Black</li>
-                        <li><i class="fas fa-check"></i> Cámara trasera HD</li>
-                        <li><i class="fas fa-check"></i> Apple CarPlay / Android Auto</li>
-                        <li><i class="fas fa-check"></i> Control de crucero adaptativo</li>
-                        <li><i class="fas fa-check"></i> Asientos de cuero calefaccionados</li>
-                    </ul>
-                </div>
-                <div class="vehicle-modal-actions">
-                    <a href="https://wa.me/584147977832?text=Hola,%20quiero%20comprar%20el%20Toyota%204Runner%20Trail%202021%200KM.%20¿Está%20disponible?"
-                        target="_blank" class="btn btn-primary btn-full">
-                        <i class="fab fa-whatsapp"></i> Quiero Comprarlo
-                    </a>
-                    <a href="https://wa.me/584147977832?text=Hola,%20quiero%20más%20información%20sobre%20el%20Toyota%204Runner%20Trail%202021%200KM."
-                        target="_blank" class="btn btn-outline btn-full">
-                        <i class="fas fa-comments"></i> Solicitar Más Info
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- ===== VEHÍCULOS DESTACADOS ===== -->
     <section class="featured-vehicles-section" id="destacados" style="padding: 80px 0; background: var(--bg2);">

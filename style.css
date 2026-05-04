@@ -87,6 +87,16 @@
     --container-width: 1320px;
 }
 
+/* Performance Optimization */
+section {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 1000px;
+}
+
+#inicio {
+    content-visibility: visible;
+}
+
 html {
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -189,33 +199,33 @@ body::after {
 }
 
 .about-monogram-hero {
-    perspective: 3000px !important;
-    display: grid !important;
-    place-items: center !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    width: 100% !important;
-    min-height: 700px !important;
-    overflow: visible !important;
+    perspective: 3000px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    width: 100%;
+    min-height: 700px;
+    overflow: visible;
 }
 
 .brand-monogram-3d {
-    width: 280% !important;
-    max-width: 280% !important;
-    height: auto !important;
-    transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    transform-style: preserve-3d !important;
-    filter: none !important;
-    cursor: pointer !important;
-    z-index: 20 !important;
-    transform: translateY(40px) !important;
+    width: 280%;
+    max-width: 280%;
+    height: auto;
+    transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-style: preserve-3d;
+    filter: none;
+    cursor: pointer;
+    z-index: 20;
+    transform: translateY(40px);
 }
 
 .about-monogram-hero:hover .brand-monogram-3d {
-    transform: translateY(40px) rotateY(360deg) scale(1.01) !important;
-    filter: none !important;
+    transform: translateY(40px) rotateY(360deg) scale(1.01);
+    filter: none;
 }
 
 
@@ -3433,298 +3443,7 @@ body::after {
     box-shadow: 0 0 30px rgba(37, 211, 102, 0.2) !important;
 }
 
-/* ===== VEHICLE INFO MODAL (0KM Hero) ===== */
-.vehicle-info-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 9000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s ease;
-}
 
-.vehicle-info-modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.vehicle-info-modal {
-    background: var(--surface-container);
-    border: 1px solid var(--ghost-border-gold);
-    border-radius: var(--radius-xl);
-    width: 100%;
-    max-width: 860px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    transform: translateY(30px) scale(0.97);
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary-container) transparent;
-}
-
-.vehicle-info-modal-overlay.open .vehicle-info-modal {
-    transform: translateY(0) scale(1);
-}
-
-.vehicle-modal-close {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--ghost-border);
-    color: var(--on-surface);
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    z-index: 10;
-}
-
-.vehicle-modal-close:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-.vehicle-modal-img-wrap {
-    position: relative;
-    min-height: 320px;
-    border-radius: var(--radius-xl) 0 0 var(--radius-xl);
-    overflow: hidden;
-}
-
-.vehicle-modal-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.vehicle-modal-badge {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 16px;
-    background: rgba(39, 92, 234, 0.9);
-    border-radius: var(--radius-full);
-    color: #fff;
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-}
-
-.vehicle-modal-body {
-    padding: 40px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow-y: auto;
-}
-
-.vehicle-modal-header {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.vehicle-modal-brand {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    letter-spacing: 4px;
-    color: var(--primary);
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.vehicle-modal-name {
-    font-family: var(--font-display);
-    font-size: 1.7rem;
-    font-weight: 700;
-    color: var(--on-surface);
-    line-height: 1.1;
-    margin: 0;
-}
-
-.vehicle-modal-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    font-family: var(--font-display);
-    letter-spacing: 0.5px;
-    margin-top: 4px;
-}
-
-.vehicle-modal-status.available {
-    color: #2ecc71;
-}
-
-.vehicle-modal-status.available i {
-    font-size: 0.55rem;
-    animation: statusPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.4;
-    }
-}
-
-.vehicle-modal-specs-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.v-spec {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: var(--surface-container-high);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--ghost-border);
-    transition: var(--transition);
-}
-
-.v-spec:hover {
-    border-color: var(--primary);
-    background: rgba(39, 92, 234, 0.05);
-}
-
-.v-spec>i {
-    color: var(--primary);
-    font-size: 0.9rem;
-    width: 16px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.v-spec>div {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.v-spec strong {
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    letter-spacing: 0.5px;
-    color: var(--on-surface-variant);
-    text-transform: uppercase;
-}
-
-.v-spec span {
-    font-size: 0.85rem;
-    color: var(--on-surface);
-    font-weight: 500;
-}
-
-.vehicle-modal-features h4 {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    letter-spacing: 1.5px;
-    color: var(--primary);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-}
-
-.vehicle-modal-features ul {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.vehicle-modal-features li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.82rem;
-    color: var(--on-surface-variant);
-}
-
-.vehicle-modal-features li i {
-    color: var(--primary);
-    font-size: 0.7rem;
-    flex-shrink: 0;
-}
-
-.vehicle-modal-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: auto;
-}
-
-.btn-full {
-    width: 100%;
-    justify-content: center;
-}
-
-@media (max-width: 768px) {
-    .vehicle-info-modal {
-        grid-template-columns: 1fr;
-        max-height: 95vh;
-    }
-
-    .vehicle-modal-img-wrap {
-        min-height: 220px;
-        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    }
-
-    .vehicle-modal-body {
-        padding: 24px 20px;
-    }
-
-    .vehicle-modal-specs-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .vehicle-modal-features ul {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-content-vehicle {
-        align-items: flex-start;
-        text-align: left;
-    }
-
-    .hero-vehicle-specs {
-        gap: 10px;
-    }
-
-    .hero-vehicle-specs span {
-        font-size: 0.75rem;
-        padding: 6px 12px;
-    }
-}
 
 @media print {
 
