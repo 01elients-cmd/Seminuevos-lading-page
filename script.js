@@ -234,6 +234,10 @@ document.addEventListener('DOMContentLoaded', () => {
             card.classList.add('vehicle-card', 'animate-on-scroll');
             card.style.cursor = 'pointer';
             card.style.transitionDelay = `${index * 0.08}s`;
+            
+            // SEO Optimized Alt Text: [Marca] [Modelo] [Año] - Seminuevos Venezuela
+            const optimizedAlt = `${car.title} ${car.year} - Seminuevos Venezuela`;
+            
             const priceDisplay = car.price === 'Consultar' ? `<span class="price-consult">Consultar Precio</span>` : car.price;
             const availabilityClass = car.availability === 'entrega_inmediata' ? 'available' : 'order';
             const availabilityText = car.availability === 'entrega_inmediata' ? 'Entrega Inmediata' : 'Por Pedido';
@@ -241,9 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const originBadge = car.origin === 'importado' ? `<span class="origin-badge importado"><i class="fas fa-globe"></i> Importado</span>` : `<span class="origin-badge nacional"><i class="fas fa-flag"></i> Nacional</span>`;
             const viewCount = car.views || 0;
             const viewsBadge = viewCount > 0 ? `<span class="views-badge" id="views-card-${car.id}"><i class="fas fa-eye"></i> ${viewCount} vista${viewCount !== 1 ? 's' : ''}</span>` : `<span class="views-badge" id="views-card-${car.id}" style="display:none;"></span>`;
+            
             card.innerHTML = `
                 <div class="vehicle-card-image">
-                    <img src="${car.images[0]}" alt="${car.title}" loading="lazy" crossorigin="anonymous">
+                    <img src="${car.images[0]}" alt="${optimizedAlt}" loading="lazy" crossorigin="anonymous">
                     ${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}
                     ${viewsBadge}
                 </div>
@@ -269,7 +274,44 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             gridElement.appendChild(card);
         });
+        
+        // Generate dynamic JSON-LD for the current rendered list
+        updateProductSchema(filtered);
         observeAnimations();
+    }
+
+    function updateProductSchema(vehicles) {
+        let schemaContainer = document.getElementById('dynamic-product-schema');
+        if (!schemaContainer) {
+            schemaContainer = document.createElement('script');
+            schemaContainer.id = 'dynamic-product-schema';
+            schemaContainer.type = 'application/ld+json';
+            document.head.appendChild(schemaContainer);
+        }
+
+        const productSchemas = vehicles.map(v => ({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": v.title,
+            "image": v.images[0],
+            "description": v.description || `Vehículo ${v.title} año ${v.year} disponible en Seminuevos Venezuela.`,
+            "brand": {
+                "@type": "Brand",
+                "name": v.title.split(' ')[0]
+            },
+            "model": v.title,
+            "productionDate": v.year.toString(),
+            "offers": {
+                "@type": "Offer",
+                "url": window.location.href,
+                "priceCurrency": "USD",
+                "price": v.price === 'Consultar' ? "0" : v.price.replace(/[^0-9.-]+/g, ""),
+                "availability": "https://schema.org/InStock",
+                "itemCondition": v.condition === '0km' ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition"
+            }
+        }));
+
+        schemaContainer.text = JSON.stringify(productSchemas);
     }
 
     // Sort and Search listeners
