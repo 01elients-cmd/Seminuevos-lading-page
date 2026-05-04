@@ -1280,5 +1280,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
+// ===== 0KM HERO VEHICLE INFO MODAL =====
+window.openVehicleInfoModal = function (vehicleKey) {
+    const overlay = document.getElementById('vehicleInfoModal');
+    if (overlay) {
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeVehicleInfoModal = function () {
+    const overlay = document.getElementById('vehicleInfoModal');
+    if (overlay) {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+};
+
+// Escape key for vehicle info modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const overlay = document.getElementById('vehicleInfoModal');
+        if (overlay && overlay.classList.contains('open')) {
+            window.closeVehicleInfoModal();
+        }
+    }
 });
 

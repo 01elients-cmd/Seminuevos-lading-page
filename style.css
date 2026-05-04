@@ -87,15 +87,7 @@
     --container-width: 1320px;
 }
 
-/* Performance Optimization */
-section {
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 1000px;
-}
 
-#inicio {
-    content-visibility: visible;
-}
 
 html {
     scroll-behavior: smooth;
