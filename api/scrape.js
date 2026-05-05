@@ -201,16 +201,18 @@ function parseIAAI(html, url) {
 
     if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en IAAI. Usa Modo Manual o verifica si IAAI está bloqueando el bot (Pardon Our Interruption).');
 
-    // Extract images with a broader regex to catch all IAAI variations
-    const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/inventory\/[^"']*?(?:width=\d+|[0-9]{3,4}x[0-9]{3,4}|[0-9]{3,4})/gi) || [];
-    const cleanImages = [...new Set(imgMatches)].map(img => {
-        // Ensure high resolution
-        if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
-        return img;
-    });
+    // Extract images with a very broad regex to catch all possible IAAI image variations
+    const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/inventory\/[^"']*?(?:\d+|width=\d+)/gi) || [];
+    const cleanImages = [...new Set(imgMatches)]
+        .filter(img => img.includes('/inventory/'))
+        .map(img => {
+            // Ensure high resolution: replace common size suffixes (/80, /160, /400, /800) with /1024 or /800
+            if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
+            return img.replace(/\/\d+$/, '/1024');
+        });
 
     return {
-        title: `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim(),
+        title: `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' '),
         year: rawData.year,
         price: rawData.price || "Consultar",
         km: rawData.km || "0 KM",
@@ -262,20 +264,16 @@ function parseCopart(html, url) {
         
         if (titleMatch) {
             let cleanTitle = titleMatch[1].split(/\||Copart/i)[0].trim().replace(/\s+/g, ' ');
-            const titleParts = cleanTitle.split(' ');
+            // Improved title split using more separators
+            const titleParts = cleanTitle.split(/[\s-]+/).filter(Boolean);
             if (titleParts.length >= 2) {
-                if (!rawData.year && titleParts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = titleParts[0];
-                if (!rawData.make) rawData.make = titleParts[1].toUpperCase();
-                if (!rawData.model) rawData.model = titleParts.slice(2).join(' ').toUpperCase();
-            }
-        }
-
-        const commonMakes = ['TOYOTA', 'FORD', 'CHEVROLET', 'HONDA', 'NISSAN', 'HYUNDAI', 'KIA', 'BMW', 'MERCEDES', 'JEEP', 'DODGE', 'RAM', 'LEXUS', 'MAZDA'];
-        if (!rawData.make) {
-            for (const m of commonMakes) {
-                if (titleTag.includes(m)) {
-                    rawData.make = m;
-                    break;
+                if (!rawData.year && titleParts[0].match(/\b(19|20)\d{2}\b/)) {
+                    rawData.year = titleParts[0];
+                    rawData.make = titleParts[1];
+                    rawData.model = titleParts.slice(2).join(' ');
+                } else if (!rawData.make) {
+                    rawData.make = titleParts[0];
+                    rawData.model = titleParts.slice(1).join(' ');
                 }
             }
         }
@@ -285,13 +283,13 @@ function parseCopart(html, url) {
 
     // Image fallback using regex if JSON images failed
     if (!rawData.images || rawData.images.length === 0) {
-        const imgReg = /https?:\/\/[^"']+\.copart\.com\/[^"']+\d+_(?:f|b|s|i|d|l)\.jpg/gi;
+        const imgReg = /https?:\/\/[^"']+\.copart\.com\/[^"']+\d+_[a-z]\.jpg/gi;
         const matches = html.match(imgReg);
         rawData.images = [...new Set(matches || [])].map(img => img.replace(/_[a-z]\.jpg/i, '_full.jpg'));
     }
 
     return {
-        title: `${rawData.year} ${rawData.make} ${rawData.model || ''}`.trim(),
+        title: `${rawData.year} ${rawData.make} ${rawData.model || ''}`.trim().replace(/\s+/g, ' '),
         year: rawData.year,
         price: rawData.price || "Consultar",
         km: rawData.km || "0 KM",

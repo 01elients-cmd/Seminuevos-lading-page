@@ -1952,7 +1952,7 @@
                 const isSelectedClass = selectedVehicles.has(v.id) ? 'class="selected"' : '';
                 html += `<tr data-id="${v.id}" ${isSelectedClass}>
                     <td style="text-align:center;"><input type="checkbox" class="vehicle-checkbox" data-id="${v.id}" onchange="toggleVehicle(${v.id})" ${isChecked}></td>
-                    <td><div class="vehicle-row-info"><img src="${imgSrc(v)}" class="vehicle-row-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'42\' viewBox=\'0 0 60 42\'%3E%3Crect width=\'60\' height=\'42\' fill=\'%231a1a1a\'/%3E%3C/svg%3E';"><div><div class="vehicle-row-name">${v.title}</div><div class="vehicle-row-cat">${v.year} · ${(v.body_type || v.bodyType || '').toUpperCase()}</div></div></div></td>
+                    <td><div class="vehicle-row-info"><img src="${imgSrc(v)}" class="vehicle-row-img" onerror="this.src='images/favicon.png'; this.style.opacity='0.3';"><div><div class="vehicle-row-name">${v.title}</div><div class="vehicle-row-cat">${v.year} · ${(v.body_type || v.bodyType || '').toUpperCase()}</div></div></div></td>
                     <td style="color:var(--accent);font-weight:600">${v.price}</td>
                     <td><span class="badge badge-gold">${(v.catalog || '').toUpperCase()}</span></td>
                     <td>${statusBadge(v.status)}</td>
