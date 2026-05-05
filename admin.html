@@ -2881,13 +2881,27 @@
                     useChrome: true,
                     proxyConfiguration: { useApifyProxy: true },
                     pageFunction: `async function pageFunction(context) { 
-                        const { request, page } = context; 
-                        await new Promise(r => setTimeout(r, 8000)); 
-                        const html = await page.evaluate(() => document.documentElement.outerHTML); 
-                        if (html.includes('Pardon Our Interruption') || html.includes('Incapsula') || html.includes('captcha')) {
-                            // Al lanzar un error aquí, Apify rotará la IP y reintentará automáticamente
-                            throw new Error('Bloqueado por Imperva. Reintentando con nueva IP...');
+                        const { request, page, log } = context; 
+                        log.info(\`Procesando: \${request.url}\`);
+                        
+                        // Simular comportamiento humano
+                        await page.evaluate(() => window.scrollBy(0, 500));
+                        await new Promise(r => setTimeout(r, 2000));
+                        await page.evaluate(() => window.scrollBy(0, -200));
+                        
+                        // Esperar a que cargue algo real (título o detalles)
+                        try {
+                            await page.waitForSelector('h1, .lot-details, .vehicle-info', { timeout: 15000 });
+                        } catch(e) {
+                            log.warning('No se encontró selector de carga, procediendo con HTML actual');
                         }
+
+                        const html = await page.evaluate(() => document.documentElement.outerHTML); 
+                        
+                        if (html.includes('Pardon Our Interruption') || html.includes('Incapsula') || html.includes('captcha') || html.length < 5000) {
+                            throw new Error('Bloqueado o HTML incompleto. Reintentando con nueva IP...');
+                        }
+                        
                         return { pageUrl: request.loadedUrl || request.url, pageHtml: html }; 
                     }`
                 };
@@ -2909,8 +2923,8 @@
                     const checkData = await checkRun.json();
                     const status = checkData.data.status;
                     if (status === 'SUCCEEDED') isFinished = true;
-                    else if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') throw new Error(`Apify falló con estado: ${status}`);
-                    else statusBox.innerHTML += `<div style="font-size:0.8rem; opacity:0.6">Estado Apify: ${status}... procesando lote.</div>`;
+                    else if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') throw new Error(`Apify falló con estado: \${status}`);
+                    else statusBox.innerHTML += `<div style="font-size:0.75rem; opacity:0.6">Apify: \${status}...</div>`;
                     statusBox.scrollTop = statusBox.scrollHeight;
                 }
 
@@ -2918,17 +2932,22 @@
                 const getDataset = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${proxyKey}`);
                 const datasetItems = await getDataset.json();
 
+                if (!Array.isArray(datasetItems) || datasetItems.length === 0) {
+                    throw new Error('Apify no devolvió ningún dato de vehículo.');
+                }
+
                 for (let i = 0; i < datasetItems.length; i++) {
                     const item = datasetItems[i];
                     const itemUrl = item.pageUrl || item.url || links[i] || 'Enlace Desconocido';
                     const itemHtml = item.pageHtml || item.html || '';
 
-                    if (!itemHtml) {
+                    if (!itemHtml || itemHtml.length < 1000) {
                         errorCount++;
+                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.75rem;">✗ [\${i+1}] Error: HTML vacío o bloqueado por el sitio.</div>`;
                         continue;
                     }
 
-                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8">[${i + 1}/${datasetItems.length}] Guardando info + fotos...</div>`;
+                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[\${i + 1}/\${datasetItems.length}] Guardando info + fotos...</div>`;
 
                     try {
                         const response = await fetch('/api/scrape', {
