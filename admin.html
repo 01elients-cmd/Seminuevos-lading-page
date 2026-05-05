@@ -2861,115 +2861,38 @@
             const statusBox = document.getElementById('bulkStatus');
             const proxyKey = document.getElementById('sProxyKey')?.value;
 
-            if (!proxyKey) { showToast('Se requiere Apify API Token para procesos en lote', 'error'); return; }
+            if (!proxyKey) { showToast('Se requiere API Key para procesos en lote', 'error'); return; }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando con Apify...';
-            statusBox.innerHTML = `<div class="info-banner" style="background:var(--accent); color:#000; font-weight:700;">Enviando ${links.length} vehículos a Apify...</div>`;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando lote...';
+            statusBox.innerHTML = `<div class="info-banner" style="background:var(--accent); color:#000; font-weight:700;">Iniciando proceso para ${links.length} vehículos con Evasión Antibot...</div>`;
 
             let successCount = 0;
             let errorCount = 0;
 
             try {
-                // ==========================
-                // PROCESAR TODOS LOS ENLACES (IAAI Y COPART) CON SCRAPER UNIVERSAL + REINTENTOS
-                // ==========================
-                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; margin-top:10px;">Iniciando Scraper Universal para ${links.length} vehículos con Evasión Antibot...</div>`;
+                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; margin-top:10px;">Scraper activado. Procesando secuencialmente...</div>`;
 
-                const apifyPayload = {
-                    startUrls: links.map(url => ({ url })),
-                    useChrome: true,
-                    proxyConfiguration: { useApifyProxy: true },
-                    pageFunction: `async function pageFunction(context) { 
-                        const { request, page, log } = context; 
-                        log.info('Procesando: ' + request.url);
-                        
-                        // User agent realista
-                        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
-                        
-                        // Esperar a que la página cargue y la red se calme
-                        try {
-                            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
-                        } catch(e) {
-                            log.warning('Timeout esperando red, continuando...');
-                        }
-                        
-                        const html = await page.evaluate(() => document.documentElement.outerHTML); 
-                        const isBlocked = html.includes('Pardon Our Interruption') || 
-                                          html.includes('captcha') || 
-                                          html.includes('Imperva') || 
-                                          html.includes('Incapsula') || 
-                                          html.includes('Additional security check') || 
-                                          html.length < 8000;
-
-                        if (isBlocked) {
-                            throw new Error('RETRY_PROXY');
-                        }
-                        
-                        return { pageUrl: request.loadedUrl || request.url, pageHtml: html }; 
-                    }`
-                };
-
-                const startRun = await fetch(`https://api.apify.com/v2/acts/apify~puppeteer-scraper/runs?token=${proxyKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(apifyPayload)
-                });
-
-                const runData = await startRun.json();
-                if (!runData.data || !runData.data.id) throw new Error('Error al iniciar Apify Scraper Antibot');
-                const runId = runData.data.id;
-
-                let isFinished = false;
-                while (!isFinished) {
-                    await new Promise(r => setTimeout(r, 5000));
-                    const checkRun = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${proxyKey}`);
-                    const checkData = await checkRun.json();
-                    const status = checkData.data.status;
-                    if (status === 'SUCCEEDED') isFinished = true;
-                    else if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') throw new Error(`Apify falló con estado: ${status}`);
-                    else statusBox.innerHTML += `<div style="font-size:0.75rem; opacity:0.6">Apify: ${status}...</div>`;
+                for (let i = 0; i < links.length; i++) {
+                    const url = links[i];
+                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[${i + 1}/${links.length}] Conectando con: ${url.split('/').pop().substring(0, 15)}...</div>`;
                     statusBox.scrollTop = statusBox.scrollHeight;
-                }
-
-                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:var(--success);">Extracción completada. Evaluando HTML...</div>`;
-                const getDataset = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${proxyKey}&clean=true`);
-                const datasetItems = await getDataset.json();
-
-                if (!Array.isArray(datasetItems) || datasetItems.length === 0) {
-                    throw new Error('Apify no devolvió ningún dato de vehículo.');
-                }
-
-                for (let i = 0; i < datasetItems.length; i++) {
-                    const item = datasetItems[i];
-                    const itemUrl = item.pageUrl || item.url || links[i] || 'Enlace Desconocido';
-                    const itemHtml = item.pageHtml || item.html || '';
-
-                    if (!itemHtml || itemHtml.length < 500) {
-                        errorCount++;
-                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.75rem;">✗ [${i + 1}] Error: HTML vacío o bloqueado por el sitio.</div>`;
-                        continue;
-                    }
-
-                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[${i + 1}/${datasetItems.length}] Guardando info + fotos...</div>`;
 
                     try {
                         const response = await fetch('/api/scrape', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ url: itemUrl, html: itemHtml })
+                            body: JSON.stringify({ url: url, proxyKey: proxyKey })
                         });
                         const result = await response.json();
 
                         if (result.success) {
                             const data = result.data;
-                            if (!data.year || !data.title) {
-                                errorCount++;
-                                statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Sin datos válidos encontrados.</div>`;
-                                continue;
-                            }
+                            if (!data.year || !data.title) throw new Error('Datos incompletos');
 
-                            // Subida secuencial con Proxy para evitar CORS (Access-Control-Allow-Origin)
+                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[${i + 1}/${links.length}] Guardando info + fotos...</div>`;
+
+                            // Subida de imágenes con Proxy
                             const finalImgs = [];
                             for (const imgUrl of (data.images || [])) {
                                 try {
@@ -3034,14 +2957,21 @@
 
 
 
+                }
+
             } catch (err) {
-                statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem; margin-top:10px;">✗ Error General: ${err.message}</div>`;
+                console.error('Batch error:', err);
+                statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem; margin-top:10px;">✗ Error Critico: ${err.message}</div>`;
             }
 
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-play"></i> Iniciar Proceso';
-            statusBox.innerHTML += `<div class="info-banner" style="margin-top:10px; background:var(--bg3)"><strong>Proceso terminado:</strong> ${successCount} éxitos, ${errorCount} errores.</div>`;
-            await loadDashboard();
+            statusBox.innerHTML += `
+                <div class="info-banner" style="margin-top:15px; background:rgba(255,255,255,0.05); border:1px solid var(--accent);">
+                    Lote Finalizado.
+                </div>`;
+            if (typeof loadDashboard === 'function') await loadDashboard();
+            else if (typeof loadVehicles === 'function') await loadVehicles();
         });
 
         // MANUAL HTML IMPORT LOGIC
