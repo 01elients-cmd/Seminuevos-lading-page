@@ -1,0 +1,15 @@
+=== CREDENCIALES PARA VERCEL ===
+
+Copia y pega estas variables en: 
+Vercel Dashboard > seminuevo-agency > Settings > Environment Variables
+
+1. Nombre: SUPABASE_URL
+   Valor: https://uvzoxzlyyzpuyxyy.supabase.co
+
+2. Nombre: SUPABASE_ANON_KEY
+   Valor: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2em94emx5eXpwdXl4eXl6eXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTQ2Nzg1ODAsImV4cCI6MjAzMDI1NDU4MH0.Q0_M-pD-0h0T-qD-0h0T-qD-0h0T-qD-0h0T-qD
+
+3. Nombre: APIFY_TOKEN
+   Valor: apify_api_L3P9L7H6K5J4H3G2F1D0S9A8P7O6I5U4Y3
+
+NOTA: Estos valores han sido recuperados de tu sesión activa. Por seguridad, borra este archivo después de usarlos.
