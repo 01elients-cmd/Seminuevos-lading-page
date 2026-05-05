@@ -2880,7 +2880,6 @@
                     startUrls: links.map(url => ({ url })),
                     useChrome: true,
                     proxyConfiguration: { useApifyProxy: true },
-                    waitUntil: 'networkidle2',
                     pageFunction: `async function pageFunction(context) { 
                         const { request, page, log } = context; 
                         log.info('Procesando: ' + request.url);
@@ -2888,13 +2887,16 @@
                         // User agent realista
                         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
                         
-                        // Esperar a que la red esté tranquila
-                        await new Promise(r => setTimeout(r, 5000));
+                        // Esperar a que la página cargue y la red se calme
+                        try {
+                            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
+                        } catch(e) {
+                            log.warning('Timeout esperando red, continuando con lo que haya...');
+                        }
                         
                         const html = await page.evaluate(() => document.documentElement.outerHTML); 
                         
                         if (html.includes('Pardon Our Interruption') || html.includes('captcha') || html.length < 5000) {
-                            log.warning('Bloqueo detectado, reintentando...');
                             throw new Error('RETRY_PROXY');
                         }
                         
