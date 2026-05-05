@@ -1737,17 +1737,31 @@
                                 <option value="Híbrido">Híbrido</option>
                                 <option value="Eléctrico">Eléctrico</option>
                             </select></div>
-                        <div class="form-group"><label class="form-label">Tipo de Carrocería</label><select
-                                class="form-select" id="vBodyType">
-                                <option value="sedan">Sedán</option>
-                                <option value="suv">SUV</option>
-                                <option value="pickup">Pickup</option>
-                                <option value="camion">Camiones</option>
-                                <option value="deportivo">Deportivos</option>
-                                <option value="hibrido">Híbridos / Eléctricos</option>
-                                <option value="coupe">Coupé</option>
-                                <option value="hatchback">Hatchback</option>
-                            </select></div>
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Carrocería</label>
+                            <input type="text" class="form-input" id="vBodyType" list="bodyTypesList" placeholder="Ej: Sedan, SUV, Pickup...">
+                            <datalist id="bodyTypesList">
+                                <option value="Sedán">
+                                <option value="SUV">
+                                <option value="Pickup">
+                                <option value="Crew Cab">
+                                <option value="Double Cab">
+                                <option value="Extended Cab">
+                                <option value="Regular Cab">
+                                <option value="Hatchback">
+                                <option value="Coupé">
+                                <option value="Convertible">
+                                <option value="Wagon">
+                                <option value="Minivan">
+                                <option value="Van">
+                                <option value="Camión">
+                                <option value="Chasis">
+                                <option value="Crossover">
+                                <option value="Deportivo">
+                                <option value="Híbrido / Eléctrico">
+                                <option value="Motocicleta">
+                            </datalist>
+                        </div>
                         <div class="form-group"><label class="form-label">Catálogo *</label><select class="form-select"
                                 id="vCatalog">
                                 <option value="seminuevos">Stock Local (Seminuevos)</option>
