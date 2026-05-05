@@ -2891,12 +2891,18 @@
                         try {
                             await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
                         } catch(e) {
-                            log.warning('Timeout esperando red, continuando con lo que haya...');
+                            log.warning('Timeout esperando red, continuando...');
                         }
                         
                         const html = await page.evaluate(() => document.documentElement.outerHTML); 
-                        
-                        if (html.includes('Pardon Our Interruption') || html.includes('captcha') || html.length < 5000) {
+                        const isBlocked = html.includes('Pardon Our Interruption') || 
+                                          html.includes('captcha') || 
+                                          html.includes('Imperva') || 
+                                          html.includes('Incapsula') || 
+                                          html.includes('Additional security check') || 
+                                          html.length < 8000;
+
+                        if (isBlocked) {
                             throw new Error('RETRY_PROXY');
                         }
                         
