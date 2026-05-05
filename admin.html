@@ -2898,7 +2898,7 @@
 
                         const html = await page.evaluate(() => document.documentElement.outerHTML); 
                         
-                        if (html.includes('Pardon Our Interruption') || html.includes('Incapsula') || html.includes('captcha') || html.length < 5000) {
+                        if (html.includes('Pardon Our Interruption') || html.includes('Incapsula') || html.includes('captcha') || html.length < 3000) {
                             throw new Error('Bloqueado o HTML incompleto. Reintentando con nueva IP...');
                         }
                         
@@ -2923,8 +2923,8 @@
                     const checkData = await checkRun.json();
                     const status = checkData.data.status;
                     if (status === 'SUCCEEDED') isFinished = true;
-                    else if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') throw new Error(`Apify falló con estado: \${status}`);
-                    else statusBox.innerHTML += `<div style="font-size:0.75rem; opacity:0.6">Apify: \${status}...</div>`;
+                    else if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') throw new Error(`Apify falló con estado: ${status}`);
+                    else statusBox.innerHTML += `<div style="font-size:0.75rem; opacity:0.6">Apify: ${status}...</div>`;
                     statusBox.scrollTop = statusBox.scrollHeight;
                 }
 
@@ -2941,13 +2941,13 @@
                     const itemUrl = item.pageUrl || item.url || links[i] || 'Enlace Desconocido';
                     const itemHtml = item.pageHtml || item.html || '';
 
-                    if (!itemHtml || itemHtml.length < 1000) {
+                    if (!itemHtml || itemHtml.length < 500) {
                         errorCount++;
-                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.75rem;">✗ [\${i+1}] Error: HTML vacío o bloqueado por el sitio.</div>`;
+                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.75rem;">✗ [${i + 1}] Error: HTML vacío o bloqueado por el sitio.</div>`;
                         continue;
                     }
 
-                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[\${i + 1}/\${datasetItems.length}] Guardando info + fotos...</div>`;
+                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[${i + 1}/${datasetItems.length}] Guardando info + fotos...</div>`;
 
                     try {
                         const response = await fetch('/api/scrape', {
