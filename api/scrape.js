@@ -83,43 +83,61 @@ function scanForData(obj, data = {}) {
     };
 
     // Mapping fields
-    const year = getVal('Year') || getVal('lcy');
+    const year = getVal('Year') || getVal('lcy') || getVal('modelYear');
     if (year && !data.year) data.year = String(year);
     
-    const make = getVal('Make') || getVal('mkn');
+    const make = getVal('Make') || getVal('mkn') || getVal('brand');
     if (make && !data.make) data.make = String(make);
     
-    const model = getVal('Model') || getVal('lm');
+    const model = getVal('Model') || getVal('lm') || getVal('modelName');
     if (model && !data.model) data.model = String(model);
     
-    const series = getVal('Series') || getVal('srs');
+    const series = getVal('Series') || getVal('srs') || getVal('trim');
     if (series && !data.series) data.series = String(series);
     
-    const vin = getVal('VIN') || getVal('fv') || getVal('vin');
+    const vin = getVal('VIN') || getVal('fv') || getVal('vin') || getVal('vinNumber');
     if (vin && !data.vin) data.vin = String(vin);
     
-    const odo = getVal('ODOValue') || getVal('orr') || getVal('odometer');
+    const odo = getVal('ODOValue') || getVal('orr') || getVal('odometer') || getVal('mileage');
     if (odo && !data.km) {
-        const uom = getVal('ODOUoM') || getVal('uom') || '';
+        const uom = getVal('ODOUoM') || getVal('uom') || getVal('mileageUnit') || '';
         data.km = `${odo} ${uom}`.trim();
         if (!uom && String(odo).length > 3) data.km += " mi";
     }
     
-    const engine = getVal('EngineSize') || getVal('egn') || getVal('engine');
+    const engine = getVal('EngineSize') || getVal('egn') || getVal('engine') || getVal('engineDescription');
     if (engine && !data.engine) data.engine = String(engine);
     
-    const trans = getVal('Transmission') || getVal('tsmn') || getVal('transmission');
+    const trans = getVal('Transmission') || getVal('tsmn') || getVal('transmission') || getVal('transmissionType');
     if (trans && !data.transmission) data.transmission = String(trans);
+
+    const body = getVal('BodyStyle') || getVal('bs') || getVal('bodyType') || getVal('bodyStyle');
+    if (body && !data.bodyType) data.bodyType = String(body);
+
+    const fuel = getVal('FuelType') || getVal('ft') || getVal('fuelType');
+    if (fuel && !data.fuel) data.fuel = String(fuel);
+
+    const color = getVal('Color') || getVal('clr') || getVal('exteriorColor');
+    if (color && !data.color) data.color = String(color);
+
+    const location = getVal('Location') || getVal('loc') || getVal('saleLocation');
+    if (location && !data.location) data.location = String(location);
     
+    // Price Logic: Prefer Buy It Now, then Current Bid
     const bnp = getVal('buyNowPrice') || getVal('bnp') || getVal('buyItNowPrice');
-    if (bnp && !data.price) data.price = `$${parseInt(bnp).toLocaleString()}`;
-    
     const bid = getVal('highBidAmount') || getVal('curm') || getVal('currentBid');
-    if (bid && !data.price) data.price = `$${parseInt(bid).toLocaleString()}`;
+    
+    if (bnp) {
+        data.price = `$${parseInt(bnp).toLocaleString()}`;
+        data.isBuyNow = true;
+    } else if (bid && !data.price) {
+        data.price = `$${parseInt(bid).toLocaleString()}`;
+        data.isBuyNow = false;
+    }
 
     // Recursive search
     for (let k in obj) {
-        if (obj[k] && typeof obj[k] === 'object' && k !== 'ancestors') {
+        if (obj[k] && typeof obj[k] === 'object' && k !== 'ancestors' && k !== 'images') {
             scanForData(obj[k], data);
         }
     }
@@ -198,9 +216,11 @@ function parseIAAI(html, url) {
         km: rawData.km || "0 KM",
         engine: rawData.engine || "N/A",
         transmission: rawData.transmission || "N/A",
+        bodyType: rawData.bodyType || "N/A",
+        fuel: rawData.fuel || "N/A",
         vin: rawData.vin || "N/A",
         images: cleanImages,
-        description: `Importado vía subasta IAAI. VIN: ${rawData.vin || 'N/A'}`
+        description: `Importado vía subasta IAAI. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.`
     };
 }
 
@@ -219,6 +239,13 @@ function parseCopart(html, url) {
                     try { 
                         const obj = JSON.parse(j);
                         scanForData(obj, rawData); 
+                        // Specific image list extraction for Copart
+                        if (obj.imagesList && obj.imagesList.fullImages) {
+                            if (!rawData.images) rawData.images = [];
+                            obj.imagesList.fullImages.forEach(img => {
+                                if (img.url) rawData.images.push(img.url);
+                            });
+                        }
                     } catch (e) { } 
                 } 
             }
@@ -256,8 +283,12 @@ function parseCopart(html, url) {
 
     if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en Copart. Usa Modo Manual.');
 
-    const imgReg = /https?:\/\/[^"']+\.copart\.com\/[^"']+\d+_(?:f|b|s|i|d|l)\.jpg/gi;
-    const matches = html.match(imgReg);
+    // Image fallback using regex if JSON images failed
+    if (!rawData.images || rawData.images.length === 0) {
+        const imgReg = /https?:\/\/[^"']+\.copart\.com\/[^"']+\d+_(?:f|b|s|i|d|l)\.jpg/gi;
+        const matches = html.match(imgReg);
+        rawData.images = [...new Set(matches || [])].map(img => img.replace(/_[a-z]\.jpg/i, '_full.jpg'));
+    }
 
     return {
         title: `${rawData.year} ${rawData.make} ${rawData.model || ''}`.trim(),
@@ -266,17 +297,43 @@ function parseCopart(html, url) {
         km: rawData.km || "0 KM",
         engine: rawData.engine || "N/A",
         transmission: rawData.transmission || "N/A",
+        bodyType: rawData.bodyType || "N/A",
+        fuel: rawData.fuel || "N/A",
         vin: rawData.vin || "N/A",
-        images: [...new Set(matches || [])].map(img => img.replace(/_[a-z]\.jpg/i, '_full.jpg')),
-        description: `Importado vía subasta Copart. VIN: ${rawData.vin || 'N/A'}`
+        images: rawData.images || [],
+        description: `Importado vía subasta Copart. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.`
     };
 }
 
 function parseGeneric(html, url) {
-    const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
-    const ogImg = html.match(/meta property="og:image" content="([^"]+)"/);
-    return {
-        title: titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : 'Vehículo',
-        images: ogImg ? [ogImg[1]] : []
+    const result = {
+        title: 'Vehículo',
+        images: []
     };
+
+    // Try LD+JSON
+    const ldJsonMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi);
+    if (ldJsonMatch) {
+        for (const s of ldJsonMatch) {
+            try {
+                const json = JSON.parse(s.replace(/<[^>]*>/g, ''));
+                if (json.name) result.title = json.name;
+                if (json.image) result.images = Array.isArray(json.image) ? json.image : [json.image];
+                if (json.brand) result.make = typeof json.brand === 'string' ? json.brand : json.brand.name;
+                // Add more if found
+            } catch (e) {}
+        }
+    }
+
+    if (result.title === 'Vehículo') {
+        const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+        if (titleMatch) result.title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+    }
+
+    if (result.images.length === 0) {
+        const ogImg = html.match(/meta property="og:image" content="([^"]+)"/);
+        if (ogImg) result.images = [ogImg[1]];
+    }
+
+    return result;
 }
