@@ -2880,26 +2880,22 @@
                     startUrls: links.map(url => ({ url })),
                     useChrome: true,
                     proxyConfiguration: { useApifyProxy: true },
+                    waitUntil: 'networkidle2',
                     pageFunction: `async function pageFunction(context) { 
                         const { request, page, log } = context; 
-                        log.info(\`Procesando: \${request.url}\`);
+                        log.info('Procesando: ' + request.url);
                         
-                        // Simular comportamiento humano
-                        await page.evaluate(() => window.scrollBy(0, 500));
-                        await new Promise(r => setTimeout(r, 2000));
-                        await page.evaluate(() => window.scrollBy(0, -200));
+                        // User agent realista
+                        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
                         
-                        // Esperar a que cargue algo real (título o detalles)
-                        try {
-                            await page.waitForSelector('h1, .lot-details, .vehicle-info', { timeout: 15000 });
-                        } catch(e) {
-                            log.warning('No se encontró selector de carga, procediendo con HTML actual');
-                        }
-
+                        // Esperar a que la red esté tranquila
+                        await new Promise(r => setTimeout(r, 5000));
+                        
                         const html = await page.evaluate(() => document.documentElement.outerHTML); 
                         
-                        if (html.includes('Pardon Our Interruption') || html.includes('Incapsula') || html.includes('captcha') || html.length < 3000) {
-                            throw new Error('Bloqueado o HTML incompleto. Reintentando con nueva IP...');
+                        if (html.includes('Pardon Our Interruption') || html.includes('captcha') || html.length < 5000) {
+                            log.warning('Bloqueo detectado, reintentando...');
+                            throw new Error('RETRY_PROXY');
                         }
                         
                         return { pageUrl: request.loadedUrl || request.url, pageHtml: html }; 
@@ -2929,7 +2925,7 @@
                 }
 
                 statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:var(--success);">Extracción completada. Evaluando HTML...</div>`;
-                const getDataset = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${proxyKey}`);
+                const getDataset = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${proxyKey}&clean=true`);
                 const datasetItems = await getDataset.json();
 
                 if (!Array.isArray(datasetItems) || datasetItems.length === 0) {
