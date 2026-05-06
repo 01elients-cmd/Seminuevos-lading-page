@@ -45,7 +45,18 @@ const BODY_TYPE_LABELS = {
     pickup: "Pickup",
     deportivo: "Deportivo",
     coupe: "Coupé",
-    hatchback: "Hatchback"
+    hatchback: "Hatchback",
+    "crew cab": "Crew Cab",
+    "double cab": "Double Cab",
+    "extended cab": "Extended Cab",
+    "regular cab": "Regular Cab",
+    wagon: "Wagon",
+    minivan: "Minivan",
+    van: "Van",
+    camion: "Camión",
+    chasis: "Chasis",
+    crossover: "Crossover",
+    motocicleta: "Motocicleta"
 };
 
 const ORIGIN_LABELS = {

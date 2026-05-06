@@ -261,7 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (typeConditionFilter !== 'todos') {
-            filtered = filtered.filter(v => v.condition === typeConditionFilter || v.bodyType === typeConditionFilter);
+            filtered = filtered.filter(v => 
+                v.condition === typeConditionFilter || 
+                (v.bodyType && (v.bodyType === typeConditionFilter || v.bodyType.toLowerCase() === typeConditionFilter.toLowerCase()))
+            );
         }
         if (brandFilter !== 'todos') {
             filtered = filtered.filter(v => v.title.toLowerCase().includes(brandFilter));
@@ -397,26 +400,48 @@ document.addEventListener('DOMContentLoaded', () => {
         zerokm: { type: 'todos', brand: 'todos' }
     };
 
-    function setupFilters(filterBtnsSelector, brandSelectId, stateKey, gridEl, getDataSource) {
-        const filterBtns = document.querySelectorAll(filterBtnsSelector);
+    function setupFilters(containerId, brandSelectId, stateKey, gridEl, getDataSource) {
+        const container = document.getElementById(containerId);
         const brandSelect = document.getElementById(brandSelectId);
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filtersState[stateKey].type = btn.dataset.filter;
-                renderVehicles(getDataSource(), gridEl, filtersState[stateKey].type, filtersState[stateKey].brand);
+        
+        // Function to render buttons dynamically
+        window[`refreshFilters_${stateKey}`] = () => {
+            const vehicles = getDataSource();
+            if (!container) return;
+            
+            // Get unique body types present in these vehicles
+            const uniqueTypes = [...new Set(vehicles.map(v => v.bodyType).filter(Boolean))];
+            
+            // Define the most common ones to show even if empty, or just show what exists
+            // To satisfy user, we show what exists + the standard ones if we want
+            const typesToShow = ['todos', ...uniqueTypes];
+            
+            container.innerHTML = typesToShow.map(t => {
+                const label = t === 'todos' ? 'Todos' : (BODY_TYPE_LABELS[t.toLowerCase()] || t);
+                const isActive = filtersState[stateKey].type === t;
+                return `<button class="filter-btn ${isActive ? 'active' : ''}" data-filter="${t}">${label}</button>`;
+            }).join('');
+            
+            // Re-attach click events
+            container.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filtersState[stateKey].type = btn.dataset.filter;
+                    renderVehicles(getDataSource(), gridEl, filtersState[stateKey].type, filtersState[stateKey].brand);
+                });
             });
-        });
+        };
+
         brandSelect?.addEventListener('change', (e) => {
             filtersState[stateKey].brand = e.target.value;
             renderVehicles(getDataSource(), gridEl, filtersState[stateKey].type, filtersState[stateKey].brand);
         });
     }
 
-    setupFilters('#seminuevosFilters .filter-btn', 'seminuevosBrandFilter', 'seminuevos', seminuevosGrid, () => appVehiclesSeminuevos);
-    setupFilters('#porpedidoFilters .filter-btn', 'porpedidoBrandFilter', 'porpedido', porpedidoGrid, () => appVehiclesPorPedido);
-    setupFilters('#zerokmFilters .filter-btn', 'zerokmBrandFilter', 'zerokm', zerokmGrid, () => appVehicles0km);
+    setupFilters('seminuevosFilters', 'seminuevosBrandFilter', 'seminuevos', seminuevosGrid, () => appVehiclesSeminuevos);
+    setupFilters('porpedidoFilters', 'porpedidoBrandFilter', 'porpedido', porpedidoGrid, () => appVehiclesPorPedido);
+    setupFilters('zerokmFilters', 'zerokmBrandFilter', 'zerokm', zerokmGrid, () => appVehicles0km);
 
     // ===== SUPABASE DATA FETCH =====
     async function initSupabaseData() {
@@ -471,6 +496,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.error('Error fetching CMS data', e); }
 
         renderAllPanels();
+        
+        // Refresh filter buttons after data is loaded
+        if (typeof refreshFilters_seminuevos === 'function') refreshFilters_seminuevos();
+        if (typeof refreshFilters_porpedido === 'function') refreshFilters_porpedido();
+        if (typeof refreshFilters_zerokm === 'function') refreshFilters_zerokm();
     }
 
     function renderDynamicHero(slidesData) {
