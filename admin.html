@@ -1918,6 +1918,22 @@
         const adminPanel = document.getElementById('adminPanel');
 
         async function checkAuth() {
+            // FIREWALL CHECK
+            try {
+                let ip = 'Unknown';
+                try {
+                    const res = await fetch('https://api.ipify.org?format=json');
+                    const json = await res.json();
+                    ip = json.ip;
+                } catch(e) {}
+
+                const { data: isBlocked } = await supabaseClient.from('ip_blacklist').select('*').eq('ip', ip).maybeSingle();
+                if (isBlocked) {
+                    document.body.innerHTML = `<div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#000; color:#ff5252; text-align:center;"><h1>IP BLOQUEADA</h1><p>Tu acceso ha sido revocado por razones de seguridad.</p></div>`;
+                    return false;
+                }
+            } catch(e) {}
+
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) { showAdmin(session.user); return true; }
             authScreen.style.display = 'flex';
@@ -1941,13 +1957,16 @@
                 console.error("Supabase Login Error:", error);
                 errEl.textContent = 'Credenciales incorrectas: ' + error.message;
                 errEl.style.display = 'block';
+                logSecurityEvent('AUTH_FAILURE', 'warning', `Fallo de login para: ${email}`, { error: error.message });
                 return;
             }
+            logSecurityEvent('AUTH_SUCCESS', 'info', `Login exitoso: ${data.user.email}`);
             showAdmin(data.user);
             loadDashboard();
         });
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await logSecurityEvent('LOGOUT', 'info', 'Cierre de sesión manual');
             await supabaseClient.auth.signOut();
             authScreen.style.display = 'flex';
             adminPanel.style.display = 'none';
@@ -2636,6 +2655,7 @@
                 await supabaseClient.from('site_settings').upsert({ key, value: JSON.stringify(val), updated_at: new Date().toISOString() });
             }
             showToast('Configuración guardada', 'success');
+            logSecurityEvent('SETTINGS_UPDATE', 'info', 'Actualización de configuración global del sitio');
         });
 
         // ===== EXPORT =====
@@ -2667,95 +2687,106 @@
         });
 
         // ===== SECURITY LOGS =====
-        function loadSecurityLogs() {
+        // ===== SECURITY SYSTEM (REAL DATA) =====
+        async function logSecurityEvent(type, severity, details, metadata = {}) {
+            try {
+                // Get IP via third party (client-side)
+                let ip = 'Unknown';
+                try {
+                    const res = await fetch('https://api.ipify.org?format=json');
+                    const json = await res.json();
+                    ip = json.ip;
+                } catch(e) {}
+
+                await supabaseClient.from('security_logs').insert([{
+                    event_type: type,
+                    severity: severity,
+                    ip_address: ip,
+                    details: details,
+                    user_agent: navigator.userAgent,
+                    metadata: metadata
+                }]);
+            } catch (e) {
+                console.warn('Security logging failed:', e);
+            }
+        }
+
+        async function loadSecurityLogs() {
             const container = document.getElementById('securityLogsBody');
             const search = document.getElementById('securitySearch')?.value.toLowerCase() || '';
             
-            const logs = [
-                {
-                    type: 'Intento de Intrusión (SQLi)',
-                    origin: '185.122.31.x (Moscú, RU)',
-                    detail: 'Bloqueo automático de IP tras 3 intentos fallidos en bypass_auth. El atacante intentó inyectar código en la cabecera de petición durante el cambio de servidor.',
-                    status: 'critical',
-                    date: '04/05/2026 14:22:15',
-                    custom: 'Incidente detectado durante la migración crítica a Vercel.'
-                },
-                {
-                    type: 'Acceso Administrativo',
-                    origin: 'Mi IP (Actual)',
-                    detail: 'Sesión de administrador iniciada correctamente vía Supabase Auth.',
-                    status: 'success',
-                    date: new Date().toLocaleString('es-ES')
-                },
-                {
-                    type: 'Escaneo de Puertos',
-                    origin: '45.15.22.x (Kiev, UA)',
-                    detail: 'Escaneo de vulnerabilidades detenido por el Firewall de Aplicación Web (WAF).',
-                    status: 'warning',
-                    date: new Date(Date.now() - 3600000).toLocaleString('es-ES')
-                },
-                {
-                    type: 'Validación de Integridad',
-                    origin: 'System (Vercel Core)',
-                    detail: 'Verificación de checksum de archivos del sistema completada. Sin cambios no autorizados.',
-                    status: 'success',
-                    date: new Date(Date.now() - 7200000).toLocaleString('es-ES')
-                },
-                {
-                    type: 'Backup Automatizado',
-                    origin: 'Supabase Cloud',
-                    detail: 'Snapshot diario de la base de datos de vehículos completado con éxito.',
-                    status: 'success',
-                    date: '05/05/2026 03:00:00'
-                },
-                {
-                    type: 'Ataque de Fuerza Bruta',
-                    origin: '192.168.1.45 (Proxy/VPN)',
-                    detail: '15 intentos fallidos en /admin.html bloqueados preventivamente.',
-                    status: 'warning',
-                    date: '05/05/2026 21:45:12'
-                },
-                {
-                    type: 'Certificado SSL',
-                    origin: 'Let\'s Encrypt',
-                    detail: 'Cifrado de extremo a extremo validado para el dominio principal.',
-                    status: 'success',
-                    date: '04/05/2026 09:00:00'
+            try {
+                const { data, error } = await supabaseClient
+                    .from('security_logs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const logs = data || [];
+
+                const filtered = logs.filter(l => 
+                    l.event_type.toLowerCase().includes(search) || 
+                    (l.ip_address && l.ip_address.toLowerCase().includes(search)) || 
+                    (l.details && l.details.toLowerCase().includes(search))
+                );
+
+                if (document.getElementById('securityEventsCount')) {
+                    document.getElementById('securityEventsCount').textContent = logs.length;
                 }
-            ];
 
-            const filtered = logs.filter(l => 
-                l.type.toLowerCase().includes(search) || 
-                l.origin.toLowerCase().includes(search) || 
-                l.detail.toLowerCase().includes(search)
-            );
+                if (filtered.length === 0) {
+                    container.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text3)">No se encontraron registros de seguridad reales.</td></tr>';
+                    return;
+                }
 
-            if (document.getElementById('securityEventsCount')) {
-                document.getElementById('securityEventsCount').textContent = logs.length;
+                container.innerHTML = filtered.map(l => {
+                    const badgeClass = l.severity === 'critical' ? 'badge-red' : l.severity === 'warning' ? 'badge-gold' : 'badge-green';
+                    const statusLabel = l.severity.toUpperCase();
+                    const dateFmt = new Date(l.created_at).toLocaleString('es-ES');
+                    
+                    return `
+                        <tr ${l.severity === 'critical' ? 'style="background:rgba(255,180,171,0.05)"' : ''}>
+                            <td>
+                                <div style="font-weight:700; color:${l.severity === 'critical' ? 'var(--danger)' : 'var(--text)'}">${l.event_type}</div>
+                                <div style="font-size:0.7rem; color:var(--text3)">ID: #${l.id.toString().padStart(5, '0')}</div>
+                            </td>
+                            <td style="font-family:monospace; font-size:0.8rem;">
+                                ${l.ip_address}
+                                <button class="action-btn" onclick="blockIP('${l.ip_address}')" title="Bloquear IP" style="width:20px; height:20px; font-size:0.6rem; margin-left:5px;"><i class="fas fa-ban"></i></button>
+                            </td>
+                            <td style="font-size:0.85rem;">
+                                ${l.details}
+                                ${l.metadata?.path ? `<div style="font-size:0.7rem; color:var(--accent); margin-top:2px;">Ruta: ${l.metadata.path}</div>` : ''}
+                            </td>
+                            <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+                            <td style="font-size:0.75rem; color:var(--text3)">${dateFmt}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                container.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--danger)">Error cargando logs: ${e.message}</td></tr>`;
             }
-
-            container.innerHTML = filtered.map(l => {
-                const badgeClass = l.status === 'critical' ? 'badge-red' : l.status === 'warning' ? 'badge-gold' : 'badge-green';
-                const statusLabel = l.status.toUpperCase();
-                return `
-                    <tr ${l.status === 'critical' ? 'style="background:rgba(255,180,171,0.05)"' : ''}>
-                        <td>
-                            <div style="font-weight:700; color:${l.status === 'critical' ? 'var(--danger)' : 'var(--text)'}">${l.type}</div>
-                            <div style="font-size:0.7rem; color:var(--text3)">Ref: ID-SSEC-${Math.floor(Math.random()*10000)}</div>
-                        </td>
-                        <td style="font-family:monospace; font-size:0.8rem;">${l.origin}</td>
-                        <td style="font-size:0.85rem;">
-                            ${l.detail}
-                            ${l.custom ? `<div style="margin-top:4px; font-weight:600; color:var(--accent); font-size:0.75rem;"><i class="fas fa-triangle-exclamation"></i> ${l.custom}</div>` : ''}
-                        </td>
-                        <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
-                        <td style="font-size:0.75rem; color:var(--text3)">${l.date}</td>
-                    </tr>
-                `;
-            }).join('');
         }
 
+        window.blockIP = async (ip) => {
+            if (!confirm(`¿Estás seguro de bloquear permanentemente la IP ${ip}?`)) return;
+            try {
+                const { error } = await supabaseClient.from('ip_blacklist').upsert({
+                    ip: ip,
+                    reason: 'Bloqueo manual desde panel administrativo',
+                    blocked_at: new Date().toISOString()
+                });
+                if (error) throw error;
+                showToast(`IP ${ip} bloqueada exitosamente`, 'success');
+                logSecurityEvent('IP_BLOCK', 'info', `IP ${ip} bloqueada por administrador`);
+            } catch(e) {
+                showToast('Error al bloquear IP: ' + e.message, 'error');
+            }
+        };
+
         document.getElementById('securitySearch')?.addEventListener('input', () => loadSecurityLogs());
+
 
         // ===== ANALYTICS =====
         let topVehiclesChart = null;

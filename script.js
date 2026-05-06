@@ -8,6 +8,62 @@
 window.WHATSAPP_NUMBER = "584248700438"; // Default fallback
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ===== SECURITY FIREWALL & IDS =====
+    async function checkSecurity() {
+        try {
+            // 1. Get current IP
+            let ip = 'Unknown';
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const json = await res.json();
+                ip = json.ip;
+            } catch(e) {}
+
+            // 2. Check Blacklist
+            const { data: isBlocked } = await supabaseClient
+                .from('ip_blacklist')
+                .select('*')
+                .eq('ip', ip)
+                .maybeSingle();
+
+            if (isBlocked) {
+                document.body.innerHTML = `
+                    <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:20px;">
+                        <i class="fas fa-shield-virus" style="font-size:4rem; color:#ff5252; margin-bottom:20px;"></i>
+                        <h1 style="font-size:2rem; margin-bottom:10px;">ACCESO RESTRINGIDO</h1>
+                        <p style="color:#888; max-width:500px;">Tu dirección IP (${ip}) ha sido bloqueada permanentemente por nuestro sistema de ciberseguridad debido a actividades sospechosas.</p>
+                        <p style="font-size:0.8rem; margin-top:20px; color:#444;">Ref: FW-BLOCK-SYSTEM-01</p>
+                    </div>
+                `;
+                return false;
+            }
+
+            // 3. Proactive Intrusion Detection (URL & Forms)
+            const suspiciousPatterns = [
+                /<script/i, /UNION SELECT/i, /OR '1'='1'/i, /DROP TABLE/i, /<img/i, /onerror/i
+            ];
+            
+            const checkSuspicious = (str) => suspiciousPatterns.some(p => p.test(str));
+
+            if (checkSuspicious(window.location.search) || checkSuspicious(window.location.hash)) {
+                await supabaseClient.from('security_logs').insert([{
+                    event_type: 'IDS_URL_ALERT',
+                    severity: 'warning',
+                    ip_address: ip,
+                    details: `Patrón sospechoso detectado en la URL: ${window.location.href}`,
+                    user_agent: navigator.userAgent
+                }]);
+            }
+
+            return true;
+        } catch (e) {
+            console.warn('Security check failed:', e);
+            return true;
+        }
+    }
+
+    checkSecurity();
+
     // ===== VISITOR IDENTIFICATION (CRM) =====
     function getVisitorId() {
         let vid = localStorage.getItem('sn_visitor_id');
