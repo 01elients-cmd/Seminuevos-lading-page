@@ -112,7 +112,7 @@ CREATE POLICY "Authenticated users can delete images"
 
 -- 10. Default settings
 INSERT INTO site_settings (key, value) VALUES
-    ('whatsapp_number', '"584147977832"'),
+    ('whatsapp_number', '"584248700438"'),
     ('company_name', '"SemiNuevo"'),
     ('company_slogan', '"Compra, Consigue, Accede"'),
     ('company_address', '"Porlamar, Isla de Margarita"'),
