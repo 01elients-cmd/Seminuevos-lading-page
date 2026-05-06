@@ -464,11 +464,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Load settings
             const { data: sData } = await supabaseClient.from('site_settings').select('*');
-                const map = {};
+            const map = {};
+            if (sData) {
                 sData.forEach(s => {
                     try {
                         map[s.key] = JSON.parse(s.value);
-                    } catch(e) {
+                    } catch (e) {
                         map[s.key] = s.value;
                     }
                 });
@@ -505,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.error('Error fetching CMS data', e); }
 
         renderAllPanels();
-        
+
         // Refresh filter buttons after data is loaded
         if (typeof refreshFilters_seminuevos === 'function') refreshFilters_seminuevos();
         if (typeof refreshFilters_porpedido === 'function') refreshFilters_porpedido();
