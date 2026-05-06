@@ -16,7 +16,7 @@ const allVehicles = [];
 /**
  *  NÚMERO DE WHATSAPP PARA CONSULTAS
  */
-const WHATSAPP_NUMBER = "584147977832";
+const WHATSAPP_NUMBER = "584248700438";
 
 /**
  *  INFORMACIÓN DE LA EMPRESA
@@ -24,7 +24,7 @@ const WHATSAPP_NUMBER = "584147977832";
 const COMPANY_INFO = {
     name: "SemiNuevos Agency",
     slogan: "Conduce a Otro Nivel",
-    phone: "+58 414-797-7832",
+    phone: "+58 424-870-0438",
     email: "info@seminuevosagency.com",
     address: "Porlamar, Isla de Margarita, Venezuela",
     hours: "Lun - Sáb: 9:00 AM - 7:00 PM",

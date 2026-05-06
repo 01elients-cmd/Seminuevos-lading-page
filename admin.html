@@ -2586,7 +2586,7 @@
             const imp = vehicles.filter(v => v.catalog === 'importados' && v.status === 'active');
             const okm = vehicles.filter(v => v.catalog === '0km' && v.status === 'active');
             const fmt = arr => JSON.stringify(arr.map(v => ({ id: v.id, title: v.title, price: v.price, year: v.year, km: v.km, engine: v.engine, transmission: v.transmission, fuel: v.fuel, bodyType: v.body_type, origin: v.origin, condition: v.condition, availability: v.availability, badge: v.badge, images: v.images, description: v.description })), null, 4);
-            document.getElementById('codeOutput').textContent = `const vehiclesSeminuevos = ${fmt(semi)};\n\nconst vehiclesImportados = ${fmt(imp)};\n\nconst vehicles0km = ${fmt(okm)};\n\nconst WHATSAPP_NUMBER = "584147977832";\n`;
+            document.getElementById('codeOutput').textContent = `const vehiclesSeminuevos = ${fmt(semi)};\n\nconst vehiclesImportados = ${fmt(imp)};\n\nconst vehicles0km = ${fmt(okm)};\n\nconst WHATSAPP_NUMBER = "584248700438";\n`;
         }
         document.getElementById('copyCodeBtn')?.addEventListener('click', () => {
             navigator.clipboard.writeText(document.getElementById('codeOutput').textContent).then(() => showToast('Código copiado', 'success'));

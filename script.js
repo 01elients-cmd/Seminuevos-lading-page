@@ -5,7 +5,7 @@
  */
 
 // Global Constants
-window.WHATSAPP_NUMBER = "584147977832"; // Default fallback
+window.WHATSAPP_NUMBER = "584248700438"; // Default fallback
 
 document.addEventListener('DOMContentLoaded', () => {
     // ===== VISITOR IDENTIFICATION (CRM) =====
@@ -464,10 +464,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Load settings
             const { data: sData } = await supabaseClient.from('site_settings').select('*');
-            if (sData) {
                 const map = {};
-                sData.forEach(s => map[s.key] = JSON.parse(s.value));
-                if (map.whatsapp_number) window.WHATSAPP_NUMBER = map.whatsapp_number;
+                sData.forEach(s => {
+                    try {
+                        map[s.key] = JSON.parse(s.value);
+                    } catch(e) {
+                        map[s.key] = s.value;
+                    }
+                });
+                
+                if (map.whatsapp_number) {
+                    // Normalize number (remove +, spaces, etc.) for WhatsApp links
+                    window.WHATSAPP_NUMBER = String(map.whatsapp_number).replace(/[^0-9]/g, '');
+                }
 
                 // Update UI visually
                 if (map.company_name) document.querySelectorAll('.logo-text').forEach(el => el.textContent = map.company_name);
