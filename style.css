@@ -528,7 +528,8 @@ body::after {
 .hero {
     position: relative;
     height: 100vh;
-    min-height: 750px;
+    height: Math.max(100vh, -webkit-fill-available); /* Estabilidad en móvil */
+    min-height: 650px;
     overflow: hidden;
 }
 
@@ -575,10 +576,28 @@ body::after {
 
 .hero-content {
     position: absolute;
-    bottom: 14%;
+    bottom: 12%;
     left: 7%;
-    max-width: 680px;
+    max-width: 800px;
     z-index: 10;
+    transition: all 0.5s ease;
+}
+
+/* Centrado automático para el primer slide (estilo bienvenida) */
+.hero-slide:first-child .hero-content {
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    bottom: 15%;
+}
+
+.hero-slide:first-child .hero-buttons {
+    justify-content: center;
+}
+
+.hero-slide:first-child .hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .hero-slide.active .hero-content {
@@ -615,11 +634,11 @@ body::after {
 .hero-title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(3.2rem, 6.5vw, 6rem);
-    line-height: 1;
-    letter-spacing: -2px;
+    font-size: clamp(2.5rem, 5vw, 4.2rem); /* Sincronizado con JS */
+    line-height: 1.1;
+    letter-spacing: -1px;
     margin-bottom: 24px;
-    text-transform: uppercase;
+    text-transform: none; /* Quitamos el uppercase para evitar el salto */
 }
 
 .hero-title .text-accent {

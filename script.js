@@ -583,23 +583,21 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `
                 <div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${s.image}')">
                     <div class="hero-overlay" style="background: ${isFirst ? 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%)' : 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)'};"></div>
-                        <div class="hero-content" style="${isFirst ? 'display:flex; flex-direction:column; align-items:center; text-align:center; bottom:15%; left:0; right:0; margin:0 auto; max-width:800px; width:100%;' : 'bottom: 35%; left: 7%;'}">
-                            <div style="font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; color: var(--outline); margin-bottom: 8px; text-transform: uppercase;">
+                        <div class="hero-content">
+                            <div class="hero-tag">
                                 <i class="fas ${isFirst ? 'fa-bolt' : (isSecond ? 'fa-star' : 'fa-car')}" style="color: var(--primary);"></i> ${s.tag}
                             </div>
-                            <h1 class="hero-title" style="font-size: clamp(3rem, 5vw, 4.5rem); text-transform: none; margin-bottom: 8px; font-weight: 700;">
-                                ${s.title.includes('<span') ? s.title : s.title.replace('0KM', '<span class="text-accent" style="background: none; -webkit-text-fill-color: initial; color: var(--primary);">0KM</span>')}
+                            <h1 class="hero-title">
+                                ${s.title.includes('<span') ? s.title : s.title.replace('0KM', '<span class="text-accent">0KM</span>')}
                             </h1>
-                            <p class="hero-subtitle" style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface-variant); max-width: 600px; ${isFirst ? 'margin-left:auto; margin-right:auto;' : ''}">
+                            <p class="hero-subtitle">
                                 ${s.subtitle}
                             </p>
-                            <div class="hero-buttons" style="${isFirst ? 'justify-content: center;' : ''}">
-                                <a href="#catalogo" class="btn btn-primary" onclick="window.scrollTo({top: document.getElementById('catalogo').offsetTop - 80, behavior: 'smooth'})" 
-                                   style="padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
+                            <div class="hero-buttons">
+                                <a href="#catalogo" class="btn btn-primary">
                                    Ver Inventario
                                 </a>
-                                <a href="https://wa.me/${window.WHATSAPP_NUMBER}" class="btn btn-outline" 
-                                   style="padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px;">
+                                <a href="https://wa.me/${window.WHATSAPP_NUMBER}" class="btn btn-outline">
                                    Consultar
                                 </a>
                             </div>
