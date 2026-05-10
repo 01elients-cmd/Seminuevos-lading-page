@@ -528,8 +528,8 @@ body::after {
 .hero {
     position: relative;
     height: 100vh;
-    height: Math.max(100vh, -webkit-fill-available); /* Estabilidad en móvil */
-    min-height: 650px;
+    height: 100dvh; /* Altura dinámica estable */
+    min-height: 600px;
     overflow: hidden;
 }
 

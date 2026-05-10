@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, { threshold: 0.5 });
-    document.querySelectorAll('section[id]').forEach(s => sectionObserver.observe(s));
+    document.querySelectorAll('section[id]:not(#inicio)').forEach(s => sectionObserver.observe(s));
 
     // Auto-track Scroll Depth
     let scrollMarkers = [25, 50, 75, 90];
@@ -627,7 +627,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     dotsContainer.appendChild(dot);
                 });
             }
-        }, 100);
+            // Asegurar que el primer slide sea visible inmediatamente
+            if(heroSlider.slides.length > 0) {
+                heroSlider.slides[0].classList.add('active');
+            }
+        }, 150);
     }
 
     initSupabaseData();

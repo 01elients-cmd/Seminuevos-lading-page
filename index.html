@@ -129,98 +129,13 @@
 
     <!-- ===== HERO SECTION — VEHICLE SHOWCASE ===== -->
     <section class="hero" id="inicio">
-        <div class="hero-slider" id="heroSlider">
-
-            <!-- SLIDE 1: 4Runner in Centered Layout -->
-            <div class="hero-slide active" style="background-image: url('images/hero1.webp')">
-                <div class="hero-overlay">
-                </div>
-                <div class="hero-content"
-                    style="left: 0; right: 0; margin: 0 auto; text-align: center; bottom: 8%; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center;">
-
-                    <div
-                        style="font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; color: var(--outline); margin-bottom: 8px; text-transform: uppercase;">
-                        <i class="fas fa-bolt" style="color: var(--primary);"></i> ENTREGA INMEDIATA
-                    </div>
-                    <h1 class="hero-title"
-                        style="font-size: clamp(3rem, 5vw, 4rem); text-transform: none; margin-bottom: 8px; font-weight: 700;">
-                        Seminuevos: Dealer Premium y Soluciones de Importación Automotriz</h1>
-                    <p style="font-size: 1.1rem; margin-bottom: 24px; color: var(--on-surface);">Toyota • 4x4 • Puerto
-                        Libre
-                    </p>
-
-                    <div
-                        style="display: flex; gap: clamp(20px, 5vw, 40px); margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
-                        <div style="text-align: center;">
-                            <div style="font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; line-height: 1;">
-                                $42.500</div>
-                            <div
-                                style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
-                                PRECIO</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; line-height: 1;">51.000
-                            </div>
-                            <div
-                                style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 4px; font-weight: 500;">
-                                KM</div>
-                        </div>
-                    </div>
-
-                    <div class="hero-buttons"
-                        style="justify-content: center; gap: 16px; flex-wrap: wrap; display: flex; width: 100%;">
-                        <a href="#catalogo" class="btn btn-primary"
-                            onclick="document.querySelector('[data-section=\'seminuevos\']').click()"
-                            style="background: #fff; color: #000; padding: 14px 32px; font-size: 0.9rem; border: none; box-shadow: none; cursor: pointer;">
-                            <i class="fas fa-search" style="margin-right: 6px;"></i> Ver en Stock
-                        </a>
-                        <a href="https://wa.me/584248700438?text=Hola,%20quiero%20comprar%20la%20Toyota%204Runner%20Trail%202021%20(%2442.500).%20%C2%BFEst%C3%A1%20disponible%3F"
-                            target="_blank" class="btn"
-                            style="background: transparent; color: #fff; border: 1px solid #fff; padding: 14px 32px; font-size: 0.9rem; box-shadow: none;">
-                            <i class="fab fa-whatsapp" style="margin-right: 6px;"></i> Comprar Ahora
-                        </a>
-                    </div>
-                </div>
+        <div class="hero-slider">
+            <!-- El contenido se inyecta dinámicamente desde Supabase -->
+            <div class="hero-slide active" style="background: #000; display: flex; align-items: center; justify-content: center;">
+                <div class="loader-spinner"></div>
             </div>
+        </div>
 
-            <!-- SLIDE 2: Generic 0KM Placeholder in Telluride Layout -->
-            <div class="hero-slide" style="background-image: url('images/hero2.png')">
-                <div class="hero-overlay"
-                    style="background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);">
-                </div>
-                <div class="hero-content" style="bottom: 35%; left: 7%;">
-                    <div
-                        style="font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; color: #d1d1d1; margin-bottom: 12px; text-transform: uppercase;">
-                        <i class="fas fa-star"></i> PRÓXIMAMENTE
-                    </div>
-                    <h1 class="hero-title"
-                        style="font-size: clamp(3rem, 5.5vw, 4.5rem); line-height: 1.05; margin-bottom: 32px; text-transform: none; font-weight: 700;">
-                        Nuevos Modelos<br><span class="text-accent"
-                            style="background: none; -webkit-text-fill-color: initial; color: var(--primary);">0KM
-                            2025</span></h1>
-
-                    <div class="hero-buttons">
-                        <a href="#catalogo" class="btn btn-primary"
-                            onclick="document.querySelector('[data-section=\'0km\']').click()"
-                            style="background: #fff; color: #000; padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border: none; box-shadow: none;">Ver
-                            Catálogo 0KM</a>
-                        <a href="https://wa.me/584248700438?text=Hola,%20quiero%20información%20sobre%20vehículos%200KM%20disponibles."
-                            target="_blank" class="btn btn-outline"
-                            style="padding: 16px 36px; font-size: 0.9rem; letter-spacing: 0.5px; border-color: #fff; color: #fff; background: transparent;">Consultar</a>
-                    </div>
-                </div>
-
-                <!-- Specs row on bottom side (replacing disclaimers) -->
-                <div style="position: absolute; bottom: 30px; left: 7%; z-index: 10;" class="slide-extra-info">
-                    <div style="display: flex; gap: 20px; font-size: 0.85rem; color: #b0b0b0;">
-                        <span><i class="fas fa-ship"></i> Importación Directa</span>
-                        <span><i class="fas fa-shield-halved"></i> Garantía 2 Años</span>
-                        <span><i class="fas fa-file-circle-check"></i> Documentación USA</span>
-                    </div>
-                </div>
-            </div>
-
-        <!-- Hero Controls -->
         <div class="hero-dots-container">
             <div class="hero-dots" id="heroDots"></div>
         </div>
