@@ -585,19 +585,27 @@ body::after {
 
 /* Centrado automático para el primer slide (estilo bienvenida) */
 .hero-slide:first-child .hero-content {
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    bottom: 15%;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+    bottom: 15% !important;
+    width: 100%;
+    max-width: 900px;
 }
 
 .hero-slide:first-child .hero-buttons {
-    justify-content: center;
+    justify-content: center !important;
 }
 
 .hero-slide:first-child .hero-subtitle {
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.hero-slide:first-child .hero-tag {
+    justify-content: center;
+    display: flex;
+    align-items: center;
 }
 
 .hero-slide.active .hero-content {
