@@ -4275,3 +4275,24 @@ body::after {
         width: 100%;
     }
 }
+
+/* Estilo del botón compartir GR */
+.btn-gr-share {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 16px 36px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-gr-share:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #fff;
+}

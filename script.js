@@ -1488,3 +1488,20 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+
+// Función para copiar el enlace directo al Yaris GR
+function copyYarisLink() {
+    const url = window.location.origin + window.location.pathname + '#yaris-gr-exclusive';
+    
+    navigator.clipboard.writeText(url).then(() => {
+        const msg = document.getElementById('copyMessage');
+        msg.style.display = 'block';
+        
+        // Ocultar el mensaje después de 3 segundos
+        setTimeout(() => {
+            msg.style.display = 'none';
+        }, 3000);
+    }).catch(err => {
+        console.error('Error al copiar el enlace: ', err);
+    });
+}

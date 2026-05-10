@@ -419,10 +419,13 @@
                 <a href="https://wa.me/584248700438?text=Hola,%20quiero%20aplicar%20por%20uno%20de%20los%2010%20cupos%20VIP%20para%20el%20Toyota%20Yaris%20GR." target="_blank" class="btn btn-gr-primary">
                     <i class="fab fa-whatsapp"></i> Reservar mi cupo
                 </a>
-                <a href="#catalogo" class="btn btn-gr-secondary">
-                    Explorar inventario regular
-                </a>
+                <button onclick="copyYarisLink()" class="btn btn-gr-share" id="shareBtn">
+                    <i class="fas fa-share-alt"></i> Compartir
+                </button>
             </div>
+            <p id="copyMessage" style="display:none; color: #4ade80; font-size: 0.8rem; margin-top: 15px; font-weight: 600;">
+                <i class="fas fa-check-circle"></i> ¡Enlace VIP copiado al portapapeles!
+            </p>
         </div>
     </section>
 
