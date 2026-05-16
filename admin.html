@@ -3070,6 +3070,9 @@
 
                 for (let i = 0; i < links.length; i++) {
                     const url = links[i];
+                    // Add small delay to avoid triggering rate limits or concurrent blocks
+                    if (i > 0) await new Promise(r => setTimeout(r, 1500));
+                    
                     statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[${i + 1}/${links.length}] Conectando con: ${url.split('/').pop().substring(0, 15)}...</div>`;
                     statusBox.scrollTop = statusBox.scrollHeight;
 

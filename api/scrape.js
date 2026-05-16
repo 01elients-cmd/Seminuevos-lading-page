@@ -39,16 +39,35 @@ export default async function handler(req, res) {
         if (!url) return res.status(400).json({ message: 'URL required' });
 
         const html = providedHtml || await (async () => {
+            const isIAAI = url.includes('iaai.com');
+            const isCopart = url.includes('copart.com');
+            
             if (providedKey) {
-                // Without render=true first (faster, often bypasses basic blocks if data is in initial HTML)
-                let sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&antibot=true&premium=true`;
+                // For IAAI, we might want to be more aggressive or use specific settings
+                let sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&antibot=true&premium=true&country_code=us`;
+                
                 let r = await fetch(sUrl);
                 let text = await r.text();
                 
+                // Detection for common blocks
+                const isBlocked = (t) => 
+                    t.includes('Pardon Our Interruption') || 
+                    t.includes('Incapsula') || 
+                    t.includes('Imperva') || 
+                    t.includes('Additional security check') ||
+                    t.includes('captcha') ||
+                    t.includes('Access Denied') ||
+                    t.includes('Reference #') ||
+                    t.includes('distil') ||
+                    t.length < 500; // Very short response is usually a block
+
                 // If blocked or missing data, try with render=true
-                if (text.includes('Pardon Our Interruption') || text.includes('Incapsula') || text.includes('Imperva')) {
-                    console.log('Bot detected, retrying with render=true');
-                    sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&antibot=true&premium=true`;
+                if (isBlocked(text)) {
+                    console.log('Bot detected or empty response, retrying with render=true');
+                    sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&antibot=true&premium=true&country_code=us`;
+                    // For IAAI specifically, adding a wait helps
+                    if (isIAAI) sUrl += '&wait_for_selector=.pdp-main-content'; 
+                    
                     r = await fetch(sUrl);
                     text = await r.text();
                 }
@@ -155,8 +174,18 @@ function scanForData(obj, data = {}) {
 }
 
 function parseIAAI(html, url) {
-    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula') || html.includes('Pardon Our Interruption')) {
-        throw new Error('IAAI Bloqueado. Usa Modo Manual o verifica tus créditos de Proxy.');
+    const isBlocked = html.includes('Additional security check') || 
+                      html.includes('captcha') || 
+                      html.includes('Imperva') || 
+                      html.includes('Incapsula') || 
+                      html.includes('Pardon Our Interruption') ||
+                      html.includes('Access Denied') ||
+                      html.includes('Reference #') ||
+                      html.includes('distil') ||
+                      html.length < 500;
+
+    if (isBlocked) {
+        throw new Error('IAAI Bloqueado. Usa Modo Manual (pega el HTML) o verifica si tu Proxy tiene créditos/antibot activado.');
     }
 
     // Improved regex for __PRELOADED_STATE__
