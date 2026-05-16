@@ -1,3 +1,6 @@
+import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+
 export default async function handler(req, res) {
     // IMAGE PROXY MODE
     if (req.method === 'GET' && req.query.proxy) {
@@ -10,14 +13,14 @@ export default async function handler(req, res) {
             let response;
             try {
                 response = await fetch(target, {
-                    headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.google.com' },
+                    headers: { 'User-Agent': 'Mozilla/5.0' },
                     signal: AbortSignal.timeout(5000)
                 });
                 if (!response.ok) throw new Error('Direct failed');
             } catch (e) {
                 if (key) {
-                    const sUrl = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(target)}&country_code=us`;
-                    response = await fetch(sUrl, { signal: AbortSignal.timeout(10000) });
+                    const agent = new HttpsProxyAgent(`http://auto:${key}@proxy.apify.com:8000`);
+                    response = await fetch(target, { agent, signal: AbortSignal.timeout(10000) });
                 } else return res.status(403).send('Blocked');
             }
 
@@ -43,11 +46,22 @@ export default async function handler(req, res) {
             const isCopart = url.includes('copart.com');
             
             if (providedKey) {
-                // For IAAI, we might want to be more aggressive or use specific settings
-                let sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&antibot=true&premium=true&country_code=us`;
+                const proxyUrl = `http://auto:${providedKey}@proxy.apify.com:8000`;
+                const agent = new HttpsProxyAgent(proxyUrl);
                 
-                let r = await fetch(sUrl);
-                let text = await r.text();
+                const fetchWithProxy = async () => {
+                    const r = await fetch(url, {
+                        agent,
+                        headers: { 
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                            'Accept-Language': 'en-US,en;q=0.5'
+                        }
+                    });
+                    return await r.text();
+                };
+
+                let text = await fetchWithProxy();
                 
                 // Detection for common blocks
                 const isBlocked = (t) => 
@@ -61,15 +75,10 @@ export default async function handler(req, res) {
                     t.includes('distil') ||
                     t.length < 500; // Very short response is usually a block
 
-                // If blocked or missing data, try with render=true
+                // If blocked or missing data, retry with proxy (auto mode will rotate IP)
                 if (isBlocked(text)) {
-                    console.log('Bot detected or empty response, retrying with render=true');
-                    sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&antibot=true&premium=true&country_code=us`;
-                    // For IAAI specifically, adding a wait helps
-                    if (isIAAI) sUrl += '&wait_for_selector=.pdp-main-content'; 
-                    
-                    r = await fetch(sUrl);
-                    text = await r.text();
+                    console.log('Bot detected or empty response, retrying with Apify Proxy...');
+                    text = await fetchWithProxy();
                 }
                 return text;
             } else {
@@ -79,8 +88,8 @@ export default async function handler(req, res) {
         })();
 
         if (!html) throw new Error('Cargando página vacía. Verifica el link.');
-        if (html.includes('Unauthorized request')) throw new Error('Scraper API Proxy Key inválida o sin créditos.');
-        if (html.includes('concurrent limit') || html.includes('ran out of credits')) throw new Error('Te has quedado sin créditos en ScraperAPI o límite excedido.');
+        if (html.includes('Proxy Authentication Required')) throw new Error('Contraseña del Proxy de Apify inválida o sin permisos.');
+        if (html.includes('ran out of credits') || html.includes('usage limit')) throw new Error('Te has quedado sin uso disponible en Apify o límite excedido.');
 
         let result;
         if (url.includes('copart.com')) {
