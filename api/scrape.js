@@ -40,9 +40,19 @@ export default async function handler(req, res) {
 
         const html = providedHtml || await (async () => {
             if (providedKey) {
-                const sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&antibot=true&premium=true`;
-                const r = await fetch(sUrl);
-                return await r.text();
+                // Without render=true first (faster, often bypasses basic blocks if data is in initial HTML)
+                let sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&antibot=true&premium=true`;
+                let r = await fetch(sUrl);
+                let text = await r.text();
+                
+                // If blocked or missing data, try with render=true
+                if (text.includes('Pardon Our Interruption') || text.includes('Incapsula') || text.includes('Imperva')) {
+                    console.log('Bot detected, retrying with render=true');
+                    sUrl = `https://api.scraperapi.com?api_key=${providedKey}&url=${encodeURIComponent(url)}&render=true&antibot=true&premium=true`;
+                    r = await fetch(sUrl);
+                    text = await r.text();
+                }
+                return text;
             } else {
                 const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
                 return await r.text();
@@ -145,8 +155,8 @@ function scanForData(obj, data = {}) {
 }
 
 function parseIAAI(html, url) {
-    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula')) {
-        throw new Error('IAAI Bloqueado. Usa Modo Manual.');
+    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula') || html.includes('Pardon Our Interruption')) {
+        throw new Error('IAAI Bloqueado. Usa Modo Manual o verifica tus créditos de Proxy.');
     }
 
     // Improved regex for __PRELOADED_STATE__
@@ -158,6 +168,17 @@ function parseIAAI(html, url) {
         } catch (e) { 
             console.error("IAAI JSON Parse Error");
         } 
+    }
+
+    // Support Next.js data (IAAI new layout)
+    const nextDataStr = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/i)?.[1];
+    if (nextDataStr) {
+        try {
+            const nextData = JSON.parse(nextDataStr);
+            rawData = scanForData(nextData, rawData);
+        } catch (e) {
+            console.error("IAAI NEXT_DATA Parse Error");
+        }
     }
 
     // Text Fallback if JSON fails
