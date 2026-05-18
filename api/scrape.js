@@ -234,8 +234,8 @@ function parseIAAI(html, url) {
         } 
     }
 
-    // Support Next.js data (IAAI new layout)
-    const nextDataStr = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/i)?.[1];
+    // Support Next.js data (IAAI new layout) - robust regex ignoring attribute order
+    const nextDataStr = html.match(/<script[^>]*id=["']?__NEXT_DATA__["']?[^>]*>([\s\S]*?)<\/script>/i)?.[1];
     if (nextDataStr) {
         try {
             const nextData = JSON.parse(nextDataStr);
@@ -245,18 +245,66 @@ function parseIAAI(html, url) {
         }
     }
 
+    // Direct DOM Parsing Fallback (if JSON data is stripped by React/Apify)
+    if (!rawData.engine || !rawData.km || !rawData.model) {
+        const extractDOM = (label) => {
+            // Buscamos la etiqueta (ej: "Odometer:"), ignoramos los tags HTML intermedios (hasta 150 caracteres), y capturamos el texto visible
+            const reg = new RegExp(`>\\s*${label}\\s*<[\\s\\S]{1,150}?>\\s*([^<\\n]+?)\\s*<`, 'i');
+            const match = html.match(reg);
+            if (match && match[1].trim() !== '') return match[1].trim().replace(/&amp;/g, '&');
+            
+            // Alternativa donde la etiqueta no está rodeada de > < perfectamente
+            const reg2 = new RegExp(`${label}\\s*<[\\s\\S]{1,150}?>\\s*([^<\\n]+?)\\s*<`, 'i');
+            const match2 = html.match(reg2);
+            return match2 ? match2[1].trim().replace(/&amp;/g, '&') : null;
+        };
+
+        if (!rawData.model) rawData.model = extractDOM('Model:');
+        if (!rawData.series) rawData.series = extractDOM('Series:');
+        
+        if (!rawData.km) rawData.km = extractDOM('Odometer:') || extractDOM('Mileage:');
+        if (!rawData.engine) rawData.engine = extractDOM('Engine:') || extractDOM('Engine Size:');
+        if (!rawData.transmission) rawData.transmission = extractDOM('Transmission:');
+        if (!rawData.bodyType) rawData.bodyType = extractDOM('Body Style:') || extractDOM('Vehicle Class:') || extractDOM('Body:');
+        if (!rawData.fuel) rawData.fuel = extractDOM('Fuel Type:') || extractDOM('Fuel:');
+        if (!rawData.vin) {
+            let extractedVin = extractDOM('VIN \\(Status\\):') || extractDOM('VIN:');
+            if (extractedVin) rawData.vin = extractedVin.split(' ')[0]; // Quitar el "(OK)"
+        }
+        if (!rawData.color) rawData.color = extractDOM('Exterior\\/Interior:') || extractDOM('Exterior Color:') || extractDOM('Color:');
+        if (!rawData.location) rawData.location = extractDOM('Selling Branch:');
+        
+        // Try to find the price directly
+        if (!rawData.price) {
+            rawData.price = extractDOM('Actual Cash Value:') || extractDOM('Estimated Repair Cost:');
+            if (!rawData.price) {
+                const priceMatch = html.match(/\$[\d,]+\.\d{2}/) || html.match(/\$[\d,]+/);
+                if (priceMatch) rawData.price = priceMatch[0];
+            }
+        }
+    }
+
     // Text Fallback if JSON fails
-    if (!rawData.year || !rawData.make) {
+    if (!rawData.year || !rawData.make || !rawData.model) {
         const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
         const titleTag = (titleMatch?.[1] || "").toUpperCase();
-        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").toUpperCase();
+        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").replace(/<[^>]+>/g, '').toUpperCase().trim();
+        
+        // Try to get exact model from h1
+        if (h1Tag && h1Tag.split(' ').length > 2) {
+            const parts = h1Tag.split(' ');
+            if (!rawData.year && parts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = parts[0];
+            if (!rawData.make) rawData.make = parts[1];
+            if (!rawData.model) rawData.model = parts.slice(2).join(' ');
+        }
+
         const combined = titleTag + " " + h1Tag;
 
         const yearMatch = combined.match(/\b(20\d{2}|19\d{2})\b/);
-        if (yearMatch) rawData.year = yearMatch[0];
+        if (yearMatch && !rawData.year) rawData.year = yearMatch[0];
 
-        if (titleMatch) {
-            let cleanTitle = titleMatch[1].split(/\||Insurance Auto Auctions|IAAI/i)[0].trim().replace(/\s+/g, ' ');
+        if (titleMatch && !rawData.model) {
+            let cleanTitle = titleMatch[1].split(/\||Insurance Auto|IAAI|For Sale/i)[0].trim().replace(/\s+/g, ' ');
             const titleParts = cleanTitle.split(' ');
             if (titleParts.length >= 2) {
                 if (!rawData.year && titleParts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = titleParts[0];
@@ -274,6 +322,7 @@ function parseIAAI(html, url) {
                 }
             }
         }
+
         
         // Final fallback to avoid crashing batch import
         if (!rawData.year) rawData.year = new Date().getFullYear();
