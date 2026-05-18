@@ -3077,12 +3077,52 @@
                     statusBox.scrollTop = statusBox.scrollHeight;
 
                     try {
-                        const response = await fetch('/api/scrape', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ url: url, proxyKey: proxyKey })
-                        });
-                        const result = await response.json();
+                        let result;
+                        try {
+                            const response = await fetch('/api/scrape', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ url: url, proxyKey: proxyKey })
+                            });
+                            result = await response.json();
+                        } catch (e) {
+                            result = { success: false, message: e.message };
+                        }
+
+                        // FALLBACK APIFY BROWSER SCRAPER PARA IAAI (Bypass Imperva TLS Fingerprinting)
+                        if (!result.success && result.message && result.message.includes('IAAI Bloqueado') && proxyKey) {
+                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#f39c12;">[${i + 1}/${links.length}] Servidor bloqueado por Imperva. Lanzando Headless Browser en Apify API... (Tardará ~15s)</div>`;
+                            statusBox.scrollTop = statusBox.scrollHeight;
+                            
+                            const apifyRes = await fetch(`https://api.apify.com/v2/acts/apify~puppeteer-scraper/run-sync-get-dataset-items?token=${proxyKey}&memory=1024`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    startUrls: [{ url: url }],
+                                    pageFunction: "async function pageFunction(context) { return { html: await context.page.content() }; }",
+                                    proxyConfiguration: { useApifyProxy: true },
+                                    preNavigationHooks: "[\n    async (page, browserController) => {\n        await page.setExtraHTTPHeaders({ 'Accept-Language': 'es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7' });\n    }\n]"
+                                })
+                            });
+                            
+                            if (apifyRes.ok) {
+                                const apifyData = await apifyRes.json();
+                                if (apifyData && apifyData.length > 0 && apifyData[0].html) {
+                                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#2ecc71;">[${i + 1}/${links.length}] Evasión exitosa. Extrayendo datos...</div>`;
+                                    const fbRes = await fetch('/api/scrape', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ url: url, html: apifyData[0].html })
+                                    });
+                                    result = await fbRes.json();
+                                } else {
+                                    throw new Error("El Headless Browser no pudo obtener el HTML. Verifica tu token de Apify.");
+                                }
+                            } else {
+                                const errData = await apifyRes.text();
+                                throw new Error("Apify API Headless Browser falló: " + apifyRes.statusText);
+                            }
+                        }
 
                         if (result.success) {
                             const data = result.data;
