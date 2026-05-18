@@ -3103,7 +3103,7 @@
                                 body: JSON.stringify({
                                     startUrls: [{ url: url }],
                                     pageFunction: "async function pageFunction(context) { const html = await context.page.content(); return { html }; }",
-                                    proxyConfiguration: { useApifyProxy: true }
+                                    proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'] }
                                 })
                             });
                             
