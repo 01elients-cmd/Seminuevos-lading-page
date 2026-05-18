@@ -46,25 +46,9 @@ export default async function handler(req, res) {
             const isCopart = url.includes('copart.com');
             
             if (providedKey) {
-                const proxyUrl = `http://auto:${providedKey}@proxy.apify.com:8000`;
-                const agent = new HttpsProxyAgent(proxyUrl);
-                
-                const fetchWithProxy = async () => {
-                    const r = await fetch(url, {
-                        agent,
-                        headers: { 
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                            'Accept-Language': 'en-US,en;q=0.5'
-                        }
-                    });
-                    return await r.text();
-                };
-
-                let text = await fetchWithProxy();
-                
                 // Detection for common blocks
                 const isBlocked = (t) => 
+                    !t ||
                     t.includes('Pardon Our Interruption') || 
                     t.includes('Incapsula') || 
                     t.includes('Imperva') || 
@@ -73,21 +57,56 @@ export default async function handler(req, res) {
                     t.includes('Access Denied') ||
                     t.includes('Reference #') ||
                     t.includes('distil') ||
-                    t.length < 500; // Very short response is usually a block
+                    t.length < 500;
 
-                // If blocked or missing data, retry with proxy (auto mode will rotate IP)
-                if (isBlocked(text)) {
-                    console.log('Bot detected or empty response, retrying with Apify Proxy...');
-                    text = await fetchWithProxy();
+                let text = '';
+                let success = false;
+                
+                for (let i = 0; i < 3; i++) {
+                    const session = Math.random().toString(36).substring(2, 12);
+                    // Intentar usar proxy residencial en el último intento si está disponible
+                    const proxyGroup = i === 2 ? 'groups-RESIDENTIAL,' : '';
+                    const proxyUrl = `http://auto,${proxyGroup}session-${session}:${providedKey}@proxy.apify.com:8000`;
+                    const agent = new HttpsProxyAgent(proxyUrl);
+                    
+                    try {
+                        const r = await fetch(url, {
+                            agent,
+                            headers: { 
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                                'Accept-Language': 'es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7',
+                                'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+                                'Sec-Ch-Ua-Mobile': '?0',
+                                'Sec-Ch-Ua-Platform': '"Windows"',
+                                'Sec-Fetch-Dest': 'document',
+                                'Sec-Fetch-Mode': 'navigate',
+                                'Sec-Fetch-Site': 'none',
+                                'Sec-Fetch-User': '?1',
+                                'Upgrade-Insecure-Requests': '1',
+                                'Cache-Control': 'max-age=0'
+                            },
+                            signal: AbortSignal.timeout(15000)
+                        });
+                        text = await r.text();
+                        if (!isBlocked(text)) {
+                            success = true;
+                            break;
+                        }
+                        console.log(`Intento ${i+1} bloqueado por el sitio.`);
+                    } catch (err) {
+                        console.log(`Intento ${i+1} falló:`, err.message);
+                    }
                 }
+                
                 return text;
             } else {
-                const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+                const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } });
                 return await r.text();
             }
         })();
 
-        if (!html) throw new Error('Cargando página vacía. Verifica el link.');
+        if (!html) throw new Error('Cargando página vacía. Verifica el link o proxy.');
         if (html.includes('Proxy Authentication Required')) throw new Error('Contraseña del Proxy de Apify inválida o sin permisos.');
         if (html.includes('ran out of credits') || html.includes('usage limit')) throw new Error('Te has quedado sin uso disponible en Apify o límite excedido.');
 
@@ -121,35 +140,35 @@ function scanForData(obj, data = {}) {
     };
 
     // Mapping fields
-    const year = getVal('Year') || getVal('lcy') || getVal('modelYear');
+    const year = getVal('Year') || getVal('lcy') || getVal('modelYear') || getVal('vehicleYear');
     if (year && !data.year) data.year = String(year);
     
-    const make = getVal('Make') || getVal('mkn') || getVal('brand');
+    const make = getVal('Make') || getVal('mkn') || getVal('brand') || getVal('makeName');
     if (make && !data.make) data.make = String(make);
     
     const model = getVal('Model') || getVal('lm') || getVal('modelName');
     if (model && !data.model) data.model = String(model);
     
-    const series = getVal('Series') || getVal('srs') || getVal('trim');
+    const series = getVal('Series') || getVal('srs') || getVal('trim') || getVal('seriesName');
     if (series && !data.series) data.series = String(series);
     
     const vin = getVal('VIN') || getVal('fv') || getVal('vin') || getVal('vinNumber');
     if (vin && !data.vin) data.vin = String(vin);
     
-    const odo = getVal('ODOValue') || getVal('orr') || getVal('odometer') || getVal('mileage');
+    const odo = getVal('ODOValue') || getVal('orr') || getVal('odometer') || getVal('mileage') || getVal('odometerReading');
     if (odo && !data.km) {
         const uom = getVal('ODOUoM') || getVal('uom') || getVal('mileageUnit') || '';
         data.km = `${odo} ${uom}`.trim();
         if (!uom && String(odo).length > 3) data.km += " mi";
     }
     
-    const engine = getVal('EngineSize') || getVal('egn') || getVal('engine') || getVal('engineDescription');
+    const engine = getVal('EngineSize') || getVal('egn') || getVal('engine') || getVal('engineDescription') || getVal('motor');
     if (engine && !data.engine) data.engine = String(engine);
     
     const trans = getVal('Transmission') || getVal('tsmn') || getVal('transmission') || getVal('transmissionType');
     if (trans && !data.transmission) data.transmission = String(trans);
 
-    const body = getVal('BodyStyle') || getVal('bs') || getVal('bodyType') || getVal('bodyStyle');
+    const body = getVal('BodyStyle') || getVal('bs') || getVal('bodyType') || getVal('bodyStyle') || getVal('body');
     if (body && !data.bodyType) data.bodyType = String(body);
 
     const fuel = getVal('FuelType') || getVal('ft') || getVal('fuelType');
@@ -158,12 +177,12 @@ function scanForData(obj, data = {}) {
     const color = getVal('Color') || getVal('clr') || getVal('exteriorColor');
     if (color && !data.color) data.color = String(color);
 
-    const location = getVal('Location') || getVal('loc') || getVal('saleLocation');
+    const location = getVal('Location') || getVal('loc') || getVal('saleLocation') || getVal('branchName');
     if (location && !data.location) data.location = String(location);
     
     // Price Logic: Prefer Buy It Now, then Current Bid
     const bnp = getVal('buyNowPrice') || getVal('bnp') || getVal('buyItNowPrice');
-    const bid = getVal('highBidAmount') || getVal('curm') || getVal('currentBid');
+    const bid = getVal('highBidAmount') || getVal('curm') || getVal('currentBid') || getVal('currentBidAmount');
     
     if (bnp) {
         data.price = `$${parseInt(bnp).toLocaleString()}`;
@@ -261,13 +280,16 @@ function parseIAAI(html, url) {
     if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en IAAI. Usa Modo Manual o verifica si IAAI está bloqueando el bot (Pardon Our Interruption).');
 
     // Extract images with a very broad regex to catch all possible IAAI image variations
-    const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/inventory\/[^"']*?(?:\d+|width=\d+)/gi) || [];
+    const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/(?:inventory|resizer)[^"'\\]*/gi) || [];
     const cleanImages = [...new Set(imgMatches)]
-        .filter(img => img.includes('/inventory/'))
         .map(img => {
-            // Ensure high resolution: replace common size suffixes (/80, /160, /400, /800) with /1024 or /800
-            if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
-            return img.replace(/\/\d+$/, '/1024');
+            img = img.replace(/\\u0026/g, '&');
+            if (img.includes('resizer')) {
+                return img.replace(/width=\d+/, 'width=1024').replace(/height=\d+/, 'height=768');
+            } else {
+                if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
+                return img.replace(/\/\d+$/, '/1024');
+            }
         });
 
     return {
