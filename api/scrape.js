@@ -359,7 +359,7 @@ function parseIAAI(html, url) {
         fuel: rawData.fuel || "N/A",
         vin: rawData.vin || "N/A",
         images: cleanImages,
-        description: `Importado vía subasta IAAI. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.`
+        description: `Importado vía subasta IAAI. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.\n\n[ADMIN-LINK]: ${url}`
     };
 }
 
@@ -436,7 +436,7 @@ function parseCopart(html, url) {
         fuel: rawData.fuel || "N/A",
         vin: rawData.vin || "N/A",
         images: rawData.images || [],
-        description: `Importado vía subasta Copart. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.`
+        description: `Importado vía subasta Copart. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.\n\n[ADMIN-LINK]: ${url}`
     };
 }
 

@@ -391,27 +391,30 @@ document.addEventListener('DOMContentLoaded', () => {
             document.head.appendChild(schemaContainer);
         }
 
-        const productSchemas = vehicles.map(v => ({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": v.title,
-            "image": v.images[0],
-            "description": v.description || `Vehículo ${v.title} año ${v.year} disponible en Seminuevos Venezuela.`,
-            "brand": {
-                "@type": "Brand",
-                "name": v.title.split(' ')[0]
-            },
-            "model": v.title,
-            "productionDate": v.year.toString(),
-            "offers": {
-                "@type": "Offer",
-                "url": window.location.href,
-                "priceCurrency": "USD",
-                "price": v.price === 'Consultar' ? "0" : v.price.replace(/[^0-9.-]+/g, ""),
-                "availability": "https://schema.org/InStock",
-                "itemCondition": v.condition === '0km' ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition"
-            }
-        }));
+        const productSchemas = vehicles.map(v => {
+            const cleanDesc = v.description ? v.description.split('\n\n[ADMIN-LINK]:')[0] : `Vehículo ${v.title} año ${v.year} disponible en Seminuevos Venezuela.`;
+            return {
+                "@context": "https://schema.org/",
+                "@type": "Product",
+                "name": v.title,
+                "image": v.images[0],
+                "description": cleanDesc,
+                "brand": {
+                    "@type": "Brand",
+                    "name": v.title.split(' ')[0]
+                },
+                "model": v.title,
+                "productionDate": v.year.toString(),
+                "offers": {
+                    "@type": "Offer",
+                    "url": window.location.href,
+                    "priceCurrency": "USD",
+                    "price": v.price === 'Consultar' ? "0" : v.price.replace(/[^0-9.-]+/g, ""),
+                    "availability": "https://schema.org/InStock",
+                    "itemCondition": v.condition === '0km' ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition"
+                }
+            };
+        });
 
         schemaContainer.text = JSON.stringify(productSchemas);
     }
@@ -750,7 +753,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalCategory').textContent = fallbackBodyType.toUpperCase();
         document.getElementById('modalTitle').textContent = car.title;
         document.getElementById('modalPrice').textContent = car.price === 'Consultar' ? 'Consultar Precio' : car.price;
-        document.getElementById('modalDescription').textContent = car.description;
+        const cleanDesc = car.description ? car.description.split('\n\n[ADMIN-LINK]:')[0] : '';
+        document.getElementById('modalDescription').textContent = cleanDesc;
 
         // Availability info
         const availabilityClass = car.availability === 'entrega_inmediata' ? 'available' : 'order';
