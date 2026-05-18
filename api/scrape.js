@@ -62,11 +62,18 @@ export default async function handler(req, res) {
                 let text = '';
                 let success = false;
                 
+                // Prioritize residential proxies for IAAI due to aggressive Imperva blocking
+                const useResidential = isIAAI;
+                
                 for (let i = 0; i < 3; i++) {
                     const session = Math.random().toString(36).substring(2, 12);
-                    // Intentar usar proxy residencial en el último intento si está disponible
-                    const proxyGroup = i === 2 ? 'groups-RESIDENTIAL,' : '';
-                    const proxyUrl = `http://auto,${proxyGroup}session-${session}:${providedKey}@proxy.apify.com:8000`;
+                    
+                    let proxyUser = 'auto';
+                    if (useResidential || i === 2) {
+                        proxyUser = 'groups-RESIDENTIAL';
+                    }
+                    
+                    const proxyUrl = `http://${proxyUser},session-${session}:${providedKey}@proxy.apify.com:8000`;
                     const agent = new HttpsProxyAgent(proxyUrl);
                     
                     try {
