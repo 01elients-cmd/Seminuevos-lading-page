@@ -3091,23 +3091,26 @@
 
                         // FALLBACK APIFY BROWSER SCRAPER PARA IAAI (Bypass Imperva TLS Fingerprinting)
                         if (!result.success && result.message && result.message.includes('IAAI Bloqueado') && proxyKey) {
-                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#f39c12;">[${i + 1}/${links.length}] Servidor bloqueado por Imperva. Lanzando Headless Browser en Apify API... (Tardará ~15s)</div>`;
+                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#f39c12;">[${i + 1}/${links.length}] Servidor bloqueado por Imperva. Lanzando Headless Browser en Apify API... (Tardará ~30s-60s)</div>`;
                             statusBox.scrollTop = statusBox.scrollHeight;
                             
-                            const apifyRes = await fetch(`https://api.apify.com/v2/acts/apify~puppeteer-scraper/run-sync-get-dataset-items?token=${proxyKey}&memory=1024`, {
+                            // apify/web-scraper is the most robust and standard headless scraper
+                            const apifyRes = await fetch(`https://api.apify.com/v2/acts/apify~web-scraper/run-sync-get-dataset-items?token=${proxyKey}&memory=1024&timeoutSecs=120`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     startUrls: [{ url: url }],
-                                    pageFunction: "async function pageFunction(context) { return { html: await context.page.content() }; }",
-                                    proxyConfiguration: { useApifyProxy: true },
-                                    preNavigationHooks: "[\n    async (page, browserController) => {\n        await page.setExtraHTTPHeaders({ 'Accept-Language': 'es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7' });\n    }\n]"
+                                    pageFunction: "async function pageFunction(context) { const html = context.jQuery('html').html(); return { html: html || 'Error: vacio' }; }",
+                                    proxyConfiguration: { useApifyProxy: true }
                                 })
                             });
                             
                             if (apifyRes.ok) {
                                 const apifyData = await apifyRes.json();
                                 if (apifyData && apifyData.length > 0 && apifyData[0].html) {
+                                    if (apifyData[0].html.includes('Error: vacio')) {
+                                        throw new Error("El Headless Browser falló al extraer el HTML (jQuery vacio).");
+                                    }
                                     statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#2ecc71;">[${i + 1}/${links.length}] Evasión exitosa. Extrayendo datos...</div>`;
                                     const fbRes = await fetch('/api/scrape', {
                                         method: 'POST',
@@ -3116,11 +3119,11 @@
                                     });
                                     result = await fbRes.json();
                                 } else {
-                                    throw new Error("El Headless Browser no pudo obtener el HTML. Verifica tu token de Apify.");
+                                    throw new Error("El Headless Browser no pudo obtener el HTML (Data vacía). Asegúrate de que tu cuenta de Apify tenga 'Compute Units' disponibles y pueda correr web-scraper.");
                                 }
                             } else {
                                 const errData = await apifyRes.text();
-                                throw new Error("Apify API Headless Browser falló: " + apifyRes.statusText);
+                                throw new Error("Apify API Headless Browser falló: " + apifyRes.status + " " + apifyRes.statusText);
                             }
                         }
 
