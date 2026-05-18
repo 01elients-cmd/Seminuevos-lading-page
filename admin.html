@@ -3091,39 +3091,57 @@
 
                         // FALLBACK APIFY BROWSER SCRAPER PARA IAAI (Bypass Imperva TLS Fingerprinting)
                         if (!result.success && result.message && result.message.includes('IAAI Bloqueado') && proxyKey) {
-                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#f39c12;">[${i + 1}/${links.length}] Servidor bloqueado por Imperva. Lanzando Headless Browser en Apify API... (Tardará ~30s-60s)</div>`;
+                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#f39c12;">[${i + 1}/${links.length}] Servidor bloqueado. Encendiendo Headless Browser en Apify... (puede tardar 45s)</div>`;
                             statusBox.scrollTop = statusBox.scrollHeight;
                             
-                            // apify/web-scraper is the most robust and standard headless scraper
-                            const apifyRes = await fetch(`https://api.apify.com/v2/acts/apify~web-scraper/run-sync-get-dataset-items?token=${proxyKey}&memory=1024&timeoutSecs=120`, {
+                            const cleanToken = proxyKey.trim();
+                            
+                            // 1. Iniciar la ejecución asíncrona del Puppeteer Scraper
+                            const startRes = await fetch(`https://api.apify.com/v2/acts/apify~puppeteer-scraper/runs?token=${cleanToken}&memory=1024`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     startUrls: [{ url: url }],
-                                    pageFunction: "async function pageFunction(context) { const html = context.jQuery('html').html(); return { html: html || 'Error: vacio' }; }",
+                                    pageFunction: "async function pageFunction(context) { const html = await context.page.content(); return { html }; }",
                                     proxyConfiguration: { useApifyProxy: true }
                                 })
                             });
                             
-                            if (apifyRes.ok) {
-                                const apifyData = await apifyRes.json();
-                                if (apifyData && apifyData.length > 0 && apifyData[0].html) {
-                                    if (apifyData[0].html.includes('Error: vacio')) {
-                                        throw new Error("El Headless Browser falló al extraer el HTML (jQuery vacio).");
-                                    }
-                                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#2ecc71;">[${i + 1}/${links.length}] Evasión exitosa. Extrayendo datos...</div>`;
-                                    const fbRes = await fetch('/api/scrape', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ url: url, html: apifyData[0].html })
-                                    });
-                                    result = await fbRes.json();
-                                } else {
-                                    throw new Error("El Headless Browser no pudo obtener el HTML (Data vacía). Asegúrate de que tu cuenta de Apify tenga 'Compute Units' disponibles y pueda correr web-scraper.");
+                            if (!startRes.ok) throw new Error("Fallo al iniciar Apify: " + startRes.status);
+                            const startData = await startRes.json();
+                            const runId = startData.data.id;
+                            const datasetId = startData.data.defaultDatasetId;
+                            
+                            // 2. Hacer Polling (esperar) hasta que termine
+                            let isFinished = false;
+                            let status = "RUNNING";
+                            for (let poll = 0; poll < 30; poll++) {
+                                await new Promise(r => setTimeout(r, 3000)); // Esperar 3s
+                                const pollRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${cleanToken}`);
+                                const pollData = await pollRes.json();
+                                status = pollData.data.status;
+                                if (status === "SUCCEEDED" || status === "FAILED" || status === "ABORTED") {
+                                    isFinished = true;
+                                    break;
                                 }
+                            }
+                            
+                            if (status !== "SUCCEEDED") throw new Error("El Headless Browser falló o tardó demasiado. Estado: " + status);
+                            
+                            // 3. Obtener los resultados
+                            const itemsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${cleanToken}`);
+                            const itemsData = await itemsRes.json();
+                            
+                            if (itemsData && itemsData.length > 0 && itemsData[0].html) {
+                                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#2ecc71;">[${i + 1}/${links.length}] Evasión exitosa. Analizando página...</div>`;
+                                const fbRes = await fetch('/api/scrape', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ url: url, html: itemsData[0].html })
+                                });
+                                result = await fbRes.json();
                             } else {
-                                const errData = await apifyRes.text();
-                                throw new Error("Apify API Headless Browser falló: " + apifyRes.status + " " + apifyRes.statusText);
+                                throw new Error("El Headless Browser terminó pero no capturó el HTML.");
                             }
                         }
 
