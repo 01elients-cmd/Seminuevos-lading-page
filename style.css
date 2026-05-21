@@ -4323,3 +4323,19 @@ body::after {
     background: rgba(255, 255, 255, 0.2);
     border-color: #fff;
 }
+
+/* Mastertech Seal */
+.mastertech-seal {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 60px;
+    height: 60px;
+    z-index: 10;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+    transition: transform 0.3s ease;
+}
+.vehicle-card:hover .mastertech-seal {
+    transform: scale(1.1) rotate(-5deg);
+}
+

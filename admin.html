@@ -1849,6 +1849,10 @@
                                 <option value="sold">Vendido</option>
                                 <option value="reserved">Reservado</option>
                             </select></div>
+                        <div class="form-group full" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="vMastertech" style="width: 18px; height: 18px; accent-color: var(--accent);">
+                            <label class="form-label" for="vMastertech" style="margin-bottom: 0;">Sello Garantía Mastertech</label>
+                        </div>
                         <div class="form-group full">
                             <label class="form-label">Imágenes</label>
                             <div class="image-upload-zone" id="imageUploadZone">
@@ -2081,6 +2085,7 @@
                 document.getElementById('vBadge').value = vehicle.badge || '';
                 document.getElementById('vStatus').value = vehicle.status || 'active';
                 document.getElementById('vDescription').value = vehicle.description || '';
+                document.getElementById('vMastertech').checked = !!vehicle.mastertech;
 
                 // Cargar imágenes existentes como miniaturas
                 document.getElementById('vImage').value = '';
@@ -2092,6 +2097,7 @@
                 document.getElementById('modalTitle').textContent = 'Agregar Vehículo';
                 document.getElementById('vehicleForm').reset();
                 document.getElementById('vId').value = '';
+                document.getElementById('vMastertech').checked = false;
             }
             modal.classList.add('active');
         }
@@ -2124,6 +2130,7 @@
             const badge = document.getElementById('vBadge').value || null;
             const status = document.getElementById('vStatus').value;
             const description = document.getElementById('vDescription').value;
+            const mastertech = document.getElementById('vMastertech').checked;
             const manualImgs = document.getElementById('vImage').value.split(',').map(s => s.trim()).filter(Boolean);
 
             if (!title || !price || !year) { showToast('Completa los campos obligatorios', 'error'); isSaving = false; return; }
@@ -2160,17 +2167,19 @@
 
                 const vehicleData = {
                     title, price, year, km, engine, transmission, fuel, body_type, catalog,
-                    availability, origin, condition, badge, status, description, images: finalImgs
+                    availability, origin, condition, badge, status, description, images: finalImgs, mastertech
                 };
 
                 if (id) {
                     const { error } = await supabaseClient.from('vehicles').update(vehicleData).eq('id', parseInt(id));
                     if (error) { showToast('Error: ' + error.message, 'error'); return; }
                     showToast('Vehículo actualizado', 'success');
+                    logSecurityEvent('VEHICLE_UPDATE', 'info', `Vehículo actualizado: ${title} (${id})`);
                 } else {
                     const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
                     if (error) { showToast('Error: ' + error.message, 'error'); return; }
                     showToast('Vehículo agregado', 'success');
+                    logSecurityEvent('VEHICLE_ADD', 'info', `Nuevo vehículo agregado: ${title}`);
                 }
                 await loadVehicles();
                 if (window.parent) window.parent.postMessage("CargaBD", "*"); // trigger frontend refresh if framed
@@ -2281,15 +2290,18 @@
             }
 
             showToast(`${idsToDelete.length} vehículo(s) eliminado(s)`, 'success');
+            logSecurityEvent('VEHICLE_DELETE_BULK', 'warning', `${idsToDelete.length} vehículos eliminados en lote.`);
             selectedVehicles.clear();
             await loadVehicles();
         }
 
         async function deleteVehicle(id) {
             if (!confirm('¿Eliminar este vehículo?')) return;
+            const v = vehicles.find(v => v.id === id);
             const { error } = await supabaseClient.from('vehicles').delete().eq('id', id);
             if (error) { showToast('Error: ' + error.message, 'error'); return; }
             showToast('Vehículo eliminado', 'success');
+            if (v) logSecurityEvent('VEHICLE_DELETE', 'warning', `Vehículo eliminado: ${v.title} (${id})`);
             await loadVehicles();
         }
 
