@@ -4325,17 +4325,18 @@ body::after {
 }
 
 /* Mastertech Seal */
-.mastertech-seal {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    width: 60px;
-    height: 60px;
-    z-index: 10;
+img.mastertech-seal {
+    position: absolute !important;
+    bottom: 15px !important;
+    right: 15px !important;
+    width: 70px !important;
+    height: 70px !important;
+    object-fit: contain !important;
+    z-index: 10 !important;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
     transition: transform 0.3s ease;
 }
-.vehicle-card:hover .mastertech-seal {
+.vehicle-card:hover img.mastertech-seal {
     transform: scale(1.1) rotate(-5deg);
 }
 
