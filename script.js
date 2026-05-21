@@ -352,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="vehicle-card-image">
                     <img src="${car.images[0]}" alt="${optimizedAlt}" loading="lazy" crossorigin="anonymous">
                     ${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}
+                    ${car.mastertech ? `<img src="CERTIFICADO---MASTERTECH.png" alt="Sello Mastertech" class="mastertech-seal">` : ''}
                     ${viewsBadge}
                 </div>
                 <div class="vehicle-card-body">

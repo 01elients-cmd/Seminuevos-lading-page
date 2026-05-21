@@ -2377,10 +2377,15 @@
             currentEditIndex = i;
             document.getElementById('imageEditorSection').style.display = 'block';
             const editorImg = document.getElementById('editorImage');
-            if (uploadedImages[i].src.startsWith('http')) {
+            if (uploadedImages[i].src.startsWith('http') && !uploadedImages[i].src.includes('supabase.co')) {
+                editorImg.crossOrigin = "anonymous";
                 editorImg.src = `/api/scrape?proxy=${encodeURIComponent(uploadedImages[i].src)}`;
             } else {
-                editorImg.removeAttribute('crossOrigin');
+                if (uploadedImages[i].src.startsWith('http')) {
+                    editorImg.crossOrigin = "anonymous";
+                } else {
+                    editorImg.removeAttribute('crossOrigin');
+                }
                 editorImg.src = uploadedImages[i].src;
             }
 
@@ -2460,9 +2465,11 @@
                 showToast('Placa censurada con mosaico', 'success');
             };
 
-            if (imgObj.src.startsWith('http')) {
+            if (imgObj.src.startsWith('http') && !imgObj.src.includes('supabase.co')) {
+                tempImg.crossOrigin = "anonymous";
                 tempImg.src = `/api/scrape?proxy=${encodeURIComponent(imgObj.src)}`;
             } else {
+                if (imgObj.src.startsWith('http')) tempImg.crossOrigin = "anonymous";
                 tempImg.src = imgObj.edited || imgObj.src;
             }
         });
@@ -2519,9 +2526,11 @@
                         renderImagePreviews();
                     };
 
-                    if (imgObj.src.startsWith('http')) {
+                    if (imgObj.src.startsWith('http') && !imgObj.src.includes('supabase.co')) {
+                        tempImg.crossOrigin = "anonymous";
                         tempImg.src = `/api/scrape?proxy=${encodeURIComponent(imgObj.src)}`;
                     } else {
+                        if (imgObj.src.startsWith('http')) tempImg.crossOrigin = "anonymous";
                         tempImg.src = imgObj.src;
                     }
                 });
