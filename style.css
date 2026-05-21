@@ -4336,6 +4336,19 @@ img.mastertech-seal {
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
     transition: transform 0.3s ease;
 }
+
+.vehicle-card-image:has(img.mastertech-seal)::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle at bottom right, rgba(0,0,0,0.85) 0%, transparent 70%);
+    z-index: 5;
+    pointer-events: none;
+}
+
 .vehicle-card:hover img.mastertech-seal {
     transform: scale(1.1) rotate(-5deg);
 }
