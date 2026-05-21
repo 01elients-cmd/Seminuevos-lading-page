@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     images TEXT[] DEFAULT '{}',
     catalog TEXT DEFAULT 'seminuevos',
     status TEXT DEFAULT 'active',
+    mastertech BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
