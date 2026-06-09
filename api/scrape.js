@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import * as cheerio from 'cheerio';
 
 export default async function handler(req, res) {
     // IMAGE PROXY MODE
@@ -209,7 +210,6 @@ function scanForData(obj, data = {}) {
 }
 
 function parseIAAI(html, url, trustHtml = false) {
-    // Skip block detection when HTML was rendered by a trusted headless browser (e.g. Apify)
     if (!trustHtml) {
         const isBlocked = html.includes('Additional security check') || 
                           html.includes('captcha') || 
@@ -226,135 +226,112 @@ function parseIAAI(html, url, trustHtml = false) {
         }
     }
 
-    // Improved regex for __PRELOADED_STATE__
-    const stateStr = html.match(/(?:window\.)?__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\})(?:[;<\n]|$)/i)?.[1];
+    const $ = cheerio.load(html);
     let rawData = {};
-    if (stateStr) { 
-        try { 
-            rawData = scanForData(JSON.parse(stateStr)); 
-        } catch (e) { 
-            console.error("IAAI JSON Parse Error");
-        } 
-    }
+    
+    // 1. Try __PRELOADED_STATE__
+    const stateStr = html.match(/(?:window\.)?__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\})(?:[;<\n]|$)/i)?.[1];
+    if (stateStr) { try { rawData = scanForData(JSON.parse(stateStr)); } catch(e){} }
 
-    // Support Next.js data (IAAI new layout) - robust regex ignoring attribute order
+    // 2. Try __NEXT_DATA__
     const nextDataStr = html.match(/<script[^>]*id=["']?__NEXT_DATA__["']?[^>]*>([\s\S]*?)<\/script>/i)?.[1];
-    if (nextDataStr) {
-        try {
-            const nextData = JSON.parse(nextDataStr);
-            rawData = scanForData(nextData, rawData);
-        } catch (e) {
-            console.error("IAAI NEXT_DATA Parse Error");
+    if (nextDataStr) { try { rawData = scanForData(JSON.parse(nextDataStr), rawData); } catch(e){} }
+
+    // 3. Fallback: Cheerio DOM Extraction
+    const getDOMValue = (keywords) => {
+        let result = null;
+        $('*').each((i, el) => {
+            const text = $(el).text().trim().replace(/:$/, '').toLowerCase();
+            // Evitar contenedores grandes, buscar nodos que contienen principalmente texto
+            if ($(el).children().length <= 1) {
+                if (keywords.some(kw => text === kw.toLowerCase())) {
+                    let val = $(el).next().text().trim();
+                    if (!val && $(el).parent().next().length) val = $(el).parent().next().text().trim();
+                    if (!val && $(el).nextAll('span, div, p').length) val = $(el).nextAll('span, div, p').first().text().trim();
+                    if (val && val.length < 50) { // Safety check to prevent grabbing huge text blocks
+                        result = val.replace(/&amp;/g, '&');
+                        return false; 
+                    }
+                }
+            }
+        });
+        return result;
+    };
+
+    if (!rawData.model || !rawData.year) {
+        // Extraer desde títulos
+        const h1 = $('h1').first().text().trim().toUpperCase() || $('title').text().trim().toUpperCase();
+        if (h1) {
+            const cleanH1 = h1.replace(/\|.*/, '').replace(/FOR SALE.*/, '').trim();
+            const parts = cleanH1.split(/[\s|]+/);
+            if (!rawData.year && parts[0] && parts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = parts[0];
+            if (!rawData.make && parts[1]) rawData.make = parts[1];
+            if (!rawData.model && parts[2]) rawData.model = parts.slice(2, 6).join(' ');
         }
     }
 
-    // Direct DOM Parsing Fallback (if JSON data is stripped by React/Apify)
-    if (!rawData.engine || !rawData.km || !rawData.model) {
-        const extractDOM = (label) => {
-            // Buscamos la etiqueta (ej: "Odometer:"), ignoramos los tags HTML intermedios (hasta 150 caracteres), y capturamos el texto visible
-            const reg = new RegExp(`>\\s*${label}\\s*<[\\s\\S]{1,150}?>\\s*([^<\\n]+?)\\s*<`, 'i');
-            const match = html.match(reg);
-            if (match && match[1].trim() !== '') return match[1].trim().replace(/&amp;/g, '&');
-            
-            // Alternativa donde la etiqueta no está rodeada de > < perfectamente
-            const reg2 = new RegExp(`${label}\\s*<[\\s\\S]{1,150}?>\\s*([^<\\n]+?)\\s*<`, 'i');
-            const match2 = html.match(reg2);
-            return match2 ? match2[1].trim().replace(/&amp;/g, '&') : null;
-        };
+    if (!rawData.km) rawData.km = getDOMValue(['Odometer', 'Mileage', 'Odometer Reading']);
+    if (!rawData.engine) rawData.engine = getDOMValue(['Engine', 'Engine Size', 'Engine Description', 'Motor']);
+    if (!rawData.transmission) rawData.transmission = getDOMValue(['Transmission', 'Trans', 'Transmission Type']);
+    if (!rawData.bodyType) rawData.bodyType = getDOMValue(['Body Style', 'Vehicle Class', 'Body']);
+    if (!rawData.fuel) rawData.fuel = getDOMValue(['Fuel Type', 'Fuel']);
+    if (!rawData.color) rawData.color = getDOMValue(['Exterior Color', 'Exterior/Interior', 'Color', 'Exterior']);
+    if (!rawData.location) rawData.location = getDOMValue(['Selling Branch', 'Branch', 'Location', 'Sale Location']);
+    
+    if (!rawData.vin) {
+        let v = getDOMValue(['VIN', 'VIN (Status)', 'VIN:']);
+        if (v) rawData.vin = v.split(' ')[0];
+    }
 
-        if (!rawData.model) rawData.model = extractDOM('Model:');
-        if (!rawData.series) rawData.series = extractDOM('Series:');
-        
-        if (!rawData.km) rawData.km = extractDOM('Odometer:') || extractDOM('Mileage:');
-        if (!rawData.engine) rawData.engine = extractDOM('Engine:') || extractDOM('Engine Size:');
-        if (!rawData.transmission) rawData.transmission = extractDOM('Transmission:');
-        if (!rawData.bodyType) rawData.bodyType = extractDOM('Body Style:') || extractDOM('Vehicle Class:') || extractDOM('Body:');
-        if (!rawData.fuel) rawData.fuel = extractDOM('Fuel Type:') || extractDOM('Fuel:');
-        if (!rawData.vin) {
-            let extractedVin = extractDOM('VIN \\(Status\\):') || extractDOM('VIN:');
-            if (extractedVin) rawData.vin = extractedVin.split(' ')[0]; // Quitar el "(OK)"
-        }
-        if (!rawData.color) rawData.color = extractDOM('Exterior\\/Interior:') || extractDOM('Exterior Color:') || extractDOM('Color:');
-        if (!rawData.location) rawData.location = extractDOM('Selling Branch:');
-        
-        // Try to find the price directly
-        if (!rawData.price) {
-            rawData.price = extractDOM('Actual Cash Value:') || extractDOM('Estimated Repair Cost:');
-            if (!rawData.price) {
-                const priceMatch = html.match(/\$[\d,]+\.\d{2}/) || html.match(/\$[\d,]+/);
+    if (!rawData.price) {
+        let p = getDOMValue(['Actual Cash Value', 'Estimated Repair Cost', 'ACV', 'Buy It Now', 'Current Bid']);
+        if (p) rawData.price = p;
+        else {
+            // Find any big price tag safely
+            const priceTagText = $('.price, [class*="price"], [class*="bid"], [class*="Amount"]').first().text();
+            if (priceTagText) {
+                const priceMatch = priceTagText.match(/\$[\d,]+/);
                 if (priceMatch) rawData.price = priceMatch[0];
             }
         }
     }
 
-    // Text Fallback if JSON fails
-    if (!rawData.year || !rawData.make || !rawData.model) {
-        const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
-        const titleTag = (titleMatch?.[1] || "").toUpperCase();
-        const h1Tag = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").replace(/<[^>]+>/g, '').toUpperCase().trim();
-        
-        // Try to get exact model from h1
-        if (h1Tag && h1Tag.split(' ').length > 2) {
-            const parts = h1Tag.split(' ');
-            if (!rawData.year && parts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = parts[0];
-            if (!rawData.make) rawData.make = parts[1];
-            if (!rawData.model) rawData.model = parts.slice(2).join(' ');
-        }
-
-        const combined = titleTag + " " + h1Tag;
-
-        const yearMatch = combined.match(/\b(20\d{2}|19\d{2})\b/);
-        if (yearMatch && !rawData.year) rawData.year = yearMatch[0];
-
-        if (titleMatch && !rawData.model) {
-            let cleanTitle = titleMatch[1].split(/\||Insurance Auto|IAAI|For Sale/i)[0].trim().replace(/\s+/g, ' ');
-            const titleParts = cleanTitle.split(' ');
-            if (titleParts.length >= 2) {
-                if (!rawData.year && titleParts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = titleParts[0];
-                if (!rawData.make) rawData.make = titleParts[1].toUpperCase();
-                if (!rawData.model) rawData.model = titleParts.slice(2).join(' ').toUpperCase();
-            }
-        }
-
-        const commonMakes = ['TOYOTA', 'FORD', 'CHEVROLET', 'CHEVY', 'HONDA', 'NISSAN', 'HYUNDAI', 'KIA', 'BMW', 'MERCEDES', 'JEEP', 'DODGE', 'RAM', 'LEXUS', 'MAZDA', 'VOLKSWAGEN', 'VW', 'AUDI', 'SUBARU', 'GMC', 'BUICK', 'CADILLAC', 'CHRYSLER', 'MITSUBISHI', 'LAND ROVER', 'PORSCHE', 'TESLA', 'VOLVO', 'MINI', 'FIAT', 'ALFA ROMEO', 'ACURA', 'INFINITI', 'LINCOLN', 'JAGUAR'];
-        if (!rawData.make) {
-            for (const m of commonMakes) {
-                if (combined.includes(m)) {
-                    rawData.make = m;
-                    break;
-                }
-            }
-        }
-
-        
-        // Final fallback to avoid crashing batch import
-        if (!rawData.year) rawData.year = new Date().getFullYear();
-        if (!rawData.make && titleTag.length > 5) {
-            // Just use the first big word as make
-            const words = titleTag.split(' ').filter(w => w.length > 2 && !w.match(/\d/));
-            if (words.length > 0) rawData.make = words[0];
-        }
+    // Fix Price Format if missing or malformed
+    if (rawData.price && typeof rawData.price === 'string') {
+        const cleanPrice = rawData.price.match(/\$[\d,]+/);
+        if (cleanPrice) rawData.price = cleanPrice[0];
+        else rawData.price = "Consultar";
+    } else {
+        rawData.price = "Consultar";
     }
 
-    if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en IAAI. Usa Modo Manual o verifica si IAAI está bloqueando el bot (Pardon Our Interruption).');
+    // Fix empty fields
+    if (!rawData.year) rawData.year = new Date().getFullYear();
+    if (!rawData.make) rawData.make = "Vehículo";
 
-    // Extract images with a very broad regex to catch all possible IAAI image variations
+    // Extract Images (Safer extraction to avoid mixing cars)
     const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/(?:inventory|resizer)[^"'\\]*/gi) || [];
-    const cleanImages = [...new Set(imgMatches)]
-        .map(img => {
-            img = img.replace(/\\u0026/g, '&');
-            if (img.includes('resizer')) {
-                return img.replace(/width=\d+/, 'width=1024').replace(/height=\d+/, 'height=768');
-            } else {
-                if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
-                return img.replace(/\/\d+$/, '/1024');
-            }
-        });
+    let cleanImages = [...new Set(imgMatches)].filter(img => {
+        // filter out small thumbnails, icons, or related vehicles if possible
+        if (img.toLowerCase().includes('similar') || img.includes('thumb')) return false;
+        return true;
+    }).map(img => {
+        img = img.replace(/\\u0026/g, '&');
+        if (img.includes('resizer')) {
+            return img.replace(/width=\d+/, 'width=1024').replace(/height=\d+/, 'height=768');
+        } else {
+            if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
+            return img.replace(/\/\d+$/, '/1024');
+        }
+    });
+
+    // Take only up to 20 images to avoid related vehicles
+    cleanImages = cleanImages.slice(0, 20);
 
     return {
         title: `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' '),
         year: rawData.year,
-        price: rawData.price || "Consultar",
+        price: rawData.price,
         km: rawData.km || "0 KM",
         engine: rawData.engine || "N/A",
         transmission: rawData.transmission || "N/A",

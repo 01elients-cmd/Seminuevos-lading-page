@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.102.0",
+    "cheerio": "^1.2.0",
     "https-proxy-agent": "^9.0.0",
     "node-fetch": "^3.3.2"
   }
