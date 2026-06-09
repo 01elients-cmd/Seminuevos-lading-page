@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
     try {
-        const { url, html: providedHtml, proxyKey: providedKey } = req.body;
+        const { url, html: providedHtml, proxyKey: providedKey, trustHtml } = req.body;
         if (!url) return res.status(400).json({ message: 'URL required' });
 
         const html = providedHtml || await (async () => {
@@ -119,9 +119,9 @@ export default async function handler(req, res) {
 
         let result;
         if (url.includes('copart.com')) {
-            result = parseCopart(html, url);
+            result = parseCopart(html, url, trustHtml);
         } else if (url.includes('iaai.com')) {
-            result = parseIAAI(html, url);
+            result = parseIAAI(html, url, trustHtml);
         } else {
             result = parseGeneric(html, url);
         }
@@ -208,19 +208,22 @@ function scanForData(obj, data = {}) {
     return data;
 }
 
-function parseIAAI(html, url) {
-    const isBlocked = html.includes('Additional security check') || 
-                      html.includes('captcha') || 
-                      html.includes('Imperva') || 
-                      html.includes('Incapsula') || 
-                      html.includes('Pardon Our Interruption') ||
-                      html.includes('Access Denied') ||
-                      html.includes('Reference #') ||
-                      html.includes('distil') ||
-                      html.length < 500;
+function parseIAAI(html, url, trustHtml = false) {
+    // Skip block detection when HTML was rendered by a trusted headless browser (e.g. Apify)
+    if (!trustHtml) {
+        const isBlocked = html.includes('Additional security check') || 
+                          html.includes('captcha') || 
+                          html.includes('Imperva') || 
+                          html.includes('Incapsula') || 
+                          html.includes('Pardon Our Interruption') ||
+                          html.includes('Access Denied') ||
+                          html.includes('Reference #') ||
+                          html.includes('distil') ||
+                          html.length < 500;
 
-    if (isBlocked) {
-        throw new Error('IAAI Bloqueado. Usa Modo Manual (pega el HTML) o verifica si tu Proxy tiene créditos/antibot activado.');
+        if (isBlocked) {
+            throw new Error('IAAI Bloqueado. Usa Modo Manual (pega el HTML) o verifica si tu Proxy tiene créditos/antibot activado.');
+        }
     }
 
     // Improved regex for __PRELOADED_STATE__
@@ -363,8 +366,8 @@ function parseIAAI(html, url) {
     };
 }
 
-function parseCopart(html, url) {
-    if (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula')) {
+function parseCopart(html, url, trustHtml = false) {
+    if (!trustHtml && (html.includes('Additional security check') || html.includes('captcha') || html.includes('Imperva') || html.includes('Incapsula'))) {
         throw new Error('Copart Bloqueado. Usa Modo Manual.');
     }
 

@@ -3136,8 +3136,8 @@
                             // 2. Hacer Polling (esperar) hasta que termine
                             let isFinished = false;
                             let status = "RUNNING";
-                            for (let poll = 0; poll < 30; poll++) {
-                                await new Promise(r => setTimeout(r, 3000)); // Esperar 3s
+                            for (let poll = 0; poll < 50; poll++) {
+                                await new Promise(r => setTimeout(r, 4000)); // Esperar 4s
                                 const pollRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${cleanToken}`);
                                 const pollData = await pollRes.json();
                                 status = pollData.data.status;
@@ -3158,7 +3158,7 @@
                                 const fbRes = await fetch('/api/scrape', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ url: url, html: itemsData[0].html })
+                                    body: JSON.stringify({ url: url, html: itemsData[0].html, trustHtml: true })
                                 });
                                 result = await fbRes.json();
                             } else {
