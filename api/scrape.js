@@ -241,16 +241,32 @@ function parseIAAI(html, url, trustHtml = false) {
     const getDOMValue = (keywords) => {
         let result = null;
         $('*').each((i, el) => {
-            const text = $(el).text().trim().replace(/:$/, '').toLowerCase();
-            // Evitar contenedores grandes, buscar nodos que contienen principalmente texto
+            let text = $(el).text().trim().toLowerCase();
+            // Limpiar los dos puntos al final si existen, para comparar exactamente
+            let cleanText = text.replace(/:$/, '').trim();
+            
             if ($(el).children().length <= 1) {
-                if (keywords.some(kw => text === kw.toLowerCase())) {
+                // Caso 1: Etiqueta y valor en elementos separados (ej: <span>Engine:</span> <span>V6</span>)
+                if (keywords.some(kw => cleanText === kw.toLowerCase())) {
                     let val = $(el).next().text().trim();
                     if (!val && $(el).parent().next().length) val = $(el).parent().next().text().trim();
                     if (!val && $(el).nextAll('span, div, p').length) val = $(el).nextAll('span, div, p').first().text().trim();
-                    if (val && val.length < 50) { // Safety check to prevent grabbing huge text blocks
+                    if (val && val.length < 50) { 
                         result = val.replace(/&amp;/g, '&');
                         return false; 
+                    }
+                }
+                
+                // Caso 2: Etiqueta y valor en el mismo elemento (ej: <span>Engine: 3.6L V6</span>)
+                const matchKw = keywords.find(kw => text.startsWith(kw.toLowerCase() + ':') || text.startsWith(kw.toLowerCase() + ' :'));
+                if (matchKw && !result) {
+                    const parts = $(el).text().split(':');
+                    if (parts.length > 1) {
+                        let val = parts.slice(1).join(':').trim();
+                        if (val && val.length < 50) {
+                            result = val.replace(/&amp;/g, '&');
+                            return false;
+                        }
                     }
                 }
             }
@@ -310,10 +326,19 @@ function parseIAAI(html, url, trustHtml = false) {
     if (!rawData.make) rawData.make = "Vehículo";
 
     // Extract Images (Safer extraction to avoid mixing cars)
+    const itemIdMatch = url.match(/\/VehicleDetail\/(\d+)/i);
+    const itemId = itemIdMatch ? itemIdMatch[1] : null;
+
     const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/(?:inventory|resizer)[^"'\\]*/gi) || [];
     let cleanImages = [...new Set(imgMatches)].filter(img => {
-        // filter out small thumbnails, icons, or related vehicles if possible
         if (img.toLowerCase().includes('similar') || img.includes('thumb')) return false;
+        // Si logramos extraer el ID del vehículo de la URL, nos aseguramos que las imágenes le pertenezcan
+        // La mayoría de las imágenes principales de IAAI contienen el stock number / item id
+        if (itemId && !img.includes(itemId)) {
+            // Algunas veces el ID no está directo en la URL de la imagen, pero si hay muchas, es mejor filtrar agresivamente
+            // Vamos a permitirlo solo si no hay itemId o si coincide.
+            return false;
+        }
         return true;
     }).map(img => {
         img = img.replace(/\\u0026/g, '&');
@@ -325,6 +350,22 @@ function parseIAAI(html, url, trustHtml = false) {
         }
     });
 
+    // Si el filtro estricto por ID nos dejó sin imágenes (porque usaban otro hash), intentamos de nuevo sin el filtro estricto
+    if (cleanImages.length === 0) {
+        cleanImages = [...new Set(imgMatches)].filter(img => {
+            if (img.toLowerCase().includes('similar') || img.includes('thumb')) return false;
+            return true;
+        }).map(img => {
+            img = img.replace(/\\u0026/g, '&');
+            if (img.includes('resizer')) {
+                return img.replace(/width=\d+/, 'width=1024').replace(/height=\d+/, 'height=768');
+            } else {
+                if (img.includes('width=')) return img.split('width=')[0] + 'width=1024';
+                return img.replace(/\/\d+$/, '/1024');
+            }
+        });
+    }
+
     // Take only up to 20 images to avoid related vehicles
     cleanImages = cleanImages.slice(0, 20);
 
@@ -333,13 +374,13 @@ function parseIAAI(html, url, trustHtml = false) {
         year: rawData.year,
         price: rawData.price,
         km: rawData.km || "0 KM",
-        engine: rawData.engine || "N/A",
-        transmission: rawData.transmission || "N/A",
-        bodyType: rawData.bodyType || "N/A",
-        fuel: rawData.fuel || "N/A",
+        engine: rawData.engine || "",
+        transmission: rawData.transmission || "",
+        bodyType: rawData.bodyType || "",
+        fuel: rawData.fuel || "",
         vin: rawData.vin || "N/A",
         images: cleanImages,
-        description: `Importado vía subasta IAAI. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.\n\n[ADMIN-LINK]: ${url}`
+        description: `Vehículo importado de subasta. Especialmente seleccionado para importación bajo pedido.\n\nEspecificaciones principales:\n- VIN: ${rawData.vin || 'N/A'}\n- Color: ${rawData.color || 'N/A'}\n- Ubicación de origen: ${rawData.location || 'USA'}\n\nContáctanos para más detalles sobre este ${rawData.make} ${rawData.model}.`
     };
 }
 
