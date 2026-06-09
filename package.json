@@ -1,7 +1,11 @@
 {
+  "type": "module",
+  "engines": {
+    "node": ">=18.x"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.102.0",
     "https-proxy-agent": "^9.0.0",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^3.3.2"
   }
 }
