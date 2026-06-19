@@ -82,7 +82,7 @@
     <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
-<nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="index.html" class="nav-logo">
                 <img src="images/logo-white.png" alt="SemiNuevos Logo" class="main-logo">
@@ -107,147 +107,17 @@
             </div>
         </div>
     </nav>
-<!-- ===== SOCIAL SIDEBAR ===== -->
-    <div class="social-sidebar">
-        <a href="#" class="social-icon" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" class="social-icon" title="TikTok"><i class="fab fa-tiktok"></i></a>
-        <a href="https://www.instagram.com/seminuevosagency/" target="_blank" class="social-icon" title="Instagram"><i
-                class="fab fa-instagram"></i></a>
-        <a href="#" class="social-icon" title="YouTube"><i class="fab fa-youtube"></i></a>
-    </div>
-<!-- ===== FLOATING WHATSAPP ===== -->
-    <a href="https://wa.me/584248700438?text=Hola,%20quiero%20información%20sobre%20un%20vehículo"
-        class="whatsapp-float" target="_blank" title="Contáctanos por WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
 
-
-
-<!-- ===== HERO SECTION — VEHICLE SHOWCASE ===== -->
-    <section class="hero" id="inicio">
-        <div class="hero-slider">
-            <!-- El contenido se inyecta dinámicamente desde Supabase -->
-            <div class="hero-slide active" style="background: #000; display: flex; align-items: center; justify-content: center;">
+    <section class="car-detail-page" style="padding-top: 150px; min-height: 80vh;">
+        <div class="container" id="carDetailContainer">
+            <div style="display:flex; justify-content:center; align-items:center; height: 50vh; flex-direction:column;">
                 <div class="loader-spinner"></div>
-            </div>
-        </div>
-
-        <div class="hero-dots-container">
-            <div class="hero-dots" id="heroDots"></div>
-        </div>
-
-        <button class="hero-arrow hero-prev" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
-        <button class="hero-arrow hero-next" id="heroNext"><i class="fas fa-chevron-right"></i></button>
-
-        <div class="hero-scroll-indicator">
-            <span>Desliza</span>
-            <div class="scroll-line"></div>
-        </div>
-    </section>
-<!-- ===== BRAND LOGOS MARQUEE ===== -->
-    <section class="brands-section">
-        <div class="brands-marquee">
-            <div class="brands-track" id="brandsTrack">
-                <div class="brand-item"><img src="images/brands/Toyota_logo_(Red).svg.png" alt="Toyota"></div>
-                <div class="brand-item"><img src="images/brands/Honda.svg.png" alt="Honda"></div>
-                <div class="brand-item"><img src="images/brands/Nissan_2020_logo.svg" alt="Nissan"></div>
-                <div class="brand-item"><img src="images/brands/jeep-logo-1.png" alt="Jeep"></div>
-                <div class="brand-item"><img src="images/brands/dodge-logo-png-transparent.png" alt="Dodge"></div>
-                <div class="brand-item"><img src="images/brands/INFINITI_Logo_Primary_Black.png" alt="Infiniti"></div>
-                <div class="brand-item"><img src="images/brands/logo-Hyundai.png" alt="Hyundai"></div>
-                <div class="brand-item"><img src="images/brands/Kia-logo.png" alt="Kia"></div>
-                <!-- Duplicated for infinite scroll -->
-                <div class="brand-item"><img src="images/brands/Toyota_logo_(Red).svg.png" alt="Toyota"></div>
-                <div class="brand-item"><img src="images/brands/Honda.svg.png" alt="Honda"></div>
-                <div class="brand-item"><img src="images/brands/Nissan_2020_logo.svg" alt="Nissan"></div>
-                <div class="brand-item"><img src="images/brands/jeep-logo-1.png" alt="Jeep"></div>
-                <div class="brand-item"><img src="images/brands/dodge-logo-png-transparent.png" alt="Dodge"></div>
-                <div class="brand-item"><img src="images/brands/INFINITI_Logo_Primary_Black.png" alt="Infiniti"></div>
-                <div class="brand-item"><img src="images/brands/logo-Hyundai.png" alt="Hyundai"></div>
-                <div class="brand-item"><img src="images/brands/Kia-logo.png" alt="Kia"></div>
+                <p style="margin-top: 20px; color: var(--on-surface-variant);">Cargando detalles del vehículo...</p>
             </div>
         </div>
     </section>
-<!-- ===== STATS BAR ===== -->
-    <section class="stats-bar">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-number" data-target="100">0</span><span class="stat-suffix">+</span>
-                    <span class="stat-label">Vehículos Vendidos</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-number" data-target="98">0</span><span class="stat-suffix">%</span>
-                    <span class="stat-label">Clientes Satisfechos</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-number" data-target="6">0</span><span class="stat-suffix"></span>
-                    <span class="stat-label">Años de Experiencia</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-number" data-target="46">0</span><span class="stat-suffix">+</span>
-                    <span class="stat-label">Vehículos en Stock</span>
-                </div>
-            </div>
-        </div>
-    </section>
-<!-- ===== EXCLUSIVE YARIS GR SECTION ===== -->
-    <section class="yaris-gr-section" id="yaris-gr-exclusive">
-        <div class="yaris-gr-video-container">
-            <!-- Mobile Video (Vertical) -->
-            <video autoplay loop muted playsinline class="yaris-video mobile-video">
-                <source src="images/yaris-gr-vertical.mp4" type="video/mp4">
-            </video>
-            <!-- Desktop Video (Horizontal) -->
-            <video autoplay loop muted playsinline class="yaris-video desktop-video">
-                <source src="images/yaris-gr-horizontal.mp4" type="video/mp4">
-            </video>
-            <div class="yaris-overlay"></div>
-        </div>
-        
-        <div class="container yaris-gr-content">
-            <div class="yaris-badge">
-                <i class="fas fa-gem"></i> OPORTUNIDAD VIP
-            </div>
-            
-            <h2 class="yaris-title">
-                TOYOTA YARIS <span class="gr-red">GR</span>
-            </h2>
-            
-            <p class="yaris-subtitle">
-                Sólo existe 1 en Venezuela. Traeremos 10 más.<br>
-                ¿Tienes lo que se necesita para domarlo?
-            </p>
 
-            <div class="yaris-scarcity">
-                <div class="scarcity-count">
-                    <span class="count-number">10</span>
-                    <span class="count-text">CUPOS<br>TOTALES</span>
-                </div>
-                <div class="scarcity-divider"></div>
-                <div class="scarcity-status">
-                    <span class="status-dot blink"></span> PRE-VENTA ABIERTA
-                </div>
-            </div>
-
-            <div class="yaris-actions">
-                <a href="https://wa.me/584248700438?text=Hola,%20quiero%20aplicar%20por%20uno%20de%20los%2010%20cupos%20VIP%20para%20el%20Toyota%20Yaris%20GR." target="_blank" class="btn btn-gr-primary">
-                    <i class="fab fa-whatsapp"></i> Reservar mi cupo
-                </a>
-                <button onclick="copyYarisLink()" class="btn btn-gr-share" id="shareBtn">
-                    <i class="fas fa-share-alt"></i> Compartir
-                </button>
-            </div>
-            <p id="copyMessage" style="display:none; color: #4ade80; font-size: 0.8rem; margin-top: 15px; font-weight: 600;">
-                <i class="fas fa-check-circle"></i> ¡Enlace VIP copiado al portapapeles!
-            </p>
-        </div>
-    </section>
-
-<footer class="footer">
+    <footer class="footer">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
@@ -297,9 +167,10 @@
         </div>
     </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
+    <script src="vehiculo.js"></script>
 </body>
 </html>

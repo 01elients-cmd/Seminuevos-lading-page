@@ -363,7 +363,7 @@ body::after {
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 24px;
     margin: 0 auto;
 }
 
@@ -527,7 +527,7 @@ body::after {
 /* ===== HERO ===== */
 .hero {
     position: relative;
-    height: 100vh;
+    height: 85vh;
     height: 100dvh; /* Altura dinámica estable */
     min-height: 600px;
     overflow: hidden;
@@ -2619,7 +2619,7 @@ body::after {
         transform: translateX(100%);
         width: 80%;
         max-width: 360px;
-        height: 100vh;
+        height: 85vh;
         background: rgba(14, 14, 14, 0.95);
         backdrop-filter: blur(30px);
         flex-direction: column;
@@ -3681,7 +3681,7 @@ body::after {
         right: -100%;
         width: 100%; /* Full screen on mobile */
         max-width: 380px;
-        height: 100vh;
+        height: 85vh;
         background: rgba(5, 5, 5, 0.95);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);

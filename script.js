@@ -624,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isSecond = i === 1;
 
             let subtitleHtml = s.subtitle || '';
-            if (!s.subtitle && s.originalPrice) {
+            if (s.originalPrice) {
                 const fmt = (num) => Number(num).toLocaleString('en-US');
                 let rows = '';
                 rows += `<div style='display: flex; justify-content: space-between; color: var(--on-surface-variant); text-decoration: line-through; margin-bottom: 8px; font-size: 0.95rem;'><span>Precio de Lista</span><span>$${fmt(s.originalPrice)}</span></div>`;
