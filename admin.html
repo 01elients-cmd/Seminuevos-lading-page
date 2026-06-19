@@ -2316,7 +2316,30 @@
         function handleFiles(files) {
             Array.from(files).forEach(file => {
                 const r = new FileReader();
-                r.onload = e => { uploadedImages.push({ src: e.target.result, edited: null }); renderImagePreviews(); };
+                r.onload = e => { 
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 1920;
+                        const MAX_HEIGHT = 1080;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+                            const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+                            width *= ratio;
+                            height *= ratio;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        // Auto-compress to ~80% JPEG
+                        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
+                        uploadedImages.push({ src: optimizedDataUrl, edited: null }); 
+                        renderImagePreviews(); 
+                    };
+                    img.src = e.target.result;
+                };
                 r.readAsDataURL(file);
             });
         }

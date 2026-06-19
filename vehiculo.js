@@ -62,9 +62,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (car.images && car.images.length > 0) {
         imagesHtml = `
             <div class="vehicle-page-gallery" style="margin-bottom: 30px;">
-                <img id="mainVehicleImage" src="${car.images[0]}" style="width: 100%; border-radius: var(--radius-lg); height: 500px; object-fit: cover;" alt="${car.title}">
+                <img id="mainVehicleImage" src="${car.images[0]}" style="width: 100%; border-radius: var(--radius-lg); height: 500px; object-fit: cover; transition: opacity 0.3s;" alt="${car.title}">
                 <div class="vehicle-thumbnails" style="display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; padding-bottom: 10px;">
-                    ${car.images.map((img, i) => `<img src="${img}" class="v-thumb" style="width: 100px; height: 75px; object-fit: cover; border-radius: var(--radius-sm); cursor: pointer; opacity: ${i===0?'1':'0.5'}; border: 2px solid ${i===0?'var(--primary)':'transparent'}; transition: 0.3s;" onclick="document.getElementById('mainVehicleImage').src=this.src; document.querySelectorAll('.v-thumb').forEach(t=>{t.style.opacity='0.5'; t.style.borderColor='transparent'}); this.style.opacity='1'; this.style.borderColor='var(--primary)';">`).join('')}
+                    ${car.images.map((img, i) => `<img src="${img}" class="v-thumb" style="width: 100px; height: 75px; object-fit: cover; border-radius: var(--radius-sm); cursor: pointer; opacity: ${i===0?'1':'0.5'}; border: 2px solid ${i===0?'var(--primary)':'transparent'}; transition: 0.3s;" onclick="changeMainVehicleImage('${img}', this)">`).join('')}
                 </div>
             </div>
         `;
@@ -139,3 +139,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
+
+
+window.changeMainVehicleImage = function(src, thumbElement) {
+    const mainImg = document.getElementById('mainVehicleImage');
+    mainImg.style.opacity = '0.3';
+    mainImg.onload = function() {
+        mainImg.style.opacity = '1';
+    };
+    mainImg.src = src;
+    
+    document.querySelectorAll('.v-thumb').forEach(t => {
+        t.style.opacity = '0.5';
+        t.style.borderColor = 'transparent';
+    });
+    thumbElement.style.opacity = '1';
+    thumbElement.style.borderColor = 'var(--primary)';
+};
+
