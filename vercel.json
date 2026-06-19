@@ -1,7 +1,6 @@
 {
     "name": "seminuevo-agency",
     "version": 2,
-    "public": true,
     "cleanUrls": true,
     "trailingSlash": false,
     "headers": [
