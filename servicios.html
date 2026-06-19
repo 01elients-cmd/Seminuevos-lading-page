@@ -251,6 +251,23 @@
         </div>
     </footer>
 
+    <!-- ===== INFO MODAL (For Benefits) ===== -->
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-content" style="max-width: 500px; padding: 40px;">
+            <button class="modal-close" id="infoModalClose"><i class="fas fa-times"></i></button>
+            <div id="infoModalIcon"
+                style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; text-align: center;"></div>
+            <h2 id="infoModalTitle" class="section-title"
+                style="font-size: 1.8rem; margin-bottom: 15px; text-align: center;"></h2>
+            <div id="infoModalBody" class="about-text" style="font-size: 0.95rem; margin-bottom: 30px;"></div>
+            <div class="modal-actions" style="border-top: 1px solid var(--ghost-border); padding-top: 20px;">
+                <a href="#contacto" class="btn btn-primary btn-block" id="infoModalCta">
+                    <i class="fab fa-whatsapp"></i> Consultar Ahora
+                </a>
+            </div>
+        </div>
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="data.js"></script>

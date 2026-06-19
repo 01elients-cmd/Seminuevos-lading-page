@@ -862,6 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeModal() {
+        if (!modal) return;
         if (modal.classList.contains('active') && currentVehicleId) {
             const duration = Math.round((performance.now() - modalStartTime) / 1000);
             if (duration > 1) {
@@ -883,7 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeModal();
-        if (modal.classList.contains('active')) {
+        if (modal?.classList.contains('active')) {
             if (e.key === 'ArrowLeft') modalGallery.prev();
             if (e.key === 'ArrowRight') modalGallery.next();
         }
