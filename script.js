@@ -551,7 +551,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (map.social_instagram && fIg) fIg.href = map.social_instagram;
                 if (map.social_tiktok && fTt) fTt.href = map.social_tiktok;
                 if (map.social_youtube && fYt) fYt.href = map.social_youtube;
-
                 // Load Calculator rates
                 window.CALC_FLETE = map.calc_flete || 3500;
                 window.CALC_ADUANA = map.calc_aduana || 3500;
@@ -559,8 +558,49 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.CALC_SERVICE_FEE = map.calc_service_fee || 900;
 
                 // Load Hero Slides
+                const overrideSlides = [
+                    {
+                        image: 'images/gallery/honda-hrv-2024-sport/1.jpg',
+                        tag: 'OFERTA EXCLUSIVA',
+                        title: 'Honda HR-V 2024 Sport',
+                        originalPrice: 33000,
+                        discountPercentage: 9900,
+                        financingBonus: 10000,
+                        finalPrice: 13100,
+                        waText: 'Hola, quiero asegurar la Honda HR-V 2024 Sport con la oferta de financiamiento.',
+                        ctaPrimary: 'Asegurar Oferta',
+                        ctaSecondary: 'Ver Detalles'
+                    },
+                    {
+                        image: 'images/gallery/toyota-corolla-cross-le-4x4-awd-2022/1.jpg',
+                        tag: 'ACCIÓN RÁPIDA',
+                        title: 'Toyota Corolla Cross LE 2022',
+                        originalPrice: 31990,
+                        discountPercentage: 9597,
+                        financingBonus: 10000,
+                        finalPrice: 12393,
+                        waText: 'Hola, quiero aplicar al bono de financiamiento en la Corolla Cross LE 2022.',
+                        ctaPrimary: 'Aplicar Ahora',
+                        ctaSecondary: 'Más Info'
+                    },
+                    {
+                        image: 'images/gallery/toyota-4runner-2021-sr5/1.jpg',
+                        tag: 'ESTATUS INMEDIATO',
+                        title: 'Toyota 4Runner 2021 SR5',
+                        originalPrice: 39990,
+                        discountPercentage: 11997,
+                        financingBonus: 10000,
+                        finalPrice: 17993,
+                        waText: 'Hola, quiero apartar la Toyota 4Runner 2021 con el beneficio especial.',
+                        ctaPrimary: 'Reservar Ya',
+                        ctaSecondary: 'Inventario'
+                    }
+                ];
+
                 if (map.hero_slides && map.hero_slides.length > 0) {
                     renderDynamicHero(map.hero_slides);
+                } else {
+                    renderDynamicHero(overrideSlides);
                 }
             }
         } catch (e) { console.error('Error fetching CMS data', e); }
@@ -583,26 +623,42 @@ document.addEventListener('DOMContentLoaded', () => {
             const isFirst = i === 0;
             const isSecond = i === 1;
 
+            let subtitleHtml = s.subtitle || '';
+            if (!s.subtitle && s.originalPrice) {
+                const fmt = (num) => Number(num).toLocaleString('en-US');
+                let rows = '';
+                rows += `<div style='display: flex; justify-content: space-between; color: var(--on-surface-variant); text-decoration: line-through; margin-bottom: 8px; font-size: 0.95rem;'><span>Precio de Lista</span><span>$${fmt(s.originalPrice)}</span></div>`;
+                if (s.discountPercentage && Number(s.discountPercentage) > 0) {
+                    rows += `<div style='display: flex; justify-content: space-between; color: #ffb4ab; margin-bottom: 8px; font-size: 0.95rem; opacity: 0; animation: contentReveal 0.6s ease 0.9s forwards;'><span>Descuento Especial</span><span>-$${fmt(s.discountPercentage)}</span></div>`;
+                }
+                if (s.financingBonus && Number(s.financingBonus) > 0) {
+                    rows += `<div style='display: flex; justify-content: space-between; color: #bfcdff; margin-bottom: 12px; font-size: 0.95rem; opacity: 0; animation: contentReveal 0.6s ease 1.2s forwards;'><span>Bono Financiamiento</span><span>-$${fmt(s.financingBonus)}</span></div>`;
+                }
+                rows += `<div style='border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display: flex; justify-content: space-between; font-size: 1.4rem; font-weight: 700; opacity: 0; animation: contentReveal 0.6s ease 1.5s forwards;'><span>Llévala por</span><span class='text-accent'>$${fmt(s.finalPrice || 0)}</span></div>`;
+                subtitleHtml = `<div style='background: rgba(10,10,10,0.55); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--ghost-border-gold); backdrop-filter: blur(15px); width: 100%; max-width: 400px; text-align: left; margin: 0 auto;'>${rows}</div>`;
+            } else if (s.subtitle && !s.subtitle.includes('<div')) {
+                subtitleHtml = `<p>${s.subtitle}</p>`;
+            }
+
             // Re-crear el diseño premium exacto
             html += `
                 <div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${s.image}')">
                     <div class="hero-overlay" style="background: ${isFirst ? 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%)' : 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)'};"></div>
                         <div class="hero-content">
-                            <div class="hero-tag">
+                            <div class="hero-tag" style="opacity: 0; animation: contentReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;">
                                 <i class="fas ${isFirst ? 'fa-bolt' : (isSecond ? 'fa-star' : 'fa-car')}" style="color: var(--primary);"></i> ${s.tag}
                             </div>
-                            <h1 class="hero-title">
+                            <h1 class="hero-title" style="opacity: 0; animation: contentReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;">
                                 ${s.title.includes('<span') ? s.title : s.title.replace('0KM', '<span class="text-accent">0KM</span>')}
                             </h1>
-                            <p class="hero-subtitle">
-                                ${s.subtitle}
-                            </p>
-                            <div class="hero-buttons">
-                                <a href="#catalogo" class="btn btn-primary">
-                                   Ver Inventario
+                            <div class="hero-subtitle" style="opacity: 0; animation: contentReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards;">
+                                ${subtitleHtml}
+                            </div><div class="hero-buttons" style="opacity: 0; animation: contentReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;">
+                                <a href="https://wa.me/${window.WHATSAPP_NUMBER}?text=${encodeURIComponent(s.waText || 'Hola, quiero aprovechar la oferta VIP del sitio web.')}" class="btn btn-primary" target="_blank" style="text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">
+                                   ${s.ctaPrimary || 'Reclamar Oferta'} <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
                                 </a>
-                                <a href="https://wa.me/${window.WHATSAPP_NUMBER}" class="btn btn-outline">
-                                   Consultar
+                                <a href="#catalogo" class="btn btn-outline" style="text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">
+                                   ${s.ctaSecondary || 'Ver Inventario'}
                                 </a>
                             </div>
                         </div>

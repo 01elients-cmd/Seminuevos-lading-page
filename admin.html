@@ -2597,9 +2597,19 @@
         function renderHeroSlides() {
             const container = document.getElementById('heroSlidesContainer');
             if (!container) return;
-            container.innerHTML = heroSlides.map((s, i) => `
+            container.innerHTML = heroSlides.map((s, i) => {
+                // Ensure defaults for new fields if they don't exist
+                const orig = s.originalPrice || '';
+                const disc = s.discountPercentage || '';
+                const fin = s.financingBonus || '';
+                const final = s.finalPrice || '';
+                const wa = s.waText || '';
+                const cta1 = s.ctaPrimary || '';
+                const cta2 = s.ctaSecondary || '';
+
+                return `
                 <div class="hero-slide-admin-item" style="background: var(--bg3); border-radius: var(--radius); padding: 15px; margin-bottom: 15px; border: 1px solid var(--border);">
-                    <div style="display: flex; gap: 15px; align-items: start;">
+                    <div style="display: flex; gap: 15px; align-items: start; margin-bottom: 10px;">
                         <div style="width: 120px; height: 80px; background: #000; border-radius: 4px; overflow: hidden; position: relative; flex-shrink: 0;">
                             <img src="${s.image}" style="width: 100%; height: 100%; object-fit: cover;">
                             <button onclick="document.getElementById('heroFile-${i}').click()" style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); border: none; color: #fff; cursor: pointer; opacity: 0; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
@@ -2607,15 +2617,38 @@
                             </button>
                             <input type="file" id="heroFile-${i}" style="display:none" onchange="uploadHeroImage(${i}, this)" accept="image/*">
                         </div>
-                        <div style="flex-grow: 1; display: grid; gap: 8px;">
+                        <div style="flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <input type="text" class="form-input" value="${s.tag}" placeholder="Tag (Ej: STOCK LOCAL)" onchange="updateHeroSlide(${i}, 'tag', this.value)" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--border-accent);">
-                            <input type="text" class="form-input" value="${s.title}" placeholder="Título" onchange="updateHeroSlide(${i}, 'title', this.value)" style="padding: 4px 8px; font-weight: 600;">
-                            <textarea class="form-textarea" placeholder="Subtítulo" onchange="updateHeroSlide(${i}, 'subtitle', this.value)" style="height: 50px; font-size: 0.85rem; padding: 4px 8px;">${s.subtitle}</textarea>
+                            <input type="text" class="form-input" value="${s.title}" placeholder="Título Principal" onchange="updateHeroSlide(${i}, 'title', this.value)" style="padding: 4px 8px; font-weight: 600;">
+                            <input type="text" class="form-input" value="${wa}" placeholder="Texto WhatsApp" onchange="updateHeroSlide(${i}, 'waText', this.value)" style="padding: 4px 8px; font-size: 0.75rem; grid-column: 1 / -1;">
                         </div>
                         <button class="action-btn delete" onclick="removeHeroSlide(${i})" style="flex-shrink: 0;"><i class="fas fa-trash"></i></button>
                     </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px;">
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <label style="font-size:0.65rem; color:var(--text3);">Precio de Lista ($)</label>
+                            <input type="number" class="form-input" value="${orig}" placeholder="33000" onchange="updateHeroSlide(${i}, 'originalPrice', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <label style="font-size:0.65rem; color:var(--danger);">Descuento Especial ($)</label>
+                            <input type="number" class="form-input" value="${disc}" placeholder="9900" onchange="updateHeroSlide(${i}, 'discountPercentage', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <label style="font-size:0.65rem; color:#bfcdff;">Bono Financiamiento ($)</label>
+                            <input type="number" class="form-input" value="${fin}" placeholder="10000" onchange="updateHeroSlide(${i}, 'financingBonus', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <label style="font-size:0.65rem; color:var(--accent);">Precio Final ($)</label>
+                            <input type="number" class="form-input" value="${final}" placeholder="13100" onchange="updateHeroSlide(${i}, 'finalPrice', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                        <input type="text" class="form-input" value="${cta1}" placeholder="CTA Principal (Ej: Asegurar Oferta)" onchange="updateHeroSlide(${i}, 'ctaPrimary', this.value)" style="padding: 4px 8px; font-size: 0.75rem;">
+                        <input type="text" class="form-input" value="${cta2}" placeholder="CTA Secundario (Ej: Ver Detalles)" onchange="updateHeroSlide(${i}, 'ctaSecondary', this.value)" style="padding: 4px 8px; font-size: 0.75rem;">
+                    </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         window.updateHeroSlide = (index, field, value) => {
@@ -2630,7 +2663,18 @@
         };
 
         document.getElementById('addHeroSlideBtn')?.addEventListener('click', () => {
-            heroSlides.push({ tag: "NUEVO TAG", title: "Nuevo Título", subtitle: "Descripción del slide...", image: "images/hero1.png" });
+            heroSlides.push({ 
+                tag: "NUEVA OFERTA", 
+                title: "Nuevo Vehículo", 
+                originalPrice: "20000",
+                discountPercentage: "2000",
+                financingBonus: "5000",
+                finalPrice: "13000",
+                waText: "Hola, me interesa este vehículo.",
+                ctaPrimary: "Asegurar Oferta",
+                ctaSecondary: "Ver Detalles",
+                image: "images/hero1.png" 
+            });
             renderHeroSlides();
         });
 
