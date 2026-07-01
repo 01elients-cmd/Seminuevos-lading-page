@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Re-crear el diseño premium exacto
             html += `
                 <div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${s.image}')">
-                    <div class="hero-overlay" style="background: ${isFirst ? 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%)' : 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)'};"></div>
+                    <div class="hero-overlay" style="background: ${isFirst ? 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 100%)' : 'linear-gradient(to top, rgba(10,10,10,1) 0%, transparent 20%), linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)'};"></div>
                         <div class="hero-content">
                             <div class="hero-tag" style="opacity: 0; animation: contentReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;">
                                 <i class="fas ${isFirst ? 'fa-bolt' : (isSecond ? 'fa-star' : 'fa-car')}" style="color: var(--primary);"></i> ${s.tag}
@@ -663,7 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                     </div>
-                </div>
             `;
         });
 
