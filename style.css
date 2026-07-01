@@ -528,8 +528,8 @@ body::after {
 .hero {
     position: relative;
     height: 85vh;
-    height: 100dvh; /* Altura dinámica estable */
-    min-height: 600px;
+    height: 85dvh; /* Altura dinámica estable que invita a hacer scroll */
+    min-height: 500px;
     overflow: hidden;
 }
 
