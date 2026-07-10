@@ -199,6 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('section[id]');
 
+    // Set active link based on current page
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        const href = link.getAttribute('href');
+        if (href === currentPath || (currentPath === '' && href === 'index.html')) {
+            link.classList.add('active');
+        }
+    });
+
     window.addEventListener('scroll', () => {
         // Navbar background
         if (window.scrollY > 60) {
@@ -206,22 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             navbar.classList.remove('scrolled');
         }
-
-        // Active nav link
-        let current = '';
-        sections.forEach(section => {
-            const top = section.offsetTop - 150;
-            if (window.scrollY >= top) {
-                current = section.getAttribute('id');
-            }
-        });
-
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
-        });
     });
 
     // ===== MOBILE MENU =====
@@ -579,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         discountPercentage: 9597,
                         financingBonus: 10000,
                         finalPrice: 12393,
-                        waText: 'Hola, quiero aplicar al bono de financiamiento en la Corolla Cross LE 2022.',
+                        waText: 'Hola, quiero aplicar al financiamiento en la Corolla Cross LE 2022.',
                         ctaPrimary: 'Aplicar Ahora',
                         ctaSecondary: 'Más Info'
                     },
@@ -632,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     rows += `<div style='display: flex; justify-content: space-between; color: #ffb4ab; margin-bottom: 8px; font-size: 0.95rem; opacity: 0; animation: contentReveal 0.6s ease 0.9s forwards;'><span>Descuento Especial</span><span>-$${fmt(s.discountPercentage)}</span></div>`;
                 }
                 if (s.financingBonus && Number(s.financingBonus) > 0) {
-                    rows += `<div style='display: flex; justify-content: space-between; color: #bfcdff; margin-bottom: 12px; font-size: 0.95rem; opacity: 0; animation: contentReveal 0.6s ease 1.2s forwards;'><span>Bono Financiamiento</span><span>-$${fmt(s.financingBonus)}</span></div>`;
+                    rows += `<div style='display: flex; justify-content: space-between; color: #bfcdff; margin-bottom: 12px; font-size: 0.95rem; opacity: 0; animation: contentReveal 0.6s ease 1.2s forwards;'><span>Financiamiento</span><span>-$${fmt(s.financingBonus)}</span></div>`;
                 }
                 rows += `<div style='border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display: flex; justify-content: space-between; font-size: 1.4rem; font-weight: 700; opacity: 0; animation: contentReveal 0.6s ease 1.5s forwards;'><span>Llévala por</span><span class='text-accent'>$${fmt(s.finalPrice || 0)}</span></div>`;
                 subtitleHtml = `<div style='background: rgba(10,10,10,0.55); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--ghost-border-gold); backdrop-filter: blur(15px); width: 100%; max-width: 400px; text-align: left; margin: 0 auto;'>${rows}</div>`;
@@ -1028,6 +1022,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcNacionalNotice = document.getElementById('calcNacionalNotice');
     const calcResults = document.getElementById('calcResults');
 
+    const toggleAuctionFees = document.getElementById('toggleAuctionFees');
+    if (toggleAuctionFees) {
+        toggleAuctionFees.addEventListener('click', () => {
+            const details = document.getElementById('auctionFeesDetails');
+            const icon = toggleAuctionFees.querySelector('i');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            } else {
+                details.style.display = 'none';
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+
     calcStatus?.addEventListener('change', () => {
         if (calcStatus.value === 'nacional') {
             calcFieldsPL.style.display = 'none';
@@ -1087,7 +1096,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // If no cost entered, reset labels but keep rows visible if needed
         if (baseCost <= 0) {
             const resetIds = [
-                'resBase', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee',
+                'resBase', 'resTotalAuctionFees', 'resBuyFee', 'resInternetFee', 'resAuctionServiceFee',
                 'resEnvFee', 'resTitleFee', 'resStateTax', 'resBrokerFee',
                 'resServiceFee', 'resTraslado', 'resFlete', 'resAduana',
                 'resDocVzla', 'resRepuesto', 'resTotal'
@@ -1179,14 +1188,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // UI Updates
         document.getElementById('resBase').textContent = fmt(baseCost);
-        document.getElementById('resBuyFee').textContent = fmt(buyFee);
-        document.getElementById('resInternetFee').textContent = fmt(internetFee);
-        document.getElementById('resAuctionServiceFee').textContent = fmt(auctionServiceFee);
-        document.getElementById('resEnvFee').textContent = fmt(envFee);
-        document.getElementById('resTitleFee').textContent = fmt(titleFee);
-        document.getElementById('resStateTax').textContent = fmt(stateTax);
-        document.getElementById('resBrokerFee').textContent = fmt(brokerFee);
-        document.getElementById('resServiceFee').textContent = fmt(serviceFee);
+        
+        const totalAuctionFees = buyFee + internetFee + auctionServiceFee + envFee;
+        if (document.getElementById('resTotalAuctionFees')) {
+            document.getElementById('resTotalAuctionFees').textContent = fmt(totalAuctionFees);
+        }
+        
+        const elBuyFee = document.getElementById('resBuyFee'); if (elBuyFee) elBuyFee.textContent = fmt(buyFee);
+        const elInternetFee = document.getElementById('resInternetFee'); if (elInternetFee) elInternetFee.textContent = fmt(internetFee);
+        const elAuctionService = document.getElementById('resAuctionServiceFee'); if (elAuctionService) elAuctionService.textContent = fmt(auctionServiceFee);
+        const elEnvFee = document.getElementById('resEnvFee'); if (elEnvFee) elEnvFee.textContent = fmt(envFee);
+        const elTitleFee = document.getElementById('resTitleFee'); if (elTitleFee) elTitleFee.textContent = fmt(titleFee);
+        const elStateTax = document.getElementById('resStateTax'); if (elStateTax) elStateTax.textContent = fmt(stateTax);
+        const elBrokerFee = document.getElementById('resBrokerFee'); if (elBrokerFee) elBrokerFee.textContent = fmt(brokerFee);
+        const elServiceFee = document.getElementById('resServiceFee'); if (elServiceFee) elServiceFee.textContent = fmt(serviceFee);
         document.getElementById('resTraslado').textContent = fmt(costTraslado);
         document.getElementById('resFlete').textContent = fmt(flete);
         document.getElementById('resAduana').textContent = fmt(aduana);
@@ -1197,6 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('resTotalMax').textContent = fmt(totalMax);
         }
     }
+    window.updateCalculatorLogic = updateCalc; // Expose globally
 
     const btnCalculateCost = document.getElementById('btnCalculateCost');
     btnCalculateCost?.addEventListener('click', updateCalc);

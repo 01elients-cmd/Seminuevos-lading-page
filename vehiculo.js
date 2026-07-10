@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p style="color: var(--on-surface-variant); white-space: pre-line;">${cleanDesc || 'Sin descripción detallada.'}</p>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px;">
                     <a href="https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}) - ${priceText}. ¿Me pueden cotizar?`)}" class="btn btn-whatsapp btn-lg btn-block" target="_blank" style="width: 100%; justify-content: center;">
                         <i class="fab fa-whatsapp"></i> Cotiza tu vehículo
                     </a>
@@ -117,11 +117,167 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <i class="fas fa-share-nodes"></i> Compartir Vehículo
                     </a>
                 </div>
+
+                <!-- INJECTED CALCULATOR -->
+                <div class="calculator-wrapper" style="margin-top: 0; box-shadow: none; border: 1px solid var(--ghost-border); border-radius: var(--radius-lg); background: var(--surface-container-low); padding: 20px;">
+                    <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 20px; text-align: center;"><i class="fas fa-calculator" style="color: var(--primary);"></i> Estimador de Importación</h3>
+                    <div class="calculator-inputs" style="grid-template-columns: 1fr;">
+                        <div class="form-group">
+                            <label for="calcStatus">Estatus del vehículo</label>
+                            <select id="calcStatus" class="calc-select">
+                                <option value="puerto_libre">Puerto Libre</option>
+                                <option value="nacional">Nacional</option>
+                                <option value="eeuu">Estados Unidos</option>
+                            </select>
+                        </div>
+                        <div id="calcNacionalNotice" class="calc-nacional-notice" style="display:none; margin-bottom: 15px;">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Para vehículos de estatus Nacional, favor <strong>consultar directamente</strong> con un asesor.</span>
+                        </div>
+                        <div id="calcFieldsPL">
+                            <div class="form-group">
+                                <label for="calcBaseCost">Costo de compra ($)</label>
+                                <input type="number" id="calcBaseCost" placeholder="Ej. 15000">
+                            </div>
+                            <div class="form-group">
+                                <label for="calcOrigin">Ubicación Origin (USA)</label>
+                                <select id="calcOrigin" class="calc-select">
+                                    <option value="FL">Florida</option>
+                                    <option value="TX">Texas</option>
+                                    <option value="CA">California</option>
+                                    <option value="custom">Otro (Manual)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="customTransportGroup" style="display:none;">
+                                <label for="calcCustomTransport">Grúa manual ($)</label>
+                                <input type="number" id="calcCustomTransport" placeholder="1200">
+                            </div>
+                            <div class="form-group">
+                                <label for="calcDestination">Destino</label>
+                                <select id="calcDestination" class="calc-select">
+                                    <option value="FL">Florida / Miami Warehouse</option>
+                                </select>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="calcRepairs1">
+                                <label for="calcRepairs1">Reparaciones grado 1</label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="calcRepairs2">
+                                <label for="calcRepairs2">Reparaciones grado 2</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-results" id="calcResults" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--ghost-border);">
+                        <div class="calc-row"><span>Costo de Compra</span><span id="resBase">$0</span></div>
+                        
+                        <div class="calc-row" id="toggleAuctionFees" style="cursor: pointer;">
+                            <span>Tarifas de Subasta <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 5px; transition: transform 0.3s;"></i></span>
+                            <span id="resTotalAuctionFees">$0</span>
+                        </div>
+                        <div id="auctionFeesDetails" style="display: none; padding-left: 15px; border-left: 2px solid var(--ghost-border); margin-bottom: 10px;">
+                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de compra</span><span id="resBuyFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa por internet</span><span id="resInternetFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de servicio</span><span id="resAuctionServiceFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
+                        </div>
+
+                        <div class="calc-row detailed-fee"><span>Trámite de título</span><span id="resTitleFee">$0</span></div>
+                        <div class="calc-row detailed-fee"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
+                        <div class="calc-row detailed-fee"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
+                        <div class="calc-row"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
+                        <div class="calc-row"><span>Traslado / Grúa (USA)</span><span id="resTraslado">$0</span></div>
+                        <div class="calc-row vzla-fee-row"><span>Flete Maritimo</span><span id="resFlete">$0</span></div>
+                        <div class="calc-row vzla-fee-row"><span>Gastos de Aduana</span><span id="resAduana">$0</span></div>
+                        <div class="calc-row vzla-fee-row"><span>Documentación en VZLA</span><span id="resDocVzla">$0</span></div>
+                        <div class="calc-row"><span>Reparaciones (Est.)</span><span id="resRepuesto">$0</span></div>
+                        <div class="calc-divider"></div>
+                        <div class="calc-row total-range">
+                            <span>ESTIMADO TOTAL</span>
+                            <span class="total-range-values">
+                                <span id="resTotal" class="text-accent">$0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     `;
 
     document.getElementById('carDetailContainer').innerHTML = html;
+    
+    // Bind calculator events for this newly injected calculator
+    setTimeout(() => {
+        const attachCalc = (id, event) => {
+            const el = document.getElementById(id);
+            if (el && typeof window.updateCalculatorLogic === 'function') {
+                el.addEventListener(event, window.updateCalculatorLogic);
+            }
+        };
+
+        attachCalc('calcStatus', 'change');
+        attachCalc('calcOrigin', 'change');
+        attachCalc('calcDestination', 'change');
+        attachCalc('calcCustomTransport', 'input');
+        attachCalc('calcBaseCost', 'input');
+        attachCalc('calcRepairs1', 'change');
+        attachCalc('calcRepairs2', 'change');
+        
+        // Also handle the display logic for PL vs Nacional vs origin custom
+        const calcStatus = document.getElementById('calcStatus');
+        const calcFieldsPL = document.getElementById('calcFieldsPL');
+        const calcNacionalNotice = document.getElementById('calcNacionalNotice');
+        const calcResults = document.getElementById('calcResults');
+        const calcOrigin = document.getElementById('calcOrigin');
+        const customTransportGroup = document.getElementById('customTransportGroup');
+
+        if (calcStatus) {
+            calcStatus.addEventListener('change', () => {
+                if (calcStatus.value === 'nacional') {
+                    calcFieldsPL.style.display = 'none';
+                    calcNacionalNotice.style.display = 'flex';
+                    calcResults.style.display = 'none';
+                } else {
+                    calcFieldsPL.style.display = 'block';
+                    calcNacionalNotice.style.display = 'none';
+                    calcResults.style.display = 'block';
+                }
+            });
+        }
+        
+        if (calcOrigin) {
+            calcOrigin.addEventListener('change', () => {
+                if (calcOrigin.value === 'custom') {
+                    customTransportGroup.style.display = 'block';
+                } else {
+                    customTransportGroup.style.display = 'none';
+                }
+            });
+        }
+        
+        // Let's manually add the basic event listeners that the accordion needs
+        const toggleAuctionFees = document.getElementById('toggleAuctionFees');
+        if (toggleAuctionFees) {
+            toggleAuctionFees.addEventListener('click', () => {
+                const details = document.getElementById('auctionFeesDetails');
+                const icon = toggleAuctionFees.querySelector('i');
+                if (details.style.display === 'none') {
+                    details.style.display = 'block';
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                } else {
+                    details.style.display = 'none';
+                    if (icon) icon.style.transform = 'rotate(0deg)';
+                }
+            });
+        }
+        
+        // Re-attach calculator logic locally if updateCalc isn't accessible
+        if (typeof window.updateCalculatorLogic === 'function') {
+            window.updateCalculatorLogic();
+        }
+    }, 100);
     
     // Make responsive using JS (for quick fix without altering global css)
     if (window.innerWidth <= 768) {
