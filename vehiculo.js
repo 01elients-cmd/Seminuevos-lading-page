@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const html = `
-        <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1fr 400px 350px; gap: 30px; align-items: start;">
+        <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; align-items: start;">
             <div class="vehicle-page-left">
                 ${imagesHtml}
             </div>
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
 
             <!-- INJECTED CALCULATOR -->
-            <div class="vehicle-page-calculator">
+            <div class="vehicle-page-calculator" style="position: sticky; top: 100px;">
                 <div class="calculator-wrapper" style="margin-top: 0; box-shadow: none; border: 1px solid var(--ghost-border); border-radius: var(--radius-lg); background: var(--surface-container-low); padding: 20px;">
                     <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 20px; text-align: center;"><i class="fas fa-calculator" style="color: var(--primary);"></i> Estimador de Importación</h3>
                     <div class="calculator-inputs" style="grid-template-columns: 1fr;">
@@ -171,31 +171,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     </div>
                     
-                    <div class="calculator-results" id="calcResults" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--ghost-border);">
-                        <div class="calc-row"><span>Costo de Compra</span><span id="resBase">$0</span></div>
+                    <div class="calculator-results" id="calcResults" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--ghost-border); font-size: 0.85rem;">
+                        <div class="calc-row" style="font-size:0.85rem;"><span>Costo de Compra</span><span id="resBase">$0</span></div>
                         
-                        <div class="calc-row" id="toggleAuctionFees" style="cursor: pointer;">
-                            <span>Tarifas de Subasta <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 5px; transition: transform 0.3s;"></i></span>
+                        <div class="calc-row" id="toggleAuctionFees" style="cursor: pointer; font-size:0.85rem;">
+                            <span>Tarifas de Subasta <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: 4px; transition: transform 0.3s;"></i></span>
                             <span id="resTotalAuctionFees">$0</span>
                         </div>
-                        <div id="auctionFeesDetails" style="display: none; padding-left: 15px; border-left: 2px solid var(--ghost-border); margin-bottom: 10px;">
-                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de compra</span><span id="resBuyFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa por internet</span><span id="resInternetFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de servicio</span><span id="resAuctionServiceFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
+                        <div id="auctionFeesDetails" style="display: none; padding-left: 10px; border-left: 2px solid var(--ghost-border); margin-bottom: 8px;">
+                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa de compra</span><span id="resBuyFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa por internet</span><span id="resInternetFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa de servicio</span><span id="resAuctionServiceFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
                         </div>
 
-                        <div class="calc-row detailed-fee"><span>Trámite de título</span><span id="resTitleFee">$0</span></div>
-                        <div class="calc-row detailed-fee"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
-                        <div class="calc-row detailed-fee"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
-                        <div class="calc-row"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
-                        <div class="calc-row"><span>Traslado / Grúa (USA)</span><span id="resTraslado">$0</span></div>
-                        <div class="calc-row vzla-fee-row"><span>Flete Maritimo</span><span id="resFlete">$0</span></div>
-                        <div class="calc-row vzla-fee-row"><span>Gastos de Aduana</span><span id="resAduana">$0</span></div>
-                        <div class="calc-row vzla-fee-row"><span>Documentación en VZLA</span><span id="resDocVzla">$0</span></div>
-                        <div class="calc-row"><span>Reparaciones (Est.)</span><span id="resRepuesto">$0</span></div>
+                        <div class="calc-row detailed-fee" style="font-size:0.85rem;"><span>Trámite de título</span><span id="resTitleFee">$0</span></div>
+                        <div class="calc-row detailed-fee" style="font-size:0.85rem;"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
+                        <div class="calc-row detailed-fee" style="font-size:0.85rem;"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
+                        <div class="calc-row" style="font-size:0.85rem;"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
+                        <div class="calc-row" style="font-size:0.85rem;"><span>Traslado / Grúa</span><span id="resTraslado">$0</span></div>
+                        <div class="calc-row vzla-fee-row" style="font-size:0.85rem;"><span>Flete Marítimo</span><span id="resFlete">$0</span></div>
+                        <div class="calc-row vzla-fee-row" style="font-size:0.85rem;"><span>Gastos de Aduana</span><span id="resAduana">$0</span></div>
+                        <div class="calc-row vzla-fee-row" style="font-size:0.85rem;"><span>Doc. en VZLA</span><span id="resDocVzla">$0</span></div>
+                        <div class="calc-row" style="font-size:0.85rem;"><span>Reparaciones (Est.)</span><span id="resRepuesto">$0</span></div>
                         <div class="calc-divider"></div>
-                        <div class="calc-row total-range">
+                        <div class="calc-row total-range" style="font-size:0.9rem;">
                             <span>ESTIMADO TOTAL</span>
                             <span class="total-range-values">
                                 <span id="resTotal" class="text-accent">$0</span>
@@ -281,28 +281,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }, 100);
     
-    // Override container width for this specific page to give 3 columns enough room
+    // Override container width for this specific page
     const container = document.getElementById('carDetailContainer');
     if (container) {
-        container.style.maxWidth = '1500px';
+        container.style.maxWidth = '1300px';
         container.style.width = '95%';
     }
 
-    // Make responsive using JS (for quick fix without altering global css)
-    if (window.innerWidth <= 1100) {
-        document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr';
-        document.getElementById('mainVehicleImage').style.height = '300px';
-    }
-    
-    window.addEventListener('resize', () => {
-        if (window.innerWidth <= 1100) {
-            document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr';
-            document.getElementById('mainVehicleImage').style.height = '300px';
+    // Make responsive using JS
+    const applyLayout = () => {
+        const grid = document.querySelector('.vehicle-grid-container');
+        if (!grid) return;
+        if (window.innerWidth <= 900) {
+            grid.style.gridTemplateColumns = '1fr';
+            const img = document.getElementById('mainVehicleImage');
+            if (img) img.style.height = '260px';
         } else {
-            document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr 400px 350px';
-            document.getElementById('mainVehicleImage').style.height = '500px';
+            grid.style.gridTemplateColumns = '1fr 380px';
+            const img = document.getElementById('mainVehicleImage');
+            if (img) img.style.height = '460px';
         }
-    });
+    };
+    applyLayout();
+    window.addEventListener('resize', applyLayout);
 });
 
 

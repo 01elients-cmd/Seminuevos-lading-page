@@ -837,13 +837,22 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'Soporte Técnico MasterTech',
             icon: '<i class="fas fa-wrench"></i>',
             body: 'MasterTech es nuestro centro de servicio especializado y aliado estratégico. Contamos con tecnología de diagnóstico de última generación, técnicos certificados y un amplio stock de repuestos para garantizar que tu vehículo importado reciba el mejor cuidado posible. Desde mantenimientos preventivos hasta reparaciones complejas, MasterTech es el respaldo que tu inversión merece.',
-            cta: 'Consultar Servicio'
+            cta: 'Consultar Servicio',
+            wa: 'Hola%2C%20quiero%20consultar%20sobre%20el%20Soporte%20T%C3%A9cnico%20MasterTech'
         },
         mtwash: {
             title: 'MT Wash Detailing',
             icon: '<i class="fas fa-droplet"></i>',
             body: 'MT Wash ofrece servicios de estética automotriz premium. Utilizamos productos de alta gama y técnicas de detallado profesional para proteger la pintura de tu vehículo, limpiar profundamente el interior y mantener ese brillo de salón por mucho más tiempo. Es el complemento ideal para que tu SemiNuevo luzca siempre como el primer día.',
-            cta: 'Agendar Lavado'
+            cta: 'Agendar Lavado',
+            wa: 'Hola%2C%20quiero%20agendar%20un%20servicio%20de%20MT%20Wash%20Detailing'
+        },
+        lealtad: {
+            title: 'Programa de Lealtad',
+            icon: '<i class="fas fa-star"></i>',
+            body: 'Al adquirir tu vehículo con Seminuevos Agency, automáticamente formas parte de nuestro Programa de Lealtad. Genera puntos en cada visita y servicio en MasterTech y obtén descuentos directos en repuestos, mano de obra y accesorios. Mientras más cuidas tu vehículo con nosotros, más ahorra tu bolsillo. Úntete hoy y empieza a disfrutar tus beneficios.',
+            cta: 'Unirse al Programa',
+            wa: 'Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20Programa%20de%20Lealtad%20de%20Seminuevos%20Agency'
         }
     };
 
@@ -854,7 +863,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('infoModalIcon').innerHTML = content.icon;
         document.getElementById('infoModalTitle').textContent = content.title;
         document.getElementById('infoModalBody').textContent = content.body;
-        document.getElementById('infoModalCta').innerHTML = `<i class="fab fa-whatsapp"></i> ${content.cta}`;
+        const ctaEl = document.getElementById('infoModalCta');
+        ctaEl.innerHTML = `<i class="fab fa-whatsapp"></i> ${content.cta}`;
+        ctaEl.href = `https://wa.me/584248700438?text=${content.wa || 'Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n'}`;
+        ctaEl.target = '_blank';
 
         infoModal.classList.add('active');
         document.body.style.overflow = 'hidden';
