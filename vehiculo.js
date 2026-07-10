@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const html = `
-        <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 30px; align-items: start;">
+        <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1fr 400px 350px; gap: 30px; align-items: start;">
             <div class="vehicle-page-left">
                 ${imagesHtml}
             </div>
@@ -154,10 +154,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <label for="calcCustomTransport">Grúa manual ($)</label>
                                 <input type="number" id="calcCustomTransport" placeholder="1200">
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="grid-column: 1 / -1;">
                                 <label for="calcDestination">Destino</label>
-                                <select id="calcDestination" class="calc-select">
-                                    <option value="FL">Florida / Miami Warehouse</option>
+                                <select id="calcDestination" class="calc-select" disabled>
+                                    <option value="FL_MIAMI">Florida / Miami Warehouse</option>
                                 </select>
                             </div>
                             <div class="form-group checkbox-group">
@@ -281,18 +281,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }, 100);
     
+    // Override container width for this specific page to give 3 columns enough room
+    const container = document.getElementById('carDetailContainer');
+    if (container) {
+        container.style.maxWidth = '1500px';
+        container.style.width = '95%';
+    }
+
     // Make responsive using JS (for quick fix without altering global css)
-    if (window.innerWidth <= 1024) {
+    if (window.innerWidth <= 1100) {
         document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr';
         document.getElementById('mainVehicleImage').style.height = '300px';
     }
     
     window.addEventListener('resize', () => {
-        if (window.innerWidth <= 1024) {
+        if (window.innerWidth <= 1100) {
             document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr';
             document.getElementById('mainVehicleImage').style.height = '300px';
         } else {
-            document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1.2fr 1fr 1fr';
+            document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr 400px 350px';
             document.getElementById('mainVehicleImage').style.height = '500px';
         }
     });
