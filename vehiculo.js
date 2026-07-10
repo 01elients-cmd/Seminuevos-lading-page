@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const html = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+        <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 30px; align-items: start;">
             <div class="vehicle-page-left">
                 ${imagesHtml}
             </div>
@@ -117,8 +117,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <i class="fas fa-share-nodes"></i> Compartir Vehículo
                     </a>
                 </div>
+            </div>
 
-                <!-- INJECTED CALCULATOR -->
+            <!-- INJECTED CALCULATOR -->
+            <div class="vehicle-page-calculator">
                 <div class="calculator-wrapper" style="margin-top: 0; box-shadow: none; border: 1px solid var(--ghost-border); border-radius: var(--radius-lg); background: var(--surface-container-low); padding: 20px;">
                     <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 20px; text-align: center;"><i class="fas fa-calculator" style="color: var(--primary);"></i> Estimador de Importación</h3>
                     <div class="calculator-inputs" style="grid-template-columns: 1fr;">
@@ -280,17 +282,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 100);
     
     // Make responsive using JS (for quick fix without altering global css)
-    if (window.innerWidth <= 768) {
-        document.querySelector('.vehicle-page-left').parentElement.style.gridTemplateColumns = '1fr';
+    if (window.innerWidth <= 1024) {
+        document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr';
         document.getElementById('mainVehicleImage').style.height = '300px';
     }
     
     window.addEventListener('resize', () => {
-        if (window.innerWidth <= 768) {
-            document.querySelector('.vehicle-page-left').parentElement.style.gridTemplateColumns = '1fr';
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1fr';
             document.getElementById('mainVehicleImage').style.height = '300px';
         } else {
-            document.querySelector('.vehicle-page-left').parentElement.style.gridTemplateColumns = '1fr 1fr';
+            document.querySelector('.vehicle-grid-container').style.gridTemplateColumns = '1.2fr 1fr 1fr';
             document.getElementById('mainVehicleImage').style.height = '500px';
         }
     });

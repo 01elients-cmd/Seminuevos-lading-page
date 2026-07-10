@@ -200,11 +200,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = document.querySelectorAll('section[id]');
 
     // Set active link based on current page
-    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    const currentPath = window.location.pathname.split('/').pop();
     navLinks.forEach(link => {
         link.classList.remove('active');
         const href = link.getAttribute('href');
-        if (href === currentPath || (currentPath === '' && href === 'index.html')) {
+        
+        // Exact match for current path OR home page fallback
+        const isHomePage = !currentPath || currentPath === 'index.html' || currentPath === '';
+        
+        if (href === currentPath || (isHomePage && href === 'index.html')) {
             link.classList.add('active');
         }
     });

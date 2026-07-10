@@ -93,10 +93,10 @@
                 <li><a href="calculadora.html" class="nav-link">CALCULADORA</a></li>
                 <li><a href="servicios.html" class="nav-link">BENEFICIOS</a></li>
                 <li><a href="nosotros.html" class="nav-link">NOSOTROS</a></li>
-                <li><a href="index.html#contacto" class="nav-link">CONTACTO</a></li>
+                <li><a href="#contacto" class="nav-link">CONTACTO</a></li>
             </ul>
             <div class="nav-actions">
-                <a href="index.html#contacto" class="nav-cta">
+                <a href="#contacto" class="nav-cta">
                     <i class="fab fa-whatsapp"></i> Contacto
                 </a>
                 <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
@@ -292,42 +292,16 @@
                         <p style="color: #666; font-size: 0.9rem;">SemiNuevos Agency - Tu aliado automotriz</p>
                     </div>
                     <div class="calc-row"><span>Costo de Compra</span><span id="resBase">$0</span></div>
-                    <div class="calc-row" id="toggleAuctionFees" style="cursor: pointer;"><span>Tarifas de Subasta <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 5px; transition: transform 0.3s;"></i></span><span id="resTotalAuctionFees"><div class="calc-row"><span>Tarifa de compra de subasta</span><span id="resBuyFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de oferta por internet</span><span
-                            id="resInternetFee">$0</span>
+                    <div class="calc-row" id="toggleAuctionFees" style="cursor: pointer;">
+                        <span>Tarifas de Subasta <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 5px; transition: transform 0.3s;"></i></span>
+                        <span id="resTotalAuctionFees">$0</span>
                     </div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de servicio de subasta</span><span
-                            id="resAuctionServiceFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span>
-                    </div></span></div><div id="auctionFeesDetails" style="display: none; padding-left: 15px; border-left: 2px solid var(--ghost-border); margin-bottom: 10px;"><div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de compra</span><span id="resBuyFee"><div class="calc-row"><span>Tarifa de compra de subasta</span><span id="resBuyFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de oferta por internet</span><span
-                            id="resInternetFee">$0</span>
+                    <div id="auctionFeesDetails" style="display: none; padding-left: 15px; border-left: 2px solid var(--ghost-border); margin-bottom: 10px;">
+                        <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de compra</span><span id="resBuyFee">$0</span></div>
+                        <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa por internet</span><span id="resInternetFee">$0</span></div>
+                        <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de servicio</span><span id="resAuctionServiceFee">$0</span></div>
+                        <div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
                     </div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de servicio de subasta</span><span
-                            id="resAuctionServiceFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span>
-                    </div></span></div><div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa por internet</span><span id="resInternetFee"><div class="calc-row"><span>Tarifa de compra de subasta</span><span id="resBuyFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de oferta por internet</span><span
-                            id="resInternetFee">$0</span>
-                    </div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de servicio de subasta</span><span
-                            id="resAuctionServiceFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span>
-                    </div></span></div><div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifa de servicio</span><span id="resAuctionServiceFee"><div class="calc-row"><span>Tarifa de compra de subasta</span><span id="resBuyFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de oferta por internet</span><span
-                            id="resInternetFee">$0</span>
-                    </div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de servicio de subasta</span><span
-                            id="resAuctionServiceFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span>
-                    </div></span></div><div class="calc-row detailed-fee" style="font-size: 0.9rem; margin-bottom: 5px;"><span>Tarifas ambientales</span><span id="resEnvFee"><div class="calc-row"><span>Tarifa de compra de subasta</span><span id="resBuyFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de oferta por internet</span><span
-                            id="resInternetFee">$0</span>
-                    </div>
-                    <div class="calc-row detailed-fee"><span>Tarifa de servicio de subasta</span><span
-                            id="resAuctionServiceFee">$0</span></div>
-                    <div class="calc-row detailed-fee"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span>
-                    </div></span></div></div>
                     <div class="calc-row detailed-fee"><span>Trámite de título in USA</span><span
                             id="resTitleFee">$0</span></div>
                     <div class="calc-row detailed-fee"><span>Impuestos del estado</span><span id="resStateTax">$0</span>
@@ -388,7 +362,7 @@
                     <a href="#catalogo">Catálogo</a>
                     <a href="#beneficios">Beneficios</a>
                     <a href="#nosotros">Nosotros</a>
-                    <a href="index.html#contacto">Contacto</a>
+                    <a href="#contacto">Contacto</a>
                 </div>
                 <div class="footer-links">
                     <h4>Ecosistema</h4>
@@ -422,5 +396,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
