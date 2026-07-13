@@ -1195,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const includeRepairs1 = document.getElementById('calcRepairs1').checked;
         const includeRepairs2 = document.getElementById('calcRepairs2').checked;
-        const repuesto = (includeRepairs1 ? baseCost * 0.12 : 0) + (includeRepairs2 ? baseCost * 0.20 : 0);
+        const repuesto = (includeRepairs1 ? baseCost * 0.20 : 0) + (includeRepairs2 ? baseCost * 0.30 : 0);
 
         const total = baseCost + buyFee + internetFee + auctionServiceFee + envFee +
             titleFee + stateTax + brokerFee + serviceFee +
@@ -1205,7 +1205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // UI Updates
         document.getElementById('resBase').textContent = fmt(baseCost);
         
-        const totalAuctionFees = buyFee + internetFee + auctionServiceFee + envFee;
+        const totalAuctionFees = buyFee + internetFee + auctionServiceFee + envFee + titleFee + stateTax;
         if (document.getElementById('resTotalAuctionFees')) {
             document.getElementById('resTotalAuctionFees').textContent = fmt(totalAuctionFees);
         }

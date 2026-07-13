@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="calc-row" style="font-size:0.85rem;"><span>Costo de Compra</span><span id="resBase">$0</span></div>
                         
                         <div class="calc-row" id="toggleAuctionFees" style="cursor: pointer; font-size:0.85rem;">
-                            <span>Tarifas de Subasta <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: 4px; transition: transform 0.3s;"></i></span>
+                            <span>Tarifa de Subasta <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: 4px; transition: transform 0.3s;"></i></span>
                             <span id="resTotalAuctionFees">$0</span>
                         </div>
                         <div id="auctionFeesDetails" style="display: none; padding-left: 10px; border-left: 2px solid var(--ghost-border); margin-bottom: 8px;">
@@ -183,10 +183,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa por internet</span><span id="resInternetFee">$0</span></div>
                             <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa de servicio</span><span id="resAuctionServiceFee">$0</span></div>
                             <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Trámite de título in USA</span><span id="resTitleFee">$0</span></div>
+                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
                         </div>
 
-                        <div class="calc-row detailed-fee" style="font-size:0.85rem;"><span>Trámite de título</span><span id="resTitleFee">$0</span></div>
-                        <div class="calc-row detailed-fee" style="font-size:0.85rem;"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
                         <div class="calc-row detailed-fee" style="font-size:0.85rem;"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
                         <div class="calc-row" style="font-size:0.85rem;"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
                         <div class="calc-row" style="font-size:0.85rem;"><span>Traslado / Grúa</span><span id="resTraslado">$0</span></div>
