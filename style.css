@@ -295,23 +295,23 @@ body::after {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 10px 0;
+    padding: 12px 0;
     transition: var(--transition);
-    background: rgba(12, 12, 12, 0.92);
+    background: rgba(12, 12, 12, 0.94);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    min-height: 82px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    min-height: 105px;
     display: flex;
     align-items: center;
 }
 
 .navbar.scrolled {
-    background: rgba(8, 8, 8, 0.96);
+    background: rgba(8, 8, 8, 0.97);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-    padding: 8px 0;
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+    padding: 10px 0;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
 }
 
 .nav-container {
@@ -332,11 +332,11 @@ body::after {
 }
 
 .main-logo {
-    height: 68px;
+    height: 95px;
     width: auto;
-    max-height: 68px;
+    max-height: 95px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.7));
 }
 
 .logo-icon {
@@ -3667,7 +3667,8 @@ body::after {
 /* --- LARGE LAPTOPS & DESKTOPS (1440px and below) --- */
 @media (max-width: 1440px) {
     .main-logo {
-        height: 48px !important;
+        height: 82px !important;
+        max-height: 82px !important;
     }
     .hero-title {
         font-size: clamp(1.8rem, 3.5vw, 3rem) !important;
@@ -3679,30 +3680,36 @@ body::after {
     :root {
         --container-width: 94%;
     }
+
+    .main-logo {
+        height: 78px !important;
+        max-height: 78px !important;
+    }
     
     .hero-title {
         font-size: clamp(1.7rem, 3.5vw, 2.6rem) !important;
     }
     
     .nav-menu {
-        gap: 8px;
+        gap: 12px;
     }
     
     .nav-link {
-        padding: 6px 10px;
-        font-size: 0.75rem;
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 }
 
 /* --- LARGE TABLETS / SMALL LAPTOPS (1024px and below) --- */
 @media (max-width: 1024px) {
     .navbar {
-        min-height: 65px;
-        padding: 6px 0;
+        min-height: 80px;
+        padding: 8px 0;
     }
 
     .main-logo {
-        height: 44px !important;
+        height: 68px !important;
+        max-height: 68px !important;
     }
 
     .nav-menu {
@@ -3802,11 +3809,12 @@ body::after {
     }
 
     .navbar {
-        min-height: 60px;
+        min-height: 70px;
     }
 
     .main-logo {
-        height: 38px !important;
+        height: 56px !important;
+        max-height: 56px !important;
     }
 
     /* Hero Section Overrides */
@@ -3989,7 +3997,8 @@ body::after {
     }
 
     .main-logo {
-        height: 34px !important;
+        height: 46px !important;
+        max-height: 46px !important;
     }
     }
 

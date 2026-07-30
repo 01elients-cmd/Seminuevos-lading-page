@@ -200,15 +200,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = document.querySelectorAll('section[id]');
 
     // Set active link based on current page
-    const currentPath = window.location.pathname.split('/').pop();
+    const currentPath = window.location.pathname.split('/').pop().replace('.html', '');
     navLinks.forEach(link => {
         link.classList.remove('active');
-        const href = link.getAttribute('href');
+        const rawHref = link.getAttribute('href') || '';
+        const href = rawHref.split('#')[0].replace('.html', '');
         
-        // Exact match for current path OR home page fallback
-        const isHomePage = !currentPath || currentPath === 'index.html' || currentPath === '';
+        const isHomePage = !currentPath || currentPath === 'index' || currentPath === '';
         
-        if (href === currentPath || (isHomePage && href === 'index.html')) {
+        if (href === currentPath || (isHomePage && (href === '/' || href === 'index' || href === '' || href === '#inicio'))) {
             link.classList.add('active');
         }
     });
@@ -769,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function openModal(carIdStr) {
         const carId = String(carIdStr);
-        window.location.href = `vehiculo.html?id=${carId}`;
+        window.location.href = `vehiculo?id=${carId}`;
     }
 
     function closeModal() {
