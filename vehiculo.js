@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const html = `
-        <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; align-items: start;">
+        <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
             <div class="vehicle-page-left">
                 ${imagesHtml}
             </div>
@@ -118,168 +118,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </a>
                 </div>
             </div>
-
-            <!-- INJECTED CALCULATOR -->
-            <div class="vehicle-page-calculator" style="position: sticky; top: 100px;">
-                <div class="calculator-wrapper" style="margin-top: 0; box-shadow: none; border: 1px solid var(--ghost-border); border-radius: var(--radius-lg); background: var(--surface-container-low); padding: 20px;">
-                    <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 20px; text-align: center;"><i class="fas fa-calculator" style="color: var(--primary);"></i> Estimador de Importación</h3>
-                    <div class="calculator-inputs" style="grid-template-columns: 1fr;">
-                        <div class="form-group">
-                            <label for="calcStatus">Estatus del vehículo</label>
-                            <select id="calcStatus" class="calc-select">
-                                <option value="puerto_libre">Puerto Libre</option>
-                                <option value="nacional">Nacional</option>
-                                <option value="eeuu">Estados Unidos</option>
-                            </select>
-                        </div>
-                        <div id="calcNacionalNotice" class="calc-nacional-notice" style="display:none; margin-bottom: 15px;">
-                            <i class="fas fa-info-circle"></i>
-                            <span>Para vehículos de estatus Nacional, favor <strong>consultar directamente</strong> con un asesor.</span>
-                        </div>
-                        <div id="calcFieldsPL">
-                            <div class="form-group">
-                                <label for="calcBaseCost">Costo de compra ($)</label>
-                                <input type="number" id="calcBaseCost" placeholder="Ej. 15000">
-                            </div>
-                            <div class="form-group">
-                                <label for="calcOrigin">Ubicación Origin (USA)</label>
-                                <select id="calcOrigin" class="calc-select">
-                                    <option value="FL">Florida</option>
-                                    <option value="TX">Texas</option>
-                                    <option value="CA">California</option>
-                                    <option value="custom">Otro (Manual)</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="customTransportGroup" style="display:none;">
-                                <label for="calcCustomTransport">Grúa manual ($)</label>
-                                <input type="number" id="calcCustomTransport" placeholder="1200">
-                            </div>
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="calcDestination">Destino</label>
-                                <select id="calcDestination" class="calc-select" disabled>
-                                    <option value="FL_MIAMI">Florida / Miami Warehouse</option>
-                                </select>
-                            </div>
-                            <div class="form-group checkbox-group">
-                                <input type="checkbox" id="calcRepairs1">
-                                <label for="calcRepairs1">Reparaciones grado 1</label>
-                            </div>
-                            <div class="form-group checkbox-group">
-                                <input type="checkbox" id="calcRepairs2">
-                                <label for="calcRepairs2">Reparaciones grado 2</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="calculator-results" id="calcResults" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--ghost-border); font-size: 0.85rem;">
-                        <div class="calc-row" style="font-size:0.85rem;"><span>Costo de Compra</span><span id="resBase">$0</span></div>
-                        
-                        <div class="calc-row" id="toggleAuctionFees" style="cursor: pointer; font-size:0.85rem;">
-                            <span>Tarifa de Subasta <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: 4px; transition: transform 0.3s;"></i></span>
-                            <span id="resTotalAuctionFees">$0</span>
-                        </div>
-                        <div id="auctionFeesDetails" style="display: none; padding-left: 10px; border-left: 2px solid var(--ghost-border); margin-bottom: 8px;">
-                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa de compra</span><span id="resBuyFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa por internet</span><span id="resInternetFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifa de servicio</span><span id="resAuctionServiceFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Tarifas ambientales</span><span id="resEnvFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Trámite de título in USA</span><span id="resTitleFee">$0</span></div>
-                            <div class="calc-row detailed-fee" style="font-size: 0.78rem; margin-bottom: 3px;"><span>Impuestos del estado</span><span id="resStateTax">$0</span></div>
-                        </div>
-
-                        <div class="calc-row detailed-fee" style="font-size:0.85rem;"><span>Tarifa broker</span><span id="resBrokerFee">$0</span></div>
-                        <div class="calc-row" style="font-size:0.85rem;"><span>Tarifa de servicio</span><span id="resServiceFee">$0</span></div>
-                        <div class="calc-row" style="font-size:0.85rem;"><span>Traslado / Grúa</span><span id="resTraslado">$0</span></div>
-                        <div class="calc-row vzla-fee-row" style="font-size:0.85rem;"><span>Flete Marítimo</span><span id="resFlete">$0</span></div>
-                        <div class="calc-row vzla-fee-row" style="font-size:0.85rem;"><span>Gastos de Aduana</span><span id="resAduana">$0</span></div>
-                        <div class="calc-row vzla-fee-row" style="font-size:0.85rem;"><span>Doc. en VZLA</span><span id="resDocVzla">$0</span></div>
-                        <div class="calc-row" style="font-size:0.85rem;"><span>Reparaciones (Est.)</span><span id="resRepuesto">$0</span></div>
-                        <div class="calc-divider"></div>
-                        <div class="calc-row total-range" style="font-size:0.9rem;">
-                            <span>ESTIMADO TOTAL</span>
-                            <span class="total-range-values">
-                                <span id="resTotal" class="text-accent">$0</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
         </div>
     `;
 
     document.getElementById('carDetailContainer').innerHTML = html;
-    
-    // Bind calculator events for this newly injected calculator
-    setTimeout(() => {
-        const attachCalc = (id, event) => {
-            const el = document.getElementById(id);
-            if (el && typeof window.updateCalculatorLogic === 'function') {
-                el.addEventListener(event, window.updateCalculatorLogic);
-            }
-        };
-
-        attachCalc('calcStatus', 'change');
-        attachCalc('calcOrigin', 'change');
-        attachCalc('calcDestination', 'change');
-        attachCalc('calcCustomTransport', 'input');
-        attachCalc('calcBaseCost', 'input');
-        attachCalc('calcRepairs1', 'change');
-        attachCalc('calcRepairs2', 'change');
-        
-        // Also handle the display logic for PL vs Nacional vs origin custom
-        const calcStatus = document.getElementById('calcStatus');
-        const calcFieldsPL = document.getElementById('calcFieldsPL');
-        const calcNacionalNotice = document.getElementById('calcNacionalNotice');
-        const calcResults = document.getElementById('calcResults');
-        const calcOrigin = document.getElementById('calcOrigin');
-        const customTransportGroup = document.getElementById('customTransportGroup');
-
-        if (calcStatus) {
-            calcStatus.addEventListener('change', () => {
-                if (calcStatus.value === 'nacional') {
-                    calcFieldsPL.style.display = 'none';
-                    calcNacionalNotice.style.display = 'flex';
-                    calcResults.style.display = 'none';
-                } else {
-                    calcFieldsPL.style.display = 'block';
-                    calcNacionalNotice.style.display = 'none';
-                    calcResults.style.display = 'block';
-                }
-            });
-        }
-        
-        if (calcOrigin) {
-            calcOrigin.addEventListener('change', () => {
-                if (calcOrigin.value === 'custom') {
-                    customTransportGroup.style.display = 'block';
-                } else {
-                    customTransportGroup.style.display = 'none';
-                }
-            });
-        }
-        
-        // Let's manually add the basic event listeners that the accordion needs
-        const toggleAuctionFees = document.getElementById('toggleAuctionFees');
-        if (toggleAuctionFees) {
-            toggleAuctionFees.addEventListener('click', () => {
-                const details = document.getElementById('auctionFeesDetails');
-                const icon = toggleAuctionFees.querySelector('i');
-                if (details.style.display === 'none') {
-                    details.style.display = 'block';
-                    if (icon) icon.style.transform = 'rotate(180deg)';
-                } else {
-                    details.style.display = 'none';
-                    if (icon) icon.style.transform = 'rotate(0deg)';
-                }
-            });
-        }
-        
-        // Re-attach calculator logic locally if updateCalc isn't accessible
-        if (typeof window.updateCalculatorLogic === 'function') {
-            window.updateCalculatorLogic();
-        }
-    }, 100);
     
     // Override container width for this specific page
     const container = document.getElementById('carDetailContainer');
@@ -295,11 +137,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.innerWidth <= 900) {
             grid.style.gridTemplateColumns = '1fr';
             const img = document.getElementById('mainVehicleImage');
-            if (img) img.style.height = '260px';
+            if (img) img.style.height = '300px';
         } else {
-            grid.style.gridTemplateColumns = '1fr 380px';
+            grid.style.gridTemplateColumns = '1fr 1fr';
             const img = document.getElementById('mainVehicleImage');
-            if (img) img.style.height = '460px';
+            if (img) img.style.height = '500px';
         }
     };
     applyLayout();
