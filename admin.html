@@ -1251,10 +1251,28 @@
             <h1>Panel de Administración</h1>
             <p>Ingresa con tu cuenta para gestionar el inventario</p>
             <div class="auth-error" id="authError"></div>
+            <div id="authSuccess" style="display:none; background: rgba(37,211,102,0.15); border:1px solid #25D366; color:#25D366; padding:12px; border-radius:var(--radius); margin-bottom:16px; font-size:0.9rem;"></div>
             <input type="email" class="auth-input" id="authEmail" placeholder="Email">
             <input type="password" class="auth-input" id="authPassword" placeholder="Contraseña">
             <button class="btn btn-primary btn-block" id="authLogin" style="padding:14px;font-size:1rem">
                 <i class="fas fa-lock"></i> Iniciar Sesión
+            </button>
+            <button type="button" id="authResetBtn" style="background:none; border:none; color:var(--text-muted); margin-top:16px; cursor:pointer; font-size:0.85rem; text-decoration:underline;">
+                ¿Olvidaste tu contraseña?
+            </button>
+        </div>
+    </div>
+
+    <!-- RESET PASSWORD MODAL -->
+    <div id="resetPasswordModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(15px); align-items:center; justify-content:center;">
+        <div style="background:var(--bg2); border:1px solid var(--border-accent); border-radius:var(--radius-lg); padding:32px; width:100%; max-width:420px; text-align:center; box-shadow:var(--shadow);">
+            <i class="fas fa-key" style="font-size:2.5rem; color:var(--primary); margin-bottom:16px;"></i>
+            <h2 style="margin-bottom:8px; font-size:1.4rem;">Nueva Contraseña</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Ingresa la nueva contraseña para tu cuenta de administrador</p>
+            <div id="newPasswordError" style="display:none; color:#ff5252; margin-bottom:12px; font-size:0.85rem;"></div>
+            <input type="password" id="newPasswordInput" class="auth-input" placeholder="Nueva Contraseña (mínimo 6 caracteres)">
+            <button id="saveNewPasswordBtn" class="btn btn-primary btn-block" style="padding:12px; font-size:0.95rem; margin-top:12px;">
+                <i class="fas fa-check-circle"></i> Guardar Nueva Contraseña
             </button>
         </div>
     </div>
@@ -1967,6 +1985,58 @@
             logSecurityEvent('AUTH_SUCCESS', 'info', `Login exitoso: ${data.user.email}`);
             showAdmin(data.user);
             loadDashboard();
+        });
+
+        document.getElementById('authResetBtn').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value.trim();
+            const errEl = document.getElementById('authError');
+            const succEl = document.getElementById('authSuccess');
+            errEl.style.display = 'none';
+            succEl.style.display = 'none';
+            if (!email) {
+                errEl.textContent = 'Por favor ingresa tu correo electrónico en la casilla para enviarte el enlace de recuperación.';
+                errEl.style.display = 'block';
+                return;
+            }
+            const redirectUrl = window.location.origin + '/admin';
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
+            if (error) {
+                errEl.textContent = 'Error al enviar enlace: ' + error.message;
+                errEl.style.display = 'block';
+            } else {
+                succEl.textContent = '¡Enlace enviado! Revisa tu bandeja de entrada o correo no deseado (Spam).';
+                succEl.style.display = 'block';
+            }
+        });
+
+        // Detect password recovery token from URL hash or Supabase event
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                document.getElementById('resetPasswordModal').style.display = 'flex';
+            }
+        });
+
+        document.getElementById('saveNewPasswordBtn').addEventListener('click', async () => {
+            const newPassword = document.getElementById('newPasswordInput').value;
+            const errEl = document.getElementById('newPasswordError');
+            errEl.style.display = 'none';
+            if (!newPassword || newPassword.length < 6) {
+                errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                errEl.style.display = 'block';
+                return;
+            }
+            const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+            if (error) {
+                errEl.textContent = 'Error al actualizar contraseña: ' + error.message;
+                errEl.style.display = 'block';
+            } else {
+                document.getElementById('resetPasswordModal').style.display = 'none';
+                showToast('¡Contraseña actualizada con éxito!', 'success');
+                if (supabaseClient.auth.getSession()) {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session) showAdmin(session.user);
+                }
+            }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
