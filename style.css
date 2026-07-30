@@ -295,20 +295,23 @@ body::after {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 10px 0;
+    padding: 8px 0;
     transition: var(--transition);
-    background: transparent;
-    min-height: 100px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    min-height: 70px;
     display: flex;
     align-items: center;
 }
 
 .navbar.scrolled {
-    background: rgba(14, 14, 14, 0.7);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    padding: 12px 0;
-    box-shadow: 0 1px 0 var(--ghost-border);
+    background: rgba(8, 8, 8, 0.95);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    padding: 6px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .nav-container {
@@ -329,9 +332,10 @@ body::after {
 }
 
 .main-logo {
-    height: 96px;
+    height: 54px;
     width: auto;
-    max-height: 96px;
+    max-height: 54px;
+    object-fit: contain;
 }
 
 .logo-icon {
@@ -576,9 +580,10 @@ body::after {
 
 .hero-content {
     position: absolute;
-    bottom: 12%;
-    left: 7%;
-    max-width: 800px;
+    top: 55%;
+    transform: translateY(-50%);
+    left: 6%;
+    max-width: 750px;
     z-index: 10;
     transition: all 0.5s ease;
 }
@@ -586,11 +591,11 @@ body::after {
 /* Centrado automático para el primer slide (estilo bienvenida) */
 .hero-slide:first-child .hero-content {
     left: 50% !important;
-    transform: translateX(-50%) !important;
+    top: 55% !important;
+    transform: translate(-50%, -50%) !important;
     text-align: center !important;
-    bottom: 15% !important;
-    width: 100%;
-    max-width: 900px;
+    width: 90%;
+    max-width: 850px;
 }
 
 .hero-slide:first-child .hero-buttons {
@@ -615,7 +620,7 @@ body::after {
 @keyframes contentReveal {
     from {
         opacity: 0;
-        transform: translateY(50px);
+        transform: translateY(30px);
     }
 
     to {
@@ -642,11 +647,12 @@ body::after {
 .hero-title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(2.5rem, 5vw, 4.2rem); /* Sincronizado con JS */
-    line-height: 1.1;
-    letter-spacing: -1px;
-    margin-bottom: 24px;
-    text-transform: none; /* Quitamos el uppercase para evitar el salto */
+    font-size: clamp(1.8rem, 3.8vw, 3.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    text-transform: none;
+    word-break: break-word;
 }
 
 .hero-title .text-accent {
@@ -3652,47 +3658,70 @@ body::after {
    ===== COMPREHENSIVE RESPONSIVE ENGINE (Premium Mobile Optimization) =====
    ========================================================================== */
 
+/* ==========================================================================
+   ===== COMPREHENSIVE RESPONSIVE ENGINE (Premium Device Optimization) =====
+   ========================================================================== */
+
+/* --- LARGE LAPTOPS & DESKTOPS (1440px and below) --- */
+@media (max-width: 1440px) {
+    .main-logo {
+        height: 48px !important;
+    }
+    .hero-title {
+        font-size: clamp(1.8rem, 3.5vw, 3rem) !important;
+    }
+}
+
 /* --- TABLET & SMALL DESKTOPS (1200px and below) --- */
 @media (max-width: 1200px) {
     :root {
-        --container-width: 92%;
+        --container-width: 94%;
     }
     
     .hero-title {
-        font-size: clamp(2.2rem, 6vw, 4rem) !important;
+        font-size: clamp(1.7rem, 3.5vw, 2.6rem) !important;
     }
     
     .nav-menu {
-        gap: 5px;
+        gap: 8px;
     }
     
     .nav-link {
-        padding: 8px 12px;
-        font-size: 0.72rem;
+        padding: 6px 10px;
+        font-size: 0.75rem;
     }
 }
 
 /* --- LARGE TABLETS / SMALL LAPTOPS (1024px and below) --- */
 @media (max-width: 1024px) {
+    .navbar {
+        min-height: 65px;
+        padding: 6px 0;
+    }
+
+    .main-logo {
+        height: 44px !important;
+    }
+
     .nav-menu {
         display: none; 
         position: fixed;
         top: 0;
         right: -100%;
-        width: 100%; /* Full screen on mobile */
-        max-width: 380px;
-        height: 85vh;
-        background: rgba(5, 5, 5, 0.95);
+        width: 100%;
+        max-width: 320px;
+        height: 100vh;
+        background: rgba(8, 8, 8, 0.98);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 30px;
-        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+        gap: 25px;
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
         z-index: 1000;
         border-left: 1px solid rgba(39, 92, 234, 0.2);
-        padding: 60px 40px;
+        padding: 60px 30px;
         box-shadow: -20px 0 50px rgba(0,0,0,0.5);
         opacity: 0;
     }
@@ -3719,11 +3748,19 @@ body::after {
     }
 
     .nav-menu .nav-link {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         width: 100%;
         text-align: center;
         letter-spacing: 2px;
         color: #fff;
+    }
+
+    .hero-content {
+        max-width: 90% !important;
+        left: 50% !important;
+        top: 52% !important;
+        transform: translate(-50%, -50%) !important;
+        text-align: center !important;
     }
 
     .social-sidebar {
@@ -3736,7 +3773,7 @@ body::after {
     }
 
     .about-monogram-hero {
-        min-height: 400px;
+        min-height: 350px;
         transform: scale(0.9);
     }
 
@@ -3753,34 +3790,42 @@ body::after {
 /* --- MOBILE DEVICES (768px and below) --- */
 @media (max-width: 768px) {
     :root {
-        --space-16: 40px;
-        --space-20: 50px;
-        --space-24: 60px;
+        --space-16: 30px;
+        --space-20: 40px;
+        --space-24: 50px;
     }
 
     section {
-        padding: 80px 0 !important;
+        padding: 60px 0 !important;
     }
 
-    /* Hero Section Overrides (Handling Inline Styles) */
+    .navbar {
+        min-height: 60px;
+    }
+
+    .main-logo {
+        height: 38px !important;
+    }
+
+    /* Hero Section Overrides */
     .hero {
-        min-height: 650px !important;
-        height: auto !important;
+        min-height: 520px !important;
+        height: 80vh !important;
         display: flex;
         align-items: center;
     }
 
     .hero-slider {
-        height: 650px !important;
+        height: 100% !important;
     }
 
     .hero-content {
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 5% !important; /* Move it up from the bottom */
-        width: 100% !important;
+        left: 50% !important;
+        top: 52% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 94% !important;
         max-width: 100% !important;
-        padding: 0 20px !important;
+        padding: 0 10px !important;
         text-align: center !important;
         align-items: center !important;
         margin: 0 auto !important;
@@ -3789,15 +3834,15 @@ body::after {
     }
 
     .hero-title {
-        font-size: 2.2rem !important;
-        line-height: 1.1 !important;
-        margin-bottom: 20px !important;
+        font-size: 1.65rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 15px !important;
         width: 100% !important;
     }
 
     .hero-subtitle, .hero-content p {
-        font-size: 1rem !important;
-        margin-bottom: 30px !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 25px !important;
         max-width: 100% !important;
         opacity: 0.9;
     }
@@ -3806,18 +3851,19 @@ body::after {
         justify-content: center !important;
         flex-direction: column !important;
         width: 100% !important;
-        gap: 12px !important;
+        gap: 10px !important;
     }
 
     .hero-buttons .btn {
         width: 100% !important;
-        padding: 16px 20px !important;
+        padding: 14px 18px !important;
         justify-content: center !important;
+        font-size: 0.82rem !important;
     }
 
     .hero-controls {
-        bottom: 20px !important;
-        transform: translateX(-50%) scale(0.8);
+        bottom: 15px !important;
+        transform: translateX(-50%) scale(0.85);
     }
 
     .hero-scroll-indicator {
@@ -3825,18 +3871,18 @@ body::after {
     }
 
     .section-title {
-        font-size: 1.8rem !important;
+        font-size: 1.6rem !important;
     }
 
     .vehicle-grid {
         grid-template-columns: 1fr !important;
-        gap: 24px;
+        gap: 20px;
         padding: 0 10px;
     }
 
     .stats-grid {
         grid-template-columns: 1fr 1fr !important;
-        gap: 25px !important;
+        gap: 20px !important;
         padding: 0 10px;
     }
 
@@ -3845,7 +3891,7 @@ body::after {
     }
 
     .stat-number {
-        font-size: 2.2rem !important;
+        font-size: 2rem !important;
     }
 
     .stat-divider {
@@ -3856,21 +3902,16 @@ body::after {
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
         justify-content: flex-start !important;
-        padding: 0 20px 15px !important;
-        margin: 0 -20px !important;
+        padding: 0 15px 12px !important;
+        margin: 0 -15px !important;
         -webkit-overflow-scrolling: touch;
-        gap: 12px !important;
+        gap: 10px !important;
     }
 
     .catalog-main-tab {
-        min-width: 180px !important;
+        min-width: 160px !important;
         flex-shrink: 0 !important;
-        padding: 15px 20px !important;
-    }
-
-    .calculator-wrapper {
-        grid-template-columns: 1fr !important;
-        padding: 20px !important;
+        padding: 12px 16px !important;
     }
 
     .contact-grid {
@@ -3880,7 +3921,7 @@ body::after {
     .footer-grid {
         grid-template-columns: 1fr !important;
         text-align: center;
-        gap: 45px;
+        gap: 35px;
     }
 
     .footer-brand, .footer-contact {
@@ -3908,8 +3949,8 @@ body::after {
     }
 
     .modal-gallery {
-        min-height: 250px !important;
-        height: 250px !important;
+        min-height: 240px !important;
+        height: 240px !important;
         flex-shrink: 0;
     }
 
@@ -3918,11 +3959,11 @@ body::after {
     }
 
     .modal-info {
-        padding: 25px 20px !important;
+        padding: 20px 16px !important;
     }
 
     .modal-title {
-        font-size: 1.6rem !important;
+        font-size: 1.4rem !important;
     }
 
     .modal-specs {
@@ -3934,7 +3975,7 @@ body::after {
 /* --- SMALL MOBILE (480px and below) --- */
 @media (max-width: 480px) {
     .hero-title {
-        font-size: 1.8rem !important;
+        font-size: 1.45rem !important;
     }
 
     .stats-grid {
@@ -3942,11 +3983,12 @@ body::after {
     }
 
     .stat-number {
-        font-size: 2.4rem !important;
+        font-size: 2rem !important;
     }
 
     .main-logo {
-        height: 64px !important;
+        height: 34px !important;
+    }
     }
 
     .whatsapp-float {
