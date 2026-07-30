@@ -295,23 +295,23 @@ body::after {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 8px 0;
+    padding: 10px 0;
     transition: var(--transition);
-    background: rgba(10, 10, 10, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    min-height: 70px;
+    background: rgba(12, 12, 12, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 82px;
     display: flex;
     align-items: center;
 }
 
 .navbar.scrolled {
-    background: rgba(8, 8, 8, 0.95);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    padding: 6px 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    background: rgba(8, 8, 8, 0.96);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    padding: 8px 0;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
 }
 
 .nav-container {
@@ -332,10 +332,11 @@ body::after {
 }
 
 .main-logo {
-    height: 54px;
+    height: 68px;
     width: auto;
-    max-height: 54px;
+    max-height: 68px;
     object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
 }
 
 .logo-icon {
@@ -459,7 +460,7 @@ body::after {
 /* ===== SOCIAL SIDEBAR ===== */
 .social-sidebar {
     position: fixed;
-    left: 24px;
+    left: 18px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
@@ -531,9 +532,9 @@ body::after {
 /* ===== HERO ===== */
 .hero {
     position: relative;
-    height: 85vh;
-    height: 85dvh; /* Altura dinámica estable que invita a hacer scroll */
-    min-height: 500px;
+    height: 88vh;
+    height: 88dvh;
+    min-height: 660px;
     overflow: hidden;
 }
 
@@ -580,10 +581,11 @@ body::after {
 
 .hero-content {
     position: absolute;
-    top: 55%;
+    top: 47%;
     transform: translateY(-50%);
-    left: 6%;
-    max-width: 750px;
+    left: 80px;
+    max-width: 780px;
+    width: calc(100% - 100px);
     z-index: 10;
     transition: all 0.5s ease;
 }
@@ -591,7 +593,7 @@ body::after {
 /* Centrado automático para el primer slide (estilo bienvenida) */
 .hero-slide:first-child .hero-content {
     left: 50% !important;
-    top: 55% !important;
+    top: 47% !important;
     transform: translate(-50%, -50%) !important;
     text-align: center !important;
     width: 90%;
