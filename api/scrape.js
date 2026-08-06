@@ -242,14 +242,21 @@ function normalizeBodyType(body, title = '') {
 }
 
 function extractEngine(engine, title = '', html = '') {
-    if (engine && engine !== 'N/A' && engine.trim() !== '' && engine.trim().length > 2) {
-        return engine.trim();
+    const isInvalid = (e) => !e || e === 'N/A' || e === '1.0' || e === '1.0L' || e === '0.0' || e === '0' || e === '1' || String(e).toLowerCase().includes('unknown');
+    
+    if (!isInvalid(engine) && String(engine).trim().length > 2) {
+        return String(engine).trim();
     }
+    
     const combined = `${title} ${html}`.toUpperCase();
-    const matchLiters = combined.match(/\b([1-8]\.[0-9]\s*L?(?:\s*(?:TURBO|V6|V8|I4|HEMI|ECOBOOST|TDI|TSI))?)\b/);
-    if (matchLiters) return matchLiters[1].trim();
+    
+    // Explicit engine search for 1.3L up to 8.0L
+    const matchLiters = combined.match(/\b((?:[1-7]\.[1-9]|8\.0)\s*L?(?:\s*(?:TURBO|V6|V8|I4|I6|HEMI|ECOBOOST|TDI|TSI|24V|DOHC|4-CYL|6-CYL))?)\b/i);
+    if (matchLiters && matchLiters[1] !== '1.0' && matchLiters[1] !== '1.0L') {
+        return matchLiters[1].trim();
+    }
 
-    const matchConfig = combined.match(/\b(V6|V8|V4|I4|HEMI|TURBO|ECOBOOST)\b/);
+    const matchConfig = combined.match(/\b(V6|V8|I4|I6|HEMI|TURBO|ECOBOOST|TWIN TURBO)\b/i);
     if (matchConfig) return matchConfig[1].trim();
 
     return '2.0L Turbo';
@@ -381,8 +388,13 @@ function parseIAAI(html, url, trustHtml = false) {
         rawData.price = "Consultar";
     }
 
+    if (!rawData.make || rawData.make === 'Vehículo' || rawData.make.includes('Access Denied')) {
+        if (!trustHtml) {
+            throw new Error('IAAI Bloqueado. Servidor requiere Headless Browser.');
+        }
+        rawData.make = "Vehículo";
+    }
     if (!rawData.year) rawData.year = new Date().getFullYear();
-    if (!rawData.make) rawData.make = "Vehículo";
 
     const itemIdMatch = url.match(/\/VehicleDetail\/(\d+)/i);
     const itemId = itemIdMatch ? itemIdMatch[1] : null;
