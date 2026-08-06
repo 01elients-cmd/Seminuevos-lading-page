@@ -2963,8 +2963,21 @@
 
                 const events = data || [];
 
-                // 1. Métricas Principales
-                const sessions = events.filter(e => e.event_type === 'page_view' || e.event_type === 'session_start').length;
+                // 1. Métricas Principales: Calcular Sesiones Únicas Reales por Sesión de Navegador (sessionStorage / Session ID)
+                const sessionIds = new Set();
+                events.forEach(e => {
+                    const meta = e.event_data || {};
+                    if (meta.session_id) {
+                        sessionIds.add(meta.session_id);
+                    } else if (e.event_type === 'session_start') {
+                        sessionIds.add(e.id || e.created_at);
+                    } else if (e.visitor_id) {
+                        // Fallback para eventos antiguos: agrupar por visitante + fecha (YYYY-MM-DD)
+                        const day = new Date(e.created_at).toISOString().split('T')[0];
+                        sessionIds.add(e.visitor_id + '_' + day);
+                    }
+                });
+                const sessions = sessionIds.size;
                 
                 // Device Stats
                 const devices = {};

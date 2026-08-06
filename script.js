@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     checkSecurity();
 
-    // ===== VISITOR IDENTIFICATION (CRM) =====
     function getVisitorId() {
         let vid = localStorage.getItem('sn_visitor_id');
         if (!vid) {
@@ -75,16 +74,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const visitorId = getVisitorId();
 
+    function getSessionId() {
+        let sid = sessionStorage.getItem('sn_session_id');
+        if (!sid) {
+            sid = 's-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
+            sessionStorage.setItem('sn_session_id', sid);
+            sessionStorage.setItem('sn_is_new_session', 'true');
+        }
+        return sid;
+    }
+    const sessionId = getSessionId();
+
     async function logAnalyticsEvent(type, data = {}) {
         try {
             const enrichedData = {
                 ...data,
+                session_id: sessionId,
                 userAgent: navigator.userAgent,
                 language: navigator.language,
                 screenRes: `${window.screen.width}x${window.screen.height}`,
                 deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
                 referrer: document.referrer || 'direct',
-                intent_category: data.intent || detectIntent(data.section || window.location.hash || 'home')
+                intent_category: data.intent || detectIntent(data.section || window.location.pathname || 'home')
             };
 
             await supabaseClient.from('site_analytics').insert([{
@@ -106,6 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (k.includes('beneficio') || k.includes('taller') || k.includes('mastertech')) return 'Servicio / Postventa';
         if (k.includes('contacto') || k.includes('whatsapp')) return 'Conversión Directa';
         return 'Navegación General';
+    }
+
+    // Check if new session start
+    if (sessionStorage.getItem('sn_is_new_session') === 'true') {
+        sessionStorage.removeItem('sn_is_new_session');
+        logAnalyticsEvent('session_start', { initial_page: window.location.pathname });
     }
 
     // Auto-track Section Interest
@@ -131,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { passive: true });
 
-    // Initial page view
+    // Page view event
     logAnalyticsEvent('page_view', { referrer: document.referrer });
 
     // ===== HERO SLIDER =====
