@@ -3221,7 +3221,7 @@
             }
         });
 
-        // BULK IMPORT LOGIC
+        // BULK IMPORT LOGIC (Ultra-Fast Parallel & Resilient Scraper)
         document.getElementById('startBulkImport').addEventListener('click', async () => {
             const linksText = document.getElementById('bulkLinks').value.trim();
             if (!linksText) return;
@@ -3232,26 +3232,30 @@
             const statusBox = document.getElementById('bulkStatus');
             const proxyKey = document.getElementById('sProxyKey')?.value;
 
-            if (!proxyKey) { showToast('Se requiere API Key para procesos en lote', 'error'); return; }
+            if (!proxyKey) { showToast('Se requiere API Key de Apify en Configuración para procesamiento en lote', 'error'); return; }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando lote...';
-            statusBox.innerHTML = `<div class="info-banner" style="background:var(--accent); color:#000; font-weight:700;">Iniciando proceso para ${links.length} vehículos con Evasión Antibot...</div>`;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando Lote Inteligente...';
+            statusBox.innerHTML = `
+                <div class="info-banner" style="background:var(--accent); color:#000; font-weight:700;">
+                    🚀 Iniciando importación paralela de ${links.length} vehículos con Evasión Antibot y Ficha Técnica Completa...
+                </div>
+                <div style="font-size:0.8rem; margin:10px 0; color:rgba(255,255,255,0.7);">
+                    Modo Multihilo Activado. Procesando enlaces en paralelo con tolerancia a fallos y reintentos automáticos.
+                </div>
+            `;
 
             let successCount = 0;
             let errorCount = 0;
+            let completed = 0;
 
-            try {
-                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; margin-top:10px;">Scraper activado. Procesando secuencialmente...</div>`;
+            // Worker function to scrape 1 link with retry
+            const processSingleLink = async (url, index) => {
+                let attempts = 0;
+                let lastErr = null;
 
-                for (let i = 0; i < links.length; i++) {
-                    const url = links[i];
-                    // Add small delay to avoid triggering rate limits or concurrent blocks
-                    if (i > 0) await new Promise(r => setTimeout(r, 1500));
-                    
-                    statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[${i + 1}/${links.length}] Conectando con: ${url.split('/').pop().substring(0, 15)}...</div>`;
-                    statusBox.scrollTop = statusBox.scrollHeight;
-
+                while (attempts < 3) {
+                    attempts++;
                     try {
                         let result;
                         try {
@@ -3265,14 +3269,9 @@
                             result = { success: false, message: e.message };
                         }
 
-                        // FALLBACK APIFY BROWSER SCRAPER PARA IAAI (Bypass Imperva TLS Fingerprinting)
-                        if (!result.success && result.message && result.message.includes('IAAI Bloqueado') && proxyKey) {
-                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#f39c12;">[${i + 1}/${links.length}] Servidor bloqueado. Encendiendo Headless Browser en Apify... (puede tardar 45s)</div>`;
-                            statusBox.scrollTop = statusBox.scrollHeight;
-                            
+                        // FALLBACK APIFY BROWSER SCRAPER PARA IAAI / COPART BLOQUEADOS
+                        if (!result.success && result.message && result.message.includes('Bloqueado') && proxyKey) {
                             const cleanToken = proxyKey.trim();
-                            
-                            // 1. Iniciar la ejecución asíncrona del Puppeteer Scraper
                             const startRes = await fetch(`https://api.apify.com/v2/acts/apify~puppeteer-scraper/runs?token=${cleanToken}&memory=1024`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -3283,127 +3282,130 @@
                                 })
                             });
                             
-                            if (!startRes.ok) throw new Error("Fallo al iniciar Apify: " + startRes.status);
-                            const startData = await startRes.json();
-                            const runId = startData.data.id;
-                            const datasetId = startData.data.defaultDatasetId;
-                            
-                            // 2. Hacer Polling (esperar) hasta que termine
-                            let isFinished = false;
-                            let status = "RUNNING";
-                            for (let poll = 0; poll < 50; poll++) {
-                                await new Promise(r => setTimeout(r, 4000)); // Esperar 4s
-                                const pollRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${cleanToken}`);
-                                const pollData = await pollRes.json();
-                                status = pollData.data.status;
-                                if (status === "SUCCEEDED" || status === "FAILED" || status === "ABORTED") {
-                                    isFinished = true;
-                                    break;
+                            if (startRes.ok) {
+                                const startData = await startRes.json();
+                                const runId = startData.data.id;
+                                const datasetId = startData.data.defaultDatasetId;
+                                
+                                let status = "RUNNING";
+                                for (let poll = 0; poll < 35; poll++) {
+                                    await new Promise(r => setTimeout(r, 3000));
+                                    const pollRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${cleanToken}`);
+                                    const pollData = await pollRes.json();
+                                    status = pollData.data.status;
+                                    if (status === "SUCCEEDED" || status === "FAILED" || status === "ABORTED") break;
                                 }
-                            }
-                            
-                            if (status !== "SUCCEEDED") throw new Error("El Headless Browser falló o tardó demasiado. Estado: " + status);
-                            
-                            // 3. Obtener los resultados
-                            const itemsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${cleanToken}`);
-                            const itemsData = await itemsRes.json();
-                            
-                            if (itemsData && itemsData.length > 0 && itemsData[0].html) {
-                                statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8; color:#2ecc71;">[${i + 1}/${links.length}] Evasión exitosa. Analizando página...</div>`;
-                                const fbRes = await fetch('/api/scrape', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ url: url, html: itemsData[0].html, trustHtml: true })
-                                });
-                                result = await fbRes.json();
-                            } else {
-                                throw new Error("El Headless Browser terminó pero no capturó el HTML.");
+                                
+                                if (status === "SUCCEEDED") {
+                                    const itemsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${cleanToken}`);
+                                    const itemsData = await itemsRes.json();
+                                    if (itemsData && itemsData.length > 0 && itemsData[0].html) {
+                                        const fbRes = await fetch('/api/scrape', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ url: url, html: itemsData[0].html, trustHtml: true })
+                                        });
+                                        result = await fbRes.json();
+                                    }
+                                }
                             }
                         }
 
-                        if (result.success) {
+                        if (result.success && result.data && result.data.title) {
                             const data = result.data;
-                            if (!data.year || !data.title) throw new Error('Datos incompletos');
-
-                            statusBox.innerHTML += `<div style="font-size:0.8rem; margin-bottom:4px; opacity:0.8;">[${i + 1}/${links.length}] Guardando info + fotos...</div>`;
-
-                            // Subida de imágenes con Proxy
+                            const rawImages = (data.images || []).slice(0, 10);
                             const finalImgs = [];
-                            for (const imgUrl of (data.images || [])) {
+
+                            // Fast Parallel Image Upload to Supabase Storage with Fallback
+                            const uploadPromises = rawImages.map(async (imgUrl) => {
                                 try {
-                                    // USAR EL PROXY INTERNO PARA EVITAR BLOQUEO CORS
                                     const proxyUrl = `/api/scrape?proxy=${encodeURIComponent(imgUrl)}&key=${encodeURIComponent(proxyKey)}`;
-                                    const res = await fetch(proxyUrl);
-                                    if (!res.ok) throw new Error('Proxy failed');
-
+                                    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
+                                    if (!res.ok) throw new Error('Proxy error');
                                     const imgBlob = await res.blob();
-                                    const fileName = `auto-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
-                                    const { error: uploadError } = await supabaseClient.storage
-                                        .from('vehicle-images')
-                                        .upload(fileName, imgBlob);
-
+                                    const fileName = `auto-${Date.now()}-${Math.random().toString(36).substr(2, 6)}.jpg`;
+                                    const { error: uploadError } = await supabaseClient.storage.from('vehicle-images').upload(fileName, imgBlob);
                                     if (!uploadError) {
-                                        const { data: publicData } = supabaseClient.storage
-                                            .from('vehicle-images')
-                                            .getPublicUrl(fileName);
-                                        finalImgs.push(publicData.publicUrl);
+                                        const { data: publicData } = supabaseClient.storage.from('vehicle-images').getPublicUrl(fileName);
+                                        return publicData.publicUrl;
                                     }
-                                } catch (e) {
-                                    console.error("Error subiendo imagen:", e);
-                                    // Fallback: intentar usar la URL original si el proxy falla (aunque puede dar error CORS en el navegador)
-                                    // pero aquí ya estamos en el servidor de Vercel/Proxy, así que el fallo es real.
-                                }
-                            }
+                                } catch (e) {}
+                                return imgUrl; // Fallback to raw/proxy URL if upload times out
+                            });
+
+                            const uploadedResults = await Promise.allSettled(uploadPromises);
+                            uploadedResults.forEach(r => {
+                                if (r.status === 'fulfilled' && r.value) finalImgs.push(r.value);
+                            });
 
                             const vehicleData = {
                                 title: data.title,
                                 price: data.price || '$0',
                                 year: parseInt(data.year) || new Date().getFullYear(),
                                 km: data.km || '0 KM',
-                                engine: data.engine || '',
+                                engine: data.engine || 'N/A',
                                 transmission: data.transmission || 'Automático',
                                 fuel: data.fuel || 'Gasolina',
-                                body_type: data.bodyType || 'suv',
+                                body_type: (data.bodyType || 'suv').toLowerCase(),
                                 catalog: 'importados',
                                 availability: 'por_pedido',
-                                origin: 'importado',
-                                condition: 'seminuevo',
+                                origin: data.location || 'importado',
+                                condition: data.damage || 'seminuevo',
                                 status: 'active',
                                 description: data.description || '',
-                                images: finalImgs
+                                images: finalImgs.length > 0 ? finalImgs : rawImages
                             };
 
-                            const { error } = await supabaseClient.from('vehicles').insert([vehicleData]);
-                            if (!error) {
+                            const { error: dbErr } = await supabaseClient.from('vehicles').insert([vehicleData]);
+                            if (!dbErr) {
                                 successCount++;
-                                statusBox.innerHTML += `<div style="color:var(--accent); font-size:0.8rem; font-weight:600;">✓ Guardado Completo: ${data.title}</div>`;
-                            } else { throw error; }
+                                completed++;
+                                statusBox.innerHTML += `<div style="color:#2ecc71; font-size:0.82rem; margin-bottom:4px; font-weight:600;">✓ [${completed}/${links.length}] ${data.title} — Motor: ${data.engine || 'N/A'} | KM: ${data.km || '0'} | Condición: ${data.damage || 'OK'} | Ubicación: ${data.location || 'USA'}</div>`;
+                                statusBox.scrollTop = statusBox.scrollHeight;
+                                return true;
+                            } else {
+                                throw dbErr;
+                            }
                         } else {
                             throw new Error(result.message || 'Sin datos');
                         }
                     } catch (err) {
-                        errorCount++;
-                        const errorMsg = err.message || 'Error desconocido';
-                        statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem;">✗ Error en lectura: ${errorMsg}</div>`;
-                        console.error('Batch Item Error:', err);
+                        lastErr = err;
+                        if (attempts < 3) {
+                            await new Promise(r => setTimeout(r, 1200));
+                        }
                     }
-                    statusBox.scrollTop = statusBox.scrollHeight;
                 }
 
+                errorCount++;
+                completed++;
+                statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.82rem; margin-bottom:4px;">✗ [${completed}/${links.length}] Error en ${url.split('/').pop().substring(0, 18)}: ${lastErr?.message || 'Error desconocido'}</div>`;
+                statusBox.scrollTop = statusBox.scrollHeight;
+                return false;
+            };
 
+            // Process links in Parallel Concurrency Pool (2 workers at a time to prevent rate limits)
+            const concurrency = 2;
+            const queue = links.map((url, idx) => ({ url, idx }));
+            
+            const worker = async () => {
+                while (queue.length > 0) {
+                    const item = queue.shift();
+                    if (item) {
+                        await processSingleLink(item.url, item.idx);
+                        await new Promise(r => setTimeout(r, 500));
+                    }
+                }
+            };
 
-
-
-            } catch (err) {
-                console.error('Batch error:', err);
-                statusBox.innerHTML += `<div style="color:#ff6b6b; font-size:0.8rem; margin-top:10px;">✗ Error Critico: ${err.message}</div>`;
-            }
+            const workers = Array.from({ length: Math.min(concurrency, links.length) }, () => worker());
+            await Promise.all(workers);
 
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-play"></i> Iniciar Proceso';
+            btn.innerHTML = '<i class="fas fa-play"></i> Iniciar Proceso de Enlaces';
             statusBox.innerHTML += `
-                <div class="info-banner" style="margin-top:15px; background:rgba(255,255,255,0.05); border:1px solid var(--accent);">
-                    Lote Finalizado.
+                <div class="info-banner" style="margin-top:15px; background:rgba(37,211,102,0.15); border:1px solid #2ecc71; color:#fff; font-weight:700;">
+                    🎉 Proceso Finalizado: ${successCount} vehículos importados exitosamente, ${errorCount} errores.
                 </div>`;
             if (typeof loadDashboard === 'function') await loadDashboard();
             else if (typeof loadVehicles === 'function') await loadVehicles();

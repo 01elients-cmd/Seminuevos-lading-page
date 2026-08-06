@@ -185,8 +185,11 @@ function scanForData(obj, data = {}) {
     const color = getVal('Color') || getVal('clr') || getVal('exteriorColor');
     if (color && !data.color) data.color = String(color);
 
-    const location = getVal('Location') || getVal('loc') || getVal('saleLocation') || getVal('branchName');
+    const location = getVal('Location') || getVal('loc') || getVal('saleLocation') || getVal('branchName') || getVal('yardName');
     if (location && !data.location) data.location = String(location);
+
+    const damage = getVal('PrimaryDamage') || getVal('dd') || getVal('primaryDamage') || getVal('damage') || getVal('damageDescription') || getVal('lossType');
+    if (damage && !data.damage) data.damage = String(damage);
     
     // Price Logic: Prefer Buy It Now, then Current Bid
     const bnp = getVal('buyNowPrice') || getVal('bnp') || getVal('buyItNowPrice');
@@ -207,6 +210,25 @@ function scanForData(obj, data = {}) {
         }
     }
     return data;
+}
+
+function formatDamage(dmg) {
+    if (!dmg) return 'Sin daño mayor reportado';
+    const s = String(dmg).toUpperCase();
+    if (s.includes('FRONT')) return 'Daño Frontal';
+    if (s.includes('REAR')) return 'Daño Trasero';
+    if (s.includes('SIDE')) return 'Daño Lateral';
+    if (s.includes('ALL OVER') || s.includes('ALL-OVER')) return 'Daño General / Múltiple';
+    if (s.includes('ROLLOVER')) return 'Vuelco';
+    if (s.includes('WATER') || s.includes('FLOOD')) return 'Daño por Inundación / Agua';
+    if (s.includes('VANDALISM')) return 'Vandalismo';
+    if (s.includes('HAIL')) return 'Daño por Granizo';
+    if (s.includes('MECHANICAL')) return 'Falla Mecánica';
+    if (s.includes('NORMAL WEAR')) return 'Desgaste Normal (Sin Daño Estructural)';
+    if (s.includes('MINOR') || s.includes('SCRATCH')) return 'Detalles / Rayones Menores';
+    if (s.includes('UNDERCARRIAGE')) return 'Daño Inferior / Chasis';
+    if (s.includes('BURN') || s.includes('FIRE')) return 'Daño por Fuego';
+    return dmg;
 }
 
 function parseIAAI(html, url, trustHtml = false) {
@@ -242,11 +264,9 @@ function parseIAAI(html, url, trustHtml = false) {
         let result = null;
         $('*').each((i, el) => {
             let text = $(el).text().trim().toLowerCase();
-            // Limpiar los dos puntos al final si existen, para comparar exactamente
             let cleanText = text.replace(/:$/, '').trim();
             
             if ($(el).children().length <= 1) {
-                // Caso 1: Etiqueta y valor en elementos separados (ej: <span>Engine:</span> <span>V6</span>)
                 if (keywords.some(kw => cleanText === kw.toLowerCase())) {
                     let val = $(el).next().text().trim();
                     if (!val && $(el).parent().next().length) val = $(el).parent().next().text().trim();
@@ -257,7 +277,6 @@ function parseIAAI(html, url, trustHtml = false) {
                     }
                 }
                 
-                // Caso 2: Etiqueta y valor en el mismo elemento (ej: <span>Engine: 3.6L V6</span>)
                 const matchKw = keywords.find(kw => text.startsWith(kw.toLowerCase() + ':') || text.startsWith(kw.toLowerCase() + ' :'));
                 if (matchKw && !result) {
                     const parts = $(el).text().split(':');
@@ -275,7 +294,6 @@ function parseIAAI(html, url, trustHtml = false) {
     };
 
     if (!rawData.model || !rawData.year) {
-        // Extraer desde títulos
         const h1 = $('h1').first().text().trim().toUpperCase() || $('title').text().trim().toUpperCase();
         if (h1) {
             const cleanH1 = h1.replace(/\|.*/, '').replace(/FOR SALE.*/, '').trim();
@@ -292,8 +310,9 @@ function parseIAAI(html, url, trustHtml = false) {
     if (!rawData.bodyType) rawData.bodyType = getDOMValue(['Body Style', 'Vehicle Class', 'Body']);
     if (!rawData.fuel) rawData.fuel = getDOMValue(['Fuel Type', 'Fuel']);
     if (!rawData.color) rawData.color = getDOMValue(['Exterior Color', 'Exterior/Interior', 'Color', 'Exterior']);
-    if (!rawData.location) rawData.location = getDOMValue(['Selling Branch', 'Branch', 'Location', 'Sale Location']);
-    
+    if (!rawData.location) rawData.location = getDOMValue(['Selling Branch', 'Branch', 'Location', 'Sale Location', 'Yard']);
+    if (!rawData.damage) rawData.damage = getDOMValue(['Primary Damage', 'Damage', 'Damage Description', 'Loss Type']);
+
     if (!rawData.vin) {
         let v = getDOMValue(['VIN', 'VIN (Status)', 'VIN:']);
         if (v) rawData.vin = v.split(' ')[0];
@@ -303,7 +322,6 @@ function parseIAAI(html, url, trustHtml = false) {
         let p = getDOMValue(['Actual Cash Value', 'Estimated Repair Cost', 'ACV', 'Buy It Now', 'Current Bid']);
         if (p) rawData.price = p;
         else {
-            // Find any big price tag safely
             const priceTagText = $('.price, [class*="price"], [class*="bid"], [class*="Amount"]').first().text();
             if (priceTagText) {
                 const priceMatch = priceTagText.match(/\$[\d,]+/);
@@ -312,7 +330,6 @@ function parseIAAI(html, url, trustHtml = false) {
         }
     }
 
-    // Fix Price Format if missing or malformed
     if (rawData.price && typeof rawData.price === 'string') {
         const cleanPrice = rawData.price.match(/\$[\d,]+/);
         if (cleanPrice) rawData.price = cleanPrice[0];
@@ -321,24 +338,16 @@ function parseIAAI(html, url, trustHtml = false) {
         rawData.price = "Consultar";
     }
 
-    // Fix empty fields
     if (!rawData.year) rawData.year = new Date().getFullYear();
     if (!rawData.make) rawData.make = "Vehículo";
 
-    // Extract Images (Safer extraction to avoid mixing cars)
     const itemIdMatch = url.match(/\/VehicleDetail\/(\d+)/i);
     const itemId = itemIdMatch ? itemIdMatch[1] : null;
 
     const imgMatches = html.match(/https?:\/\/(?:vis|images|an-cdn)\.iaai\.com\/(?:inventory|resizer)[^"'\\]*/gi) || [];
     let cleanImages = [...new Set(imgMatches)].filter(img => {
         if (img.toLowerCase().includes('similar') || img.includes('thumb')) return false;
-        // Si logramos extraer el ID del vehículo de la URL, nos aseguramos que las imágenes le pertenezcan
-        // La mayoría de las imágenes principales de IAAI contienen el stock number / item id
-        if (itemId && !img.includes(itemId)) {
-            // Algunas veces el ID no está directo en la URL de la imagen, pero si hay muchas, es mejor filtrar agresivamente
-            // Vamos a permitirlo solo si no hay itemId o si coincide.
-            return false;
-        }
+        if (itemId && !img.includes(itemId)) return false;
         return true;
     }).map(img => {
         img = img.replace(/\\u0026/g, '&');
@@ -350,7 +359,6 @@ function parseIAAI(html, url, trustHtml = false) {
         }
     });
 
-    // Si el filtro estricto por ID nos dejó sin imágenes (porque usaban otro hash), intentamos de nuevo sin el filtro estricto
     if (cleanImages.length === 0) {
         cleanImages = [...new Set(imgMatches)].filter(img => {
             if (img.toLowerCase().includes('similar') || img.includes('thumb')) return false;
@@ -366,21 +374,40 @@ function parseIAAI(html, url, trustHtml = false) {
         });
     }
 
-    // Take only up to 20 images to avoid related vehicles
     cleanImages = cleanImages.slice(0, 20);
 
+    const formattedDamage = formatDamage(rawData.damage);
+    const formattedLocation = rawData.location || 'EE. UU. (Subasta)';
+
+    const fullTitle = `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' ');
+
     return {
-        title: `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' '),
+        title: fullTitle,
         year: rawData.year,
         price: rawData.price,
         km: rawData.km || "0 KM",
-        engine: rawData.engine || "",
-        transmission: rawData.transmission || "",
-        bodyType: rawData.bodyType || "",
-        fuel: rawData.fuel || "",
+        engine: rawData.engine || "N/A",
+        transmission: rawData.transmission || "Automático",
+        bodyType: rawData.bodyType || "SUV",
+        fuel: rawData.fuel || "Gasolina",
         vin: rawData.vin || "N/A",
+        damage: formattedDamage,
+        location: formattedLocation,
         images: cleanImages,
-        description: `Vehículo importado de subasta. Especialmente seleccionado para importación bajo pedido.\n\nEspecificaciones principales:\n- VIN: ${rawData.vin || 'N/A'}\n- Color: ${rawData.color || 'N/A'}\n- Ubicación de origen: ${rawData.location || 'USA'}\n\nContáctanos para más detalles sobre este ${rawData.make} ${rawData.model}.`
+        description: `📋 FICHA TÉCNICA Y ESPECIFICACIONES:
+• Vehículo: ${fullTitle}
+• Motor: ${rawData.engine || 'N/A'}
+• Transmisión: ${rawData.transmission || 'Automático'}
+• Recorrido: ${rawData.km || 'N/A'}
+• Tipo de Accidente / Condición: ${formattedDamage}
+• Ubicación de Origen: ${formattedLocation}
+• Combustible: ${rawData.fuel || 'Gasolina'}
+• Color Exterior: ${rawData.color || 'N/A'}
+• Número VIN: ${rawData.vin || 'N/A'}
+
+🚗 Importado especialmente bajo pedido. Contáctanos para cotizar impuestos y logística de importación.
+
+[ADMIN-LINK]: ${url}`
     };
 }
 
@@ -399,7 +426,6 @@ function parseCopart(html, url, trustHtml = false) {
                     try { 
                         const obj = JSON.parse(j);
                         scanForData(obj, rawData); 
-                        // Specific image list extraction for Copart
                         if (obj.imagesList && obj.imagesList.fullImages) {
                             if (!rawData.images) rawData.images = [];
                             obj.imagesList.fullImages.forEach(img => {
@@ -412,7 +438,6 @@ function parseCopart(html, url, trustHtml = false) {
         }
     }
 
-    // Text Fallback
     if (!rawData.year || !rawData.make) {
         const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
         const titleTag = (titleMatch?.[1] || "").toUpperCase();
@@ -422,7 +447,6 @@ function parseCopart(html, url, trustHtml = false) {
         
         if (titleMatch) {
             let cleanTitle = titleMatch[1].split(/\||Copart/i)[0].trim().replace(/\s+/g, ' ');
-            // Improved title split using more separators
             const titleParts = cleanTitle.split(/[\s-]+/).filter(Boolean);
             if (titleParts.length >= 2) {
                 if (!rawData.year && titleParts[0].match(/\b(19|20)\d{2}\b/)) {
@@ -439,25 +463,43 @@ function parseCopart(html, url, trustHtml = false) {
 
     if (!rawData.year || !rawData.make) throw new Error('Datos no encontrados en Copart. Usa Modo Manual.');
 
-    // Image fallback using regex if JSON images failed
     if (!rawData.images || rawData.images.length === 0) {
         const imgReg = /https?:\/\/[^"']+\.copart\.com\/[^"']+\d+_[a-z]\.jpg/gi;
         const matches = html.match(imgReg);
         rawData.images = [...new Set(matches || [])].map(img => img.replace(/_[a-z]\.jpg/i, '_full.jpg'));
     }
 
+    const formattedDamage = formatDamage(rawData.damage);
+    const formattedLocation = rawData.location || 'EE. UU. (Copart)';
+    const fullTitle = `${rawData.year} ${rawData.make} ${rawData.model || ''}`.trim().replace(/\s+/g, ' ');
+
     return {
-        title: `${rawData.year} ${rawData.make} ${rawData.model || ''}`.trim().replace(/\s+/g, ' '),
+        title: fullTitle,
         year: rawData.year,
         price: rawData.price || "Consultar",
         km: rawData.km || "0 KM",
         engine: rawData.engine || "N/A",
-        transmission: rawData.transmission || "N/A",
-        bodyType: rawData.bodyType || "N/A",
-        fuel: rawData.fuel || "N/A",
+        transmission: rawData.transmission || "Automático",
+        bodyType: rawData.bodyType || "SUV",
+        fuel: rawData.fuel || "Gasolina",
         vin: rawData.vin || "N/A",
+        damage: formattedDamage,
+        location: formattedLocation,
         images: rawData.images || [],
-        description: `Importado vía subasta Copart. VIN: ${rawData.vin || 'N/A'}. Color: ${rawData.color || 'N/A'}. Ubicación: ${rawData.location || 'USA'}.\n\n[ADMIN-LINK]: ${url}`
+        description: `📋 FICHA TÉCNICA Y ESPECIFICACIONES:
+• Vehículo: ${fullTitle}
+• Motor: ${rawData.engine || 'N/A'}
+• Transmisión: ${rawData.transmission || 'Automático'}
+• Recorrido: ${rawData.km || 'N/A'}
+• Tipo de Accidente / Condición: ${formattedDamage}
+• Ubicación de Origen: ${formattedLocation}
+• Combustible: ${rawData.fuel || 'Gasolina'}
+• Color Exterior: ${rawData.color || 'N/A'}
+• Número VIN: ${rawData.vin || 'N/A'}
+
+🚗 Importado especialmente vía subasta Copart.
+
+[ADMIN-LINK]: ${url}`
     };
 }
 
