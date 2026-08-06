@@ -343,19 +343,23 @@ function parseIAAI(html, url, trustHtml = false) {
         return result;
     };
 
-    if (!rawData.model || !rawData.year) {
-        const h1 = $('h1').first().text().trim().toUpperCase() || $('title').text().trim().toUpperCase();
-        if (h1) {
-            const cleanH1 = h1.replace(/\|.*/, '').replace(/FOR SALE.*/, '').trim();
-            const parts = cleanH1.split(/[\s|]+/);
-            if (!rawData.year && parts[0] && parts[0].match(/\b(19|20)\d{2}\b/)) rawData.year = parts[0];
-            if (!rawData.make && parts[1]) rawData.make = parts[1];
-            if (!rawData.model && parts[2]) rawData.model = parts.slice(2, 6).join(' ');
+    if (!rawData.model || !rawData.year || !rawData.make) {
+        const h1Text = $('h1, .vehicle-title, [class*="heading"], [class*="title"]').text().trim().toUpperCase() || $('title').text().trim().toUpperCase();
+        if (h1Text) {
+            const cleanH1 = h1Text.replace(/\|.*/, '').replace(/FOR SALE.*/, '').replace(/IAAI.*/, '').trim();
+            const yearMatch = cleanH1.match(/\b(19|20)\d{2}\b/);
+            if (yearMatch) {
+                rawData.year = yearMatch[0];
+                const afterYear = cleanH1.substring(cleanH1.indexOf(yearMatch[0]) + 4).trim();
+                const parts = afterYear.split(/\s+/).filter(Boolean);
+                if (parts[0]) rawData.make = parts[0];
+                if (parts[1]) rawData.model = parts.slice(1, 5).join(' ');
+            }
         }
     }
 
     if (!rawData.km) rawData.km = getDOMValue(['Odometer', 'Mileage', 'Odometer Reading']);
-    if (!rawData.engine) rawData.engine = getDOMValue(['Engine', 'Engine Size', 'Engine Description', 'Motor']);
+    if (!rawData.engine) rawData.engine = getDOMValue(['Engine Description', 'Engine', 'Engine Size', 'Motor']);
     if (!rawData.transmission) rawData.transmission = getDOMValue(['Transmission', 'Trans', 'Transmission Type']);
     if (!rawData.bodyType) rawData.bodyType = getDOMValue(['Body Style', 'Vehicle Class', 'Body']);
     if (!rawData.fuel) rawData.fuel = getDOMValue(['Fuel Type', 'Fuel']);

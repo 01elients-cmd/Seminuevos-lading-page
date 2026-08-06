@@ -3334,7 +3334,7 @@
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     startUrls: [{ url: url }],
-                                    pageFunction: "async function pageFunction(context) { const html = await context.page.content(); return { html }; }",
+                                    pageFunction: "async function pageFunction(context) { await new Promise(r => setTimeout(r, 4000)); const html = await context.page.content(); return { html }; }",
                                     proxyConfiguration: { useApifyProxy: true }
                                 })
                             });
@@ -3441,8 +3441,8 @@
                 return false;
             };
 
-            // Process links in Parallel Concurrency Pool (2 workers at a time to prevent rate limits)
-            const concurrency = 2;
+            // Process links sequentially to prevent Apify rate/memory limit collisions
+            const concurrency = 1;
             const queue = links.map((url, idx) => ({ url, idx }));
             
             const worker = async () => {
