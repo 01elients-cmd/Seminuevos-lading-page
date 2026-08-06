@@ -170,25 +170,27 @@ function scanForData(obj, data = {}) {
         if (!uom && String(odo).length > 3) data.km += " mi";
     }
     
-    const engine = getVal('EngineSize') || getVal('egn') || getVal('engine') || getVal('engineDescription') || getVal('motor');
-    if (engine && !data.engine) data.engine = String(engine);
+    const engine = getVal('engineDescription') || getVal('engineDesc') || getVal('engineType') || getVal('engine') || getVal('motor');
+    if (engine && !data.engine && !/^\d+\.?\d*$/.test(String(engine).trim())) {
+        data.engine = String(engine);
+    }
     
-    const trans = getVal('Transmission') || getVal('tsmn') || getVal('transmission') || getVal('transmissionType');
+    const trans = getVal('transmissionDescription') || getVal('Transmission') || getVal('tsmn') || getVal('transmission') || getVal('transmissionType');
     if (trans && !data.transmission) data.transmission = String(trans);
 
-    const body = getVal('BodyStyle') || getVal('bs') || getVal('bodyType') || getVal('bodyStyle') || getVal('body');
+    const body = getVal('bodyStyleDescription') || getVal('BodyStyle') || getVal('bs') || getVal('bodyType') || getVal('bodyStyle') || getVal('body');
     if (body && !data.bodyType) data.bodyType = String(body);
 
-    const fuel = getVal('FuelType') || getVal('ft') || getVal('fuelType');
+    const fuel = getVal('fuelTypeDescription') || getVal('FuelType') || getVal('ft') || getVal('fuelType');
     if (fuel && !data.fuel) data.fuel = String(fuel);
 
     const color = getVal('Color') || getVal('clr') || getVal('exteriorColor');
     if (color && !data.color) data.color = String(color);
 
-    const location = getVal('Location') || getVal('loc') || getVal('saleLocation') || getVal('branchName') || getVal('yardName');
+    const location = getVal('SellingBranch') || getVal('BranchName') || getVal('Location') || getVal('loc') || getVal('saleLocation') || getVal('branchName') || getVal('yardName');
     if (location && !data.location) data.location = String(location);
 
-    const damage = getVal('PrimaryDamage') || getVal('dd') || getVal('primaryDamage') || getVal('damage') || getVal('damageDescription') || getVal('lossType');
+    const damage = getVal('PrimaryDamageDescription') || getVal('PrimaryDamage') || getVal('dd') || getVal('primaryDamage') || getVal('damage') || getVal('damageDescription') || getVal('lossType');
     if (damage && !data.damage) data.damage = String(damage);
     
     // Price Logic: Prefer Buy It Now, then Current Bid
@@ -242,7 +244,14 @@ function normalizeBodyType(body, title = '') {
 }
 
 function extractEngine(engine, title = '', html = '') {
-    const isInvalid = (e) => !e || e === 'N/A' || e === '1.0' || e === '1.0L' || e === '0.0' || e === '0' || e === '1' || String(e).toLowerCase().includes('unknown');
+    const isInvalid = (e) => {
+        if (!e) return true;
+        const s = String(e).trim();
+        if (s === 'N/A' || s === '0.0' || s === '0' || s === '1' || s === '1.0' || s === '1.0L' || s === '2.6' || s.toLowerCase().includes('unknown')) return true;
+        // Reject any purely numeric engine string without letters like "2.6" or "2.0"
+        if (/^\d+\.?\d*$/.test(s)) return true;
+        return false;
+    };
     
     if (!isInvalid(engine) && String(engine).trim().length > 2) {
         return String(engine).trim();
@@ -251,8 +260,8 @@ function extractEngine(engine, title = '', html = '') {
     const combined = `${title} ${html}`.toUpperCase();
     
     // Explicit engine search for 1.3L up to 8.0L
-    const matchLiters = combined.match(/\b((?:[1-7]\.[1-9]|8\.0)\s*L?(?:\s*(?:TURBO|V6|V8|I4|I6|HEMI|ECOBOOST|TDI|TSI|24V|DOHC|4-CYL|6-CYL))?)\b/i);
-    if (matchLiters && matchLiters[1] !== '1.0' && matchLiters[1] !== '1.0L') {
+    const matchLiters = combined.match(/\b((?:[1-7]\.[0-9]|8\.0)\s*L?(?:\s*(?:TURBO|V6|V8|I4|I6|HEMI|ECOBOOST|TDI|TSI|24V|DOHC|4-CYL|6-CYL))?)\b/i);
+    if (matchLiters && matchLiters[1] !== '1.0' && matchLiters[1] !== '1.0L' && matchLiters[1] !== '2.6') {
         return matchLiters[1].trim();
     }
 
@@ -438,7 +447,8 @@ function parseIAAI(html, url, trustHtml = false) {
     const formattedDamage = formatDamage(rawData.damage);
     const formattedLocation = rawData.location || 'EE. UU. (Subasta)';
 
-    const fullTitle = `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' ');
+    const rawTitle = `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' ');
+    const fullTitle = rawTitle.replace(/\s*LIVE AUCTION.*/i, '').replace(/\s*FOR SALE.*/i, '').trim();
     const normTrans = normalizeTransmission(rawData.transmission);
     const normFuelType = normalizeFuel(rawData.fuel);
     const normBody = normalizeBodyType(rawData.bodyType, fullTitle);

@@ -3417,7 +3417,7 @@
                             if (!dbErr) {
                                 successCount++;
                                 completed++;
-                                statusBox.innerHTML += `<div style="color:#2ecc71; font-size:0.82rem; margin-bottom:4px; font-weight:600;">✓ [${completed}/${links.length}] ${data.title} — Motor: ${data.engine || 'N/A'} | KM: ${data.km || '0'} | Condición: ${data.damage || 'OK'} | Ubicación: ${data.location || 'USA'}</div>`;
+                                statusBox.innerHTML += `<div style="color:#2ecc71; font-size:0.82rem; margin-bottom:4px; font-weight:600;">✓ [${completed}/${links.length}] ${vehicleData.title} — Motor: ${vehicleData.engine || 'N/A'} | KM: ${vehicleData.km || '0'} | Condición: ${data.damage || 'OK'} | Ubicación: ${data.location || 'USA'}</div>`;
                                 statusBox.scrollTop = statusBox.scrollHeight;
                                 return true;
                             } else {
