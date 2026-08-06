@@ -2134,6 +2134,62 @@
             updateBulkBar();
         }
 
+        // Helper normalizers for modal form pre-filling
+        function normTrans(trans) {
+            if (!trans) return 'Automático';
+            const s = String(trans).toLowerCase();
+            if (s.includes('manual') || s.includes('mecanic') || s.includes('mecánic') || s.includes('stick') || s.includes('m/t')) return 'Manual';
+            return 'Automático';
+        }
+
+        function normFuel(fuel) {
+            if (!fuel) return 'Gasolina';
+            const s = String(fuel).toLowerCase();
+            if (s.includes('diesel') || s.includes('diésel') || s.includes('petrol')) return 'Diésel';
+            if (s.includes('hibrid') || s.includes('híbrid') || s.includes('hybrid') || s.includes('phev')) return 'Híbrido';
+            if (s.includes('electr') || s.includes('eléctr') || s.includes('ev') || s.includes('bev')) return 'Eléctrico';
+            return 'Gasolina';
+        }
+
+        function normBody(body, title = '') {
+            const s = `${body || ''} ${title || ''}`.toLowerCase();
+            if (s.includes('pickup') || s.includes('truck') || s.includes('crew cab') || s.includes('double cab') || s.includes('extended cab') || s.includes('regular cab')) return 'Pickup';
+            if (s.includes('suv') || s.includes('crossover') || s.includes('jeep') || s.includes('wrangler') || s.includes('4x4') || s.includes('cherokee') || s.includes('tahoe') || s.includes('suburban') || s.includes('explorer') || s.includes('rav4') || s.includes('cr-v')) return 'SUV';
+            if (s.includes('hatchback') || s.includes('hatch') || s.includes('5-door')) return 'Hatchback';
+            if (s.includes('convertible') || s.includes('cabrio') || s.includes('spider')) return 'Convertible';
+            if (s.includes('coupe') || s.includes('coupé')) return 'Coupé';
+            if (s.includes('van') || s.includes('minivan')) return 'Van';
+            if (s.includes('wagon')) return 'Wagon';
+            if (s.includes('sedan') || s.includes('sedán') || s.includes('4-door') || s.includes('4dr')) return 'Sedán';
+            return 'SUV';
+        }
+
+        function normEngine(engine, title = '', desc = '') {
+            if (engine && engine !== 'N/A' && engine.trim() !== '' && engine.trim().length > 2) {
+                return engine.trim();
+            }
+            const combined = `${title} ${desc}`.toUpperCase();
+            const matchLiters = combined.match(/\b([1-8]\.[0-9]\s*L?(?:\s*(?:TURBO|V6|V8|I4|HEMI|ECOBOOST|TDI|TSI))?)\b/);
+            if (matchLiters) return matchLiters[1].trim();
+            const matchConfig = combined.match(/\b(V6|V8|V4|I4|HEMI|TURBO|ECOBOOST)\b/);
+            if (matchConfig) return matchConfig[1].trim();
+            return '2.0L Turbo';
+        }
+
+        function normOrigin(orig) {
+            if (!orig) return 'importado';
+            const s = String(orig).toLowerCase();
+            if (s.includes('nacion') || s.includes('local') || s.includes('venezuela')) return 'nacional';
+            return 'importado';
+        }
+
+        function normCondition(cond) {
+            if (!cond) return 'seminuevo';
+            const s = String(cond).toLowerCase();
+            if (s.includes('0km') || s.includes('nuevo') || s.includes('brand new')) return '0km';
+            return 'seminuevo';
+        }
+
         // ===== MODAL =====
         const modal = document.getElementById('vehicleModal');
         let isSaving = false;
@@ -2149,14 +2205,14 @@
                 document.getElementById('vPrice').value = vehicle.price;
                 document.getElementById('vYear').value = vehicle.year;
                 document.getElementById('vKm').value = vehicle.km || '';
-                document.getElementById('vEngine').value = vehicle.engine || '';
-                document.getElementById('vTransmission').value = vehicle.transmission || 'Automático';
-                document.getElementById('vFuel').value = vehicle.fuel || 'Gasolina';
-                document.getElementById('vBodyType').value = vehicle.body_type || vehicle.bodyType || 'suv';
-                document.getElementById('vCatalog').value = vehicle.catalog || 'seminuevos';
-                document.getElementById('vAvailability').value = vehicle.availability || 'entrega_inmediata';
-                document.getElementById('vOrigin').value = vehicle.origin || 'importado';
-                document.getElementById('vCondition').value = vehicle.condition || 'seminuevo';
+                document.getElementById('vEngine').value = normEngine(vehicle.engine, vehicle.title, vehicle.description);
+                document.getElementById('vTransmission').value = normTrans(vehicle.transmission);
+                document.getElementById('vFuel').value = normFuel(vehicle.fuel);
+                document.getElementById('vBodyType').value = normBody(vehicle.body_type || vehicle.bodyType, vehicle.title);
+                document.getElementById('vCatalog').value = vehicle.catalog || 'importados';
+                document.getElementById('vAvailability').value = vehicle.availability || 'por_pedido';
+                document.getElementById('vOrigin').value = normOrigin(vehicle.origin);
+                document.getElementById('vCondition').value = normCondition(vehicle.condition);
                 document.getElementById('vBadge').value = vehicle.badge || '';
                 document.getElementById('vStatus').value = vehicle.status || 'active';
                 document.getElementById('vDescription').value = vehicle.description || '';
@@ -3340,17 +3396,17 @@
 
                             const vehicleData = {
                                 title: data.title,
-                                price: data.price || '$0',
+                                price: data.price || 'Consultar',
                                 year: parseInt(data.year) || new Date().getFullYear(),
                                 km: data.km || '0 KM',
-                                engine: data.engine || 'N/A',
-                                transmission: data.transmission || 'Automático',
-                                fuel: data.fuel || 'Gasolina',
-                                body_type: (data.bodyType || 'suv').toLowerCase(),
+                                engine: normEngine(data.engine, data.title, data.description),
+                                transmission: normTrans(data.transmission),
+                                fuel: normFuel(data.fuel),
+                                body_type: normBody(data.bodyType, data.title),
                                 catalog: 'importados',
                                 availability: 'por_pedido',
-                                origin: data.location || 'importado',
-                                condition: data.damage || 'seminuevo',
+                                origin: 'importado',
+                                condition: 'seminuevo',
                                 status: 'active',
                                 description: data.description || '',
                                 images: finalImgs.length > 0 ? finalImgs : rawImages

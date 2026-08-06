@@ -212,6 +212,49 @@ function scanForData(obj, data = {}) {
     return data;
 }
 
+function normalizeTransmission(trans) {
+    if (!trans) return 'Automático';
+    const s = String(trans).toLowerCase();
+    if (s.includes('manual') || s.includes('mecanic') || s.includes('mecánic') || s.includes('stick') || s.includes('m/t')) return 'Manual';
+    return 'Automático';
+}
+
+function normalizeFuel(fuel) {
+    if (!fuel) return 'Gasolina';
+    const s = String(fuel).toLowerCase();
+    if (s.includes('diesel') || s.includes('diésel') || s.includes('petrol')) return 'Diésel';
+    if (s.includes('hibrid') || s.includes('híbrid') || s.includes('hybrid') || s.includes('phev')) return 'Híbrido';
+    if (s.includes('electr') || s.includes('eléctr') || s.includes('ev') || s.includes('bev')) return 'Eléctrico';
+    return 'Gasolina';
+}
+
+function normalizeBodyType(body, title = '') {
+    const s = `${body || ''} ${title || ''}`.toLowerCase();
+    if (s.includes('pickup') || s.includes('truck') || s.includes('crew cab') || s.includes('double cab') || s.includes('extended cab') || s.includes('regular cab')) return 'Pickup';
+    if (s.includes('suv') || s.includes('crossover') || s.includes('jeep') || s.includes('wrangler') || s.includes('4x4') || s.includes('cherokee') || s.includes('tahoe') || s.includes('suburban') || s.includes('explorer') || s.includes('rav4') || s.includes('cr-v')) return 'SUV';
+    if (s.includes('hatchback') || s.includes('hatch') || s.includes('5-door')) return 'Hatchback';
+    if (s.includes('convertible') || s.includes('cabrio') || s.includes('spider')) return 'Convertible';
+    if (s.includes('coupe') || s.includes('coupé')) return 'Coupé';
+    if (s.includes('van') || s.includes('minivan')) return 'Van';
+    if (s.includes('wagon')) return 'Wagon';
+    if (s.includes('sedan') || s.includes('sedán') || s.includes('4-door') || s.includes('4dr')) return 'Sedán';
+    return 'SUV';
+}
+
+function extractEngine(engine, title = '', html = '') {
+    if (engine && engine !== 'N/A' && engine.trim() !== '' && engine.trim().length > 2) {
+        return engine.trim();
+    }
+    const combined = `${title} ${html}`.toUpperCase();
+    const matchLiters = combined.match(/\b([1-8]\.[0-9]\s*L?(?:\s*(?:TURBO|V6|V8|I4|HEMI|ECOBOOST|TDI|TSI))?)\b/);
+    if (matchLiters) return matchLiters[1].trim();
+
+    const matchConfig = combined.match(/\b(V6|V8|V4|I4|HEMI|TURBO|ECOBOOST)\b/);
+    if (matchConfig) return matchConfig[1].trim();
+
+    return '2.0L Turbo';
+}
+
 function formatDamage(dmg) {
     if (!dmg) return 'Sin daño mayor reportado';
     const s = String(dmg).toUpperCase();
@@ -380,28 +423,32 @@ function parseIAAI(html, url, trustHtml = false) {
     const formattedLocation = rawData.location || 'EE. UU. (Subasta)';
 
     const fullTitle = `${rawData.year} ${rawData.make} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' ');
+    const normTrans = normalizeTransmission(rawData.transmission);
+    const normFuelType = normalizeFuel(rawData.fuel);
+    const normBody = normalizeBodyType(rawData.bodyType, fullTitle);
+    const normEng = extractEngine(rawData.engine, fullTitle, html);
 
     return {
         title: fullTitle,
         year: rawData.year,
         price: rawData.price,
         km: rawData.km || "0 KM",
-        engine: rawData.engine || "N/A",
-        transmission: rawData.transmission || "Automático",
-        bodyType: rawData.bodyType || "SUV",
-        fuel: rawData.fuel || "Gasolina",
+        engine: normEng,
+        transmission: normTrans,
+        bodyType: normBody,
+        fuel: normFuelType,
         vin: rawData.vin || "N/A",
         damage: formattedDamage,
         location: formattedLocation,
         images: cleanImages,
         description: `📋 FICHA TÉCNICA Y ESPECIFICACIONES:
 • Vehículo: ${fullTitle}
-• Motor: ${rawData.engine || 'N/A'}
-• Transmisión: ${rawData.transmission || 'Automático'}
+• Motor: ${normEng}
+• Transmisión: ${normTrans}
 • Recorrido: ${rawData.km || 'N/A'}
 • Tipo de Accidente / Condición: ${formattedDamage}
 • Ubicación de Origen: ${formattedLocation}
-• Combustible: ${rawData.fuel || 'Gasolina'}
+• Combustible: ${normFuelType}
 • Color Exterior: ${rawData.color || 'N/A'}
 • Número VIN: ${rawData.vin || 'N/A'}
 
@@ -472,24 +519,39 @@ function parseCopart(html, url, trustHtml = false) {
     const formattedDamage = formatDamage(rawData.damage);
     const formattedLocation = rawData.location || 'EE. UU. (Copart)';
     const fullTitle = `${rawData.year} ${rawData.make} ${rawData.model || ''}`.trim().replace(/\s+/g, ' ');
+    const normTrans = normalizeTransmission(rawData.transmission);
+    const normFuelType = normalizeFuel(rawData.fuel);
+    const normBody = normalizeBodyType(rawData.bodyType, fullTitle);
+    const normEng = extractEngine(rawData.engine, fullTitle, html);
 
     return {
         title: fullTitle,
         year: rawData.year,
         price: rawData.price || "Consultar",
         km: rawData.km || "0 KM",
-        engine: rawData.engine || "N/A",
-        transmission: rawData.transmission || "Automático",
-        bodyType: rawData.bodyType || "SUV",
-        fuel: rawData.fuel || "Gasolina",
+        engine: normEng,
+        transmission: normTrans,
+        bodyType: normBody,
+        fuel: normFuelType,
         vin: rawData.vin || "N/A",
         damage: formattedDamage,
         location: formattedLocation,
         images: rawData.images || [],
         description: `📋 FICHA TÉCNICA Y ESPECIFICACIONES:
 • Vehículo: ${fullTitle}
-• Motor: ${rawData.engine || 'N/A'}
-• Transmisión: ${rawData.transmission || 'Automático'}
+• Motor: ${normEng}
+• Transmisión: ${normTrans}
+• Recorrido: ${rawData.km || 'N/A'}
+• Tipo de Accidente / Condición: ${formattedDamage}
+• Ubicación de Origen: ${formattedLocation}
+• Combustible: ${normFuelType}
+• Color Exterior: ${rawData.color || 'N/A'}
+• Número VIN: ${rawData.vin || 'N/A'}
+
+🚗 Importado especialmente vía subasta Copart.
+
+[ADMIN-LINK]: ${url}`
+    };
 • Recorrido: ${rawData.km || 'N/A'}
 • Tipo de Accidente / Condición: ${formattedDamage}
 • Ubicación de Origen: ${formattedLocation}
