@@ -1193,12 +1193,49 @@ body::after {
     box-shadow: var(--glow-gold);
 }
 
-/* ===== VEHICLE GRID ===== */
+/* ===== VEHICLE GRID (5-6 CARDS PER ROW) ===== */
+.catalog-section .container,
+.featured-vehicles .container {
+    max-width: 1750px;
+    width: 95%;
+}
+
 .vehicle-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: var(--space-8);
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
     margin-bottom: var(--space-12);
+}
+
+@media (min-width: 1680px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (max-width: 1350px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vehicle-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .vehicle-card {
@@ -1219,7 +1256,7 @@ body::after {
 
 .vehicle-card-image {
     position: relative;
-    height: 300px;
+    height: 220px;
     overflow: hidden;
     background: #000;
 }
@@ -3885,9 +3922,15 @@ body::after {
     }
 
     .vehicle-grid {
-        grid-template-columns: 1fr !important;
-        gap: 20px;
-        padding: 0 10px;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 14px;
+        padding: 0 5px;
+    }
+
+    @media (max-width: 480px) {
+        .vehicle-grid {
+            grid-template-columns: 1fr !important;
+        }
     }
 
     .stats-grid {
