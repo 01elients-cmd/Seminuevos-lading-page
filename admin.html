@@ -3270,7 +3270,7 @@
                         }
 
                         // FALLBACK APIFY BROWSER SCRAPER PARA IAAI / COPART BLOQUEADOS
-                        if (!result.success && result.message && result.message.includes('Bloqueado') && proxyKey) {
+                        if (!result.success && proxyKey) {
                             const cleanToken = proxyKey.trim();
                             const startRes = await fetch(`https://api.apify.com/v2/acts/apify~puppeteer-scraper/runs?token=${cleanToken}&memory=1024`, {
                                 method: 'POST',
@@ -3278,7 +3278,7 @@
                                 body: JSON.stringify({
                                     startUrls: [{ url: url }],
                                     pageFunction: "async function pageFunction(context) { const html = await context.page.content(); return { html }; }",
-                                    proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'] }
+                                    proxyConfiguration: { useApifyProxy: true }
                                 })
                             });
                             
