@@ -254,19 +254,38 @@ function extractEngine(engine, title = '', html = '') {
     };
     
     if (!isInvalid(engine) && String(engine).trim().length > 2) {
-        return String(engine).trim();
+        let engStr = String(engine).trim();
+        // If engine is just a configuration like "TURBO", "I4", or "V6", combine with Liters if available!
+        if (/^(TURBO|V6|V8|I4|I6|HEMI|ECOBOOST|TWIN TURBO)$/i.test(engStr)) {
+            const combinedText = `${title} ${html}`.toUpperCase();
+            const literMatch = combinedText.match(/\b([1-7]\.[0-9]|8\.0)\s*L?\b/i);
+            if (literMatch) {
+                return `${literMatch[1]}L ${engStr}`.toUpperCase();
+            }
+            if (engStr.toUpperCase() === 'TURBO') return '2.0L TURBO';
+            if (engStr.toUpperCase() === 'I4') return '2.4L I4';
+            if (engStr.toUpperCase() === 'V6') return '3.6L V6';
+        }
+        return engStr;
     }
     
-    const combined = `${title} ${html}`.toUpperCase();
+    const combined = `${engine || ''} ${title || ''} ${html || ''}`.toUpperCase();
     
-    // Explicit engine search for 1.3L up to 8.0L
-    const matchLiters = combined.match(/\b((?:[1-7]\.[0-9]|8\.0)\s*L?(?:\s*(?:TURBO|V6|V8|I4|I6|HEMI|ECOBOOST|TDI|TSI|24V|DOHC|4-CYL|6-CYL))?)\b/i);
-    if (matchLiters && matchLiters[1] !== '1.0' && matchLiters[1] !== '1.0L' && matchLiters[1] !== '2.6') {
-        return matchLiters[1].trim();
+    const literMatch = combined.match(/\b([1-7]\.[0-9]|8\.0)\s*L?\b/i);
+    const configMatch = combined.match(/\b(V6|V8|I4|I6|HEMI|TURBO|ECOBOOST|TWIN TURBO|4-CYL|6-CYL|8-CYL)\b/i);
+    
+    if (literMatch && configMatch) {
+        return `${literMatch[1]}L ${configMatch[1]}`.toUpperCase();
     }
-
-    const matchConfig = combined.match(/\b(V6|V8|I4|I6|HEMI|TURBO|ECOBOOST|TWIN TURBO)\b/i);
-    if (matchConfig) return matchConfig[1].trim();
+    if (literMatch) {
+        return `${literMatch[1]}L`.toUpperCase();
+    }
+    if (configMatch) {
+        const cfg = configMatch[1].toUpperCase();
+        if (cfg === 'V6') return '3.6L V6';
+        if (cfg === 'V8') return '5.7L V8';
+        return `2.0L ${cfg}`;
+    }
 
     return '2.0L Turbo';
 }
