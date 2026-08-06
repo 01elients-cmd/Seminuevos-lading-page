@@ -552,17 +552,6 @@ function parseCopart(html, url, trustHtml = false) {
 
 [ADMIN-LINK]: ${url}`
     };
-• Recorrido: ${rawData.km || 'N/A'}
-• Tipo de Accidente / Condición: ${formattedDamage}
-• Ubicación de Origen: ${formattedLocation}
-• Combustible: ${rawData.fuel || 'Gasolina'}
-• Color Exterior: ${rawData.color || 'N/A'}
-• Número VIN: ${rawData.vin || 'N/A'}
-
-🚗 Importado especialmente vía subasta Copart.
-
-[ADMIN-LINK]: ${url}`
-    };
 }
 
 function parseGeneric(html, url) {
