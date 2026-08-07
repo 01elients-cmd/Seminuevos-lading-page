@@ -1279,19 +1279,23 @@ body::after {
 
 .vehicle-badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    padding: 6px 12px;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
     background: var(--gradient-gold);
     color: var(--on-primary);
     border-radius: var(--radius-full);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.65rem;
-    letter-spacing: 1.2px;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
     text-transform: uppercase;
     box-shadow: var(--glow-gold);
     z-index: 2;
+    max-width: calc(100% - 55px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Vehicle Card Tags (row above title) */
@@ -3562,22 +3566,22 @@ body::after {
 /* ===== VIEWS BADGE ===== */
 .views-badge {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    bottom: 10px;
+    right: 10px;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 5px 10px;
-    background: rgba(0, 0, 0, 0.65);
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-full);
     color: #fff;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-family: var(--font-display);
     font-weight: 500;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     z-index: 5;
     transition: var(--transition);
 }
