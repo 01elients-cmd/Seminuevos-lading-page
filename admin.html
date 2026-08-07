@@ -3387,7 +3387,7 @@
                                         return publicData.publicUrl;
                                     }
                                 } catch (e) {}
-                                return imgUrl; // Fallback to raw/proxy URL if upload times out
+                                return (imgUrl.includes('iaai.com') || imgUrl.includes('copart.com')) ? `/api/scrape?proxy=${encodeURIComponent(imgUrl)}` : imgUrl;
                             });
 
                             const uploadedResults = await Promise.allSettled(uploadPromises);

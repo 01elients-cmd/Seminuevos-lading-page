@@ -361,11 +361,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const availabilityIcon = car.availability === 'entrega_inmediata' ? 'fa-bolt' : 'fa-clock';
             const originBadge = car.origin === 'importado' ? `<span class="origin-badge importado"><i class="fas fa-globe"></i> Importado</span>` : `<span class="origin-badge nacional"><i class="fas fa-flag"></i> Nacional</span>`;
             const viewCount = car.views || 0;
-            const viewsBadge = viewCount > 0 ? `<span class="views-badge" id="views-card-${car.id}"><i class="fas fa-eye"></i> ${viewCount} vista${viewCount !== 1 ? 's' : ''}</span>` : `<span class="views-badge" id="views-card-${car.id}" style="display:none;"></span>`;
+            let carImg = (car.images && car.images.length > 0 && car.images[0]) ? car.images[0] : '';
+            if (carImg && (carImg.includes('iaai.com') || carImg.includes('copart.com')) && !carImg.includes('/api/scrape?proxy=')) {
+                carImg = `/api/scrape?proxy=${encodeURIComponent(carImg)}`;
+            }
+            if (!carImg) {
+                carImg = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000&auto=format&fit=crop';
+            }
             
             card.innerHTML = `
                 <div class="vehicle-card-image">
-                    <img src="${car.images[0]}" alt="${optimizedAlt}" loading="lazy" crossorigin="anonymous">
+                    <img src="${carImg}" alt="${optimizedAlt}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000&auto=format&fit=crop';">
                     ${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}
                     <a href="#" class="share-vehicle btn-card-share-float" data-id="${car.id}" data-title="${car.title}" title="Compartir"><i class="fas fa-share-nodes"></i></a>
                     ${car.mastertech ? `<img src="CERTIFICADO---MASTERTECH.png" alt="Sello Mastertech" class="mastertech-seal">` : ''}
