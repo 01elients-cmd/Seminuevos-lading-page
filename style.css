@@ -1417,29 +1417,74 @@ body::after {
 
 .vehicle-card-footer {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 6px;
-    padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.02);
     margin: 0 12px 12px;
     border-radius: var(--radius-md);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.vehicle-card-footer a {
-    display: flex;
+.btn-card-details,
+.btn-card-whatsapp {
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 5px;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 0.82rem;
-    color: var(--primary);
-    transition: var(--transition);
+    font-size: 0.76rem;
+    padding: 7px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex: 1;
 }
 
-.vehicle-card-footer a:hover {
-    color: var(--primary-fixed);
+.btn-card-details {
+    background: rgba(255, 255, 255, 0.06);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-card-details:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-card-whatsapp {
+    background: rgba(37, 211, 102, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(37, 211, 102, 0.22);
+}
+
+.btn-card-whatsapp:hover {
+    background: rgba(37, 211, 102, 0.22);
+    color: #22c55e;
+    border-color: rgba(37, 211, 102, 0.35);
+}
+
+.btn-card-share {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--primary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-card-share:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 /* Import Notice */
