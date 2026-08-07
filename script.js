@@ -367,6 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="vehicle-card-image">
                     <img src="${car.images[0]}" alt="${optimizedAlt}" loading="lazy" crossorigin="anonymous">
                     ${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}
+                    <a href="#" class="share-vehicle btn-card-share-float" data-id="${car.id}" data-title="${car.title}" title="Compartir"><i class="fas fa-share-nodes"></i></a>
                     ${car.mastertech ? `<img src="CERTIFICADO---MASTERTECH.png" alt="Sello Mastertech" class="mastertech-seal">` : ''}
                     ${viewsBadge}
                 </div>
@@ -383,11 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="spec-item"><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
                         <span class="spec-item"><i class="fas fa-gears"></i> ${car.transmission}</span>
                     </div>
-                </div>
-                <div class="vehicle-card-footer">
-                    <a href="#" class="view-details btn-card-details" data-id="${car.id}"><i class="fas fa-eye"></i> Detalles</a>
-                    <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}).`)}" class="track-whatsapp btn-card-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> Cotizar</a>
-                    <a href="#" class="share-vehicle btn-card-share" data-id="${car.id}" data-title="${car.title}" title="Compartir"><i class="fas fa-share-nodes"></i></a>
+                    <div class="vehicle-card-footer">
+                        <a href="#" class="view-details btn-card-details" data-id="${car.id}"><i class="fas fa-eye"></i> Detalles</a>
+                        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}).`)}" class="track-whatsapp btn-card-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> Cotizar</a>
+                    </div>
                 </div>
             `;
             gridElement.appendChild(card);
