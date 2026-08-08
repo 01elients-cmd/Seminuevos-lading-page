@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const priceDisplay = car.price === 'Consultar' ? `<span class="price-consult">Consultar Precio</span>` : car.price;
             const availabilityClass = car.availability === 'entrega_inmediata' ? 'available' : 'order';
-            const availabilityText = car.availability === 'entrega_inmediata' ? 'Entrega Inmediata' : 'Por Pedido';
+            const availabilityText = car.availability === 'entrega_inmediata' ? 'En Stock' : 'Por Pedido';
             const availabilityIcon = car.availability === 'entrega_inmediata' ? 'fa-bolt' : 'fa-clock';
             const originBadge = car.origin === 'importado' ? `<span class="origin-badge importado"><i class="fas fa-globe"></i> Importado</span>` : `<span class="origin-badge nacional"><i class="fas fa-flag"></i> Nacional</span>`;
             const viewCount = car.views || 0;
