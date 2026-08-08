@@ -1249,10 +1249,13 @@ body::after {
     cursor: pointer;
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.06);
+    will-change: transform;
+    transform: translateZ(0);
+    contain: layout style paint;
 }
 
 .vehicle-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-8px) translateZ(0);
     border-color: var(--ghost-border-gold);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), var(--glow-gold);
 }
@@ -1271,6 +1274,8 @@ body::after {
     object-fit: cover;
     object-position: center center;
     transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+    content-visibility: auto;
 }
 
 .vehicle-card:hover .vehicle-card-image img {

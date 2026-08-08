@@ -367,13 +367,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (carImg && (carImg.includes('iaai.com') || carImg.includes('copart.com')) && !carImg.includes('/api/scrape?proxy=')) {
                 carImg = `/api/scrape?proxy=${encodeURIComponent(carImg)}`;
             }
+            const fallbackImg = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=70&w=500&auto=format&fit=crop';
             if (!carImg) {
-                carImg = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000&auto=format&fit=crop';
+                carImg = fallbackImg;
             }
             
+            const loadingAttr = index < 4 ? 'eager' : 'lazy';
+            const priorityAttr = index < 4 ? 'fetchpriority="high"' : '';
+
             card.innerHTML = `
                 <div class="vehicle-card-image">
-                    <img src="${carImg}" alt="${optimizedAlt}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000&auto=format&fit=crop';">
+                    <img src="${carImg}" alt="${optimizedAlt}" loading="${loadingAttr}" ${priorityAttr} decoding="async" onerror="this.onerror=null; this.src='${fallbackImg}';">
                     ${car.mastertech ? `<img src="CERTIFICADO---MASTERTECH.png" alt="Sello Mastertech" class="mastertech-seal">` : ''}
                     ${viewsBadge}
                 </div>
@@ -521,9 +525,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== SUPABASE DATA FETCH =====
     async function initSupabaseData() {
+        if (window.location.pathname.includes('vehiculo')) {
+            return; // Skip full catalog query on single vehicle detail page for maximum speed
+        }
         try {
-            // Load vehicles
-            const { data: vDataRaw } = await supabaseClient.from('vehicles').select('*').eq('status', 'active');
+            // Load vehicles and site_settings concurrently in PARALLEL for maximum speed
+            const [vDataRes, sDataRes] = await Promise.all([
+                supabaseClient.from('vehicles').select('*').eq('status', 'active'),
+                supabaseClient.from('site_settings').select('*')
+            ]);
+
+            const vDataRaw = vDataRes.data;
             if (vDataRaw && vDataRaw.length > 0) {
                 const vData = vDataRaw
                     .map(v => ({ ...v, bodyType: v.bodyType || v.body_type }))
@@ -559,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAllPanels();
 
             // Load settings
-            const { data: sData } = await supabaseClient.from('site_settings').select('*');
+            const sData = sDataRes.data;
             const map = {};
             if (sData) {
                 sData.forEach(s => {

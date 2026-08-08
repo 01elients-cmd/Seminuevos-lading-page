@@ -28,7 +28,7 @@ export default async function handler(req, res) {
             if (!response.ok) return res.status(404).send('Not found');
             const arrayBuffer = await response.arrayBuffer();
             res.setHeader('Content-Type', response.headers.get('Content-Type') || 'image/jpeg');
-            res.setHeader('Cache-Control', 'public, max-age=86400');
+            res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
             return res.send(Buffer.from(arrayBuffer));
         } catch (e) {
             return res.status(500).send(e.message);
