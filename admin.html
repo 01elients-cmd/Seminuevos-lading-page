@@ -2060,8 +2060,14 @@
         async function loadVehicles() {
             const { data, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
             if (error) { showToast('Error cargando vehículos: ' + error.message, 'error'); return; }
-            // Filtrar basura (records vacíos o con títulos genéricos) para limpiar la vista del usuario
-            vehicles = (data || []).filter(v => v.title && !v.title.includes('Vehículo'));
+            
+            // Clean up dummy orphan records from database
+            const dummyIds = (data || []).filter(v => !v.title || v.title.includes('Vehículo') || v.title.includes('Vehiculo')).map(v => v.id);
+            if (dummyIds.length > 0) {
+                supabaseClient.from('vehicles').delete().in('id', dummyIds).then(() => {});
+            }
+
+            vehicles = (data || []).filter(v => v.title && !v.title.includes('Vehículo') && !v.title.includes('Vehiculo'));
             renderStats();
             renderTable();
         }

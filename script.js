@@ -527,7 +527,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Load vehicles
             const { data: vDataRaw } = await supabaseClient.from('vehicles').select('*').eq('status', 'active');
             if (vDataRaw && vDataRaw.length > 0) {
-                const vData = vDataRaw.map(v => ({ ...v, bodyType: v.bodyType || v.body_type }));
+                const vData = vDataRaw
+                    .map(v => ({ ...v, bodyType: v.bodyType || v.body_type }))
+                    .filter(v => v.title && !v.title.toLowerCase().includes('vehículo') && !v.title.toLowerCase().includes('vehiculo'));
                 
                 appVehiclesSeminuevos = vData.filter(v => {
                     const c = (v.catalog || '').toLowerCase().trim();
