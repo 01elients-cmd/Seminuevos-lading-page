@@ -528,33 +528,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const { data: vDataRaw } = await supabaseClient.from('vehicles').select('*').eq('status', 'active');
             if (vDataRaw && vDataRaw.length > 0) {
                 const vData = vDataRaw.map(v => ({ ...v, bodyType: v.bodyType || v.body_type }));
-                appVehiclesPorPedido = vData.filter(v => 
-                    v.catalog === 'importados' || 
-                    v.catalog === 'importado' || 
-                    v.catalog === 'por_pedido' || 
-                    v.catalog === 'pedido' || 
-                    v.availability === 'por_pedido' ||
-                    v.origin === 'importado'
-                );
-                appVehiclesSeminuevos = vData.filter(v => 
-                    v.catalog === 'seminuevos' || 
-                    v.catalog === 'seminuevo' || 
-                    v.catalog === 'stock_local' || 
-                    v.availability === 'entrega_inmediata' || 
-                    (v.origin === 'nacional' && !appVehiclesPorPedido.includes(v))
-                );
-                appVehicles0km = vData.filter(v => 
-                    v.catalog === '0km' || 
-                    v.catalog === '0KM' || 
-                    v.condition === '0km'
-                );
                 
-                // Fallback: If catalog didn't match any filter, place in porpedido or seminuevos
-                const sortedVehicles = new Set([...appVehiclesPorPedido, ...appVehiclesSeminuevos, ...appVehicles0km]);
-                vData.forEach(v => {
-                    if (!sortedVehicles.has(v)) {
-                        appVehiclesPorPedido.push(v);
-                    }
+                appVehiclesSeminuevos = vData.filter(v => {
+                    const c = (v.catalog || '').toLowerCase().trim();
+                    if (c) return c === 'seminuevos' || c === 'seminuevo' || c === 'stock_local';
+                    return v.availability === 'entrega_inmediata';
+                });
+
+                appVehiclesPorPedido = vData.filter(v => {
+                    const c = (v.catalog || '').toLowerCase().trim();
+                    if (c) return c === 'importados' || c === 'importado' || c === 'por_pedido' || c === 'pedido';
+                    return v.availability === 'por_pedido';
+                });
+
+                appVehicles0km = vData.filter(v => {
+                    const c = (v.catalog || '').toLowerCase().trim();
+                    if (c) return c === '0km';
+                    return v.condition === '0km';
                 });
             } else {
                 // Fallback to data.js if db is empty
@@ -567,15 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Render all grids with data
             renderAllPanels();
-
-            // Auto-switch to Por Pedido tab if Stock Local is empty so user immediately sees registered cars
-            if (appVehiclesSeminuevos.length === 0 && appVehiclesPorPedido.length > 0) {
-                const porpedidoTab = document.querySelector('.catalog-main-tab[data-section="porpedido"]');
-                if (porpedidoTab && !window.hasAutoSwitchedTab) {
-                    window.hasAutoSwitchedTab = true;
-                    porpedidoTab.click();
-                }
-            }
 
             // Load settings
             const { data: sData } = await supabaseClient.from('site_settings').select('*');
