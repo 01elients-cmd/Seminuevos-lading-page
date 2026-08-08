@@ -348,7 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         filtered.forEach((car, index) => {
             const card = document.createElement('div');
-            card.classList.add('vehicle-card', 'animate-on-scroll');
+            card.className = 'vehicle-card';
+            card.dataset.id = car.id;
             card.style.cursor = 'pointer';
             card.style.transitionDelay = `${index * 0.08}s`;
             
@@ -356,9 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const optimizedAlt = `${car.title} ${car.year} - Seminuevos Venezuela`;
             
             const priceDisplay = car.price === 'Consultar' ? `<span class="price-consult">Consultar Precio</span>` : car.price;
-            const availabilityClass = car.availability === 'entrega_inmediata' ? 'available' : 'order';
-            const availabilityText = car.availability === 'entrega_inmediata' ? 'En Stock' : 'Por Pedido';
-            const availabilityIcon = car.availability === 'entrega_inmediata' ? 'fa-bolt' : 'fa-clock';
             const originText = car.origin === 'nacional' ? 'Nacional' : (car.badge || 'Puerto Libre');
             const originClass = car.origin === 'nacional' ? 'nacional' : 'importado';
             const originIcon = car.origin === 'nacional' ? 'fa-flag' : 'fa-globe';
@@ -376,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="vehicle-card-image">
                     <img src="${carImg}" alt="${optimizedAlt}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000&auto=format&fit=crop';">
-                    <a href="#" class="share-vehicle btn-card-share-float" data-id="${car.id}" data-title="${car.title}" title="Compartir"><i class="fas fa-share-nodes"></i></a>
                     ${car.mastertech ? `<img src="CERTIFICADO---MASTERTECH.png" alt="Sello Mastertech" class="mastertech-seal">` : ''}
                     ${viewsBadge}
                 </div>
@@ -391,10 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="spec-item"><i class="fas fa-road"></i> ${car.km}</span>
                         <span class="spec-item"><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
                         <span class="spec-item"><i class="fas fa-gears"></i> ${car.transmission}</span>
-                    </div>
-                    <div class="vehicle-card-footer">
-                        <a href="#" class="view-details btn-card-details" data-id="${car.id}"><i class="fas fa-eye"></i> Detalles</a>
-                        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el ${car.title} (${car.year}).`)}" class="track-whatsapp btn-card-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> Cotizar</a>
                     </div>
                 </div>
             `;
