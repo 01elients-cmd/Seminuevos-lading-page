@@ -379,10 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${viewsBadge}
                 </div>
                 <div class="vehicle-card-body">
-                    <div class="vehicle-card-tags">
-                        ${originBadge}
-                        <span class="vehicle-availability ${availabilityClass}"><i class="fas ${availabilityIcon}"></i> ${availabilityText}</span>
-                    </div>
                     <h3 class="vehicle-card-title">${car.title}</h3>
                     <p class="vehicle-card-price">${priceDisplay}</p>
                     <div class="vehicle-card-specs">
