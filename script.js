@@ -852,9 +852,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             openModal(viewBtn.dataset.id);
         } else if (vehicleCard && !e.target.closest('a') && !e.target.closest('button')) {
-            const viewLink = vehicleCard.querySelector('.view-details');
-            if (viewLink) {
-                openModal(viewLink.dataset.id);
+            const carId = vehicleCard.dataset.id;
+            if (carId) {
+                openModal(carId);
             }
         }
 
