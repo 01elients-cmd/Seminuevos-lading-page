@@ -359,7 +359,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const availabilityClass = car.availability === 'entrega_inmediata' ? 'available' : 'order';
             const availabilityText = car.availability === 'entrega_inmediata' ? 'En Stock' : 'Por Pedido';
             const availabilityIcon = car.availability === 'entrega_inmediata' ? 'fa-bolt' : 'fa-clock';
-            const originBadge = car.origin === 'importado' ? `<span class="origin-badge importado"><i class="fas fa-globe"></i> Importado</span>` : `<span class="origin-badge nacional"><i class="fas fa-flag"></i> Nacional</span>`;
+            const originText = car.origin === 'nacional' ? 'Nacional' : (car.badge || 'Puerto Libre');
+            const originClass = car.origin === 'nacional' ? 'nacional' : 'importado';
+            const originIcon = car.origin === 'nacional' ? 'fa-flag' : 'fa-globe';
+            const singleBadge = `<span class="origin-badge ${originClass}"><i class="fas ${originIcon}"></i> ${originText}</span>`;
             const viewCount = car.views || 0;
             const viewsBadge = viewCount > 0 ? `<span class="views-badge" id="views-card-${car.id}"><i class="fas fa-eye"></i> ${viewCount} vista${viewCount !== 1 ? 's' : ''}</span>` : `<span class="views-badge" id="views-card-${car.id}" style="display:none;"></span>`;
             let carImg = (car.images && car.images.length > 0 && car.images[0]) ? car.images[0] : '';
@@ -373,12 +376,14 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="vehicle-card-image">
                     <img src="${carImg}" alt="${optimizedAlt}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000&auto=format&fit=crop';">
-                    ${car.badge ? `<span class="vehicle-badge">${car.badge}</span>` : ''}
                     <a href="#" class="share-vehicle btn-card-share-float" data-id="${car.id}" data-title="${car.title}" title="Compartir"><i class="fas fa-share-nodes"></i></a>
                     ${car.mastertech ? `<img src="CERTIFICADO---MASTERTECH.png" alt="Sello Mastertech" class="mastertech-seal">` : ''}
                     ${viewsBadge}
                 </div>
                 <div class="vehicle-card-body">
+                    <div class="vehicle-card-tags">
+                        ${singleBadge}
+                    </div>
                     <h3 class="vehicle-card-title">${car.title}</h3>
                     <p class="vehicle-card-price">${priceDisplay}</p>
                     <div class="vehicle-card-specs">
