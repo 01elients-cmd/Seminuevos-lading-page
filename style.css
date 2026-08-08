@@ -1298,26 +1298,25 @@ body::after {
     text-overflow: ellipsis;
 }
 
-/* Vehicle Card Tags (row above title - side by side) */
+/* Vehicle Card Tags (row above title - compact side by side) */
 .vehicle-card-tags {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 8px;
     flex-wrap: nowrap;
-    overflow: hidden;
 }
 
 .origin-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 9px;
+    gap: 3px;
+    padding: 2px 7px;
     border-radius: var(--radius-full);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.65rem;
-    letter-spacing: 0.3px;
+    font-size: 0.58rem;
+    letter-spacing: 0.2px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     white-space: nowrap;
@@ -1361,13 +1360,13 @@ body::after {
 .vehicle-availability {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 9px;
+    gap: 3px;
+    padding: 2px 7px;
     border-radius: var(--radius-full);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.65rem;
-    letter-spacing: 0.3px;
+    font-size: 0.58rem;
+    letter-spacing: 0.2px;
     white-space: nowrap;
     flex-shrink: 0;
 }
