@@ -75,13 +75,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    const originBadgeHtml = (car.origin === 'importado' || car.catalog === 'importados')
-        ? `<span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: rgba(96, 165, 250, 0.15); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); font-size: 0.8rem; font-weight: 700;"><i class="fas fa-globe"></i> IMPORTADO</span>`
-        : `<span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: rgba(37, 211, 102, 0.15); color: #4ade80; border: 1px solid rgba(37, 211, 102, 0.3); font-size: 0.8rem; font-weight: 700;"><i class="fas fa-flag"></i> NACIONAL</span>`;
-
     const availBadgeHtml = (car.availability === 'entrega_inmediata')
-        ? `<span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: rgba(37, 211, 102, 0.15); color: #4ade80; border: 1px solid rgba(37, 211, 102, 0.3); font-size: 0.8rem; font-weight: 700;"><i class="fas fa-bolt"></i> EN STOCK (ENTREGA INMEDIATA)</span>`
-        : `<span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.8rem; font-weight: 700;"><i class="fas fa-clock"></i> POR PEDIDO</span>`;
+        ? `<span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: rgba(37, 211, 102, 0.15); color: #4ade80; border: 1px solid rgba(37, 211, 102, 0.3); font-size: 0.8rem; font-weight: 700; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 0.5px;"><i class="fas fa-bolt"></i> EN STOCK (ENTREGA INMEDIATA)</span>`
+        : `<span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.8rem; font-weight: 700; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 0.5px;"><i class="fas fa-clock"></i> POR PEDIDO</span>`;
+
+    const originFormatted = car.origin ? (car.origin === 'nacional' ? 'Nacional' : 'Puerto Libre / Importado') : (car.badge || 'Puerto Libre');
 
     const html = `
         <div class="vehicle-grid-container" style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: start;">
@@ -89,12 +87,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${imagesHtml}
             </div>
             <div class="vehicle-page-right" style="background: var(--surface-container); padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--ghost-border);">
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; align-items: center;">
-                    <span class="section-tag" style="display: inline-block; padding: 6px 14px; border-radius: 100px; background: rgba(39,92,234,0.15); color: var(--primary); font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(39,92,234,0.3);">${fallbackBodyType.toUpperCase()}</span>
-                    ${originBadgeHtml}
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; align-items: center;">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: rgba(39,92,234,0.15); color: #60a5fa; border: 1px solid rgba(39,92,234,0.3); font-size: 0.8rem; font-weight: 700; font-family: system-ui, -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-car-side"></i> ${fallbackBodyType}</span>
                     ${availBadgeHtml}
                 </div>
-                <h1 style="font-family: var(--font-display); font-size: 2.3rem; margin-bottom: 10px;">${car.title}</h1>
+                <h1 style="font-family: var(--font-display); font-size: 2.3rem; margin-bottom: 10px; line-height: 1.2;">${car.title}</h1>
                 <p style="font-size: 1.9rem; font-weight: bold; color: var(--primary); margin-bottom: 25px;">${priceText}</p>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
@@ -114,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <i class="fas fa-gas-pump" style="color: var(--primary);"></i> <span>Combustible: <strong>${car.fuel || 'Gasolina'}</strong></span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px; background: var(--surface-container-low); padding: 14px; border-radius: var(--radius-sm);">
-                        <i class="fas fa-globe" style="color: var(--primary);"></i> <span>Origen: <strong>${car.origin || 'Importado'}</strong></span>
+                        <i class="fas fa-globe" style="color: var(--primary);"></i> <span>Origen: <strong>${originFormatted}</strong></span>
                     </div>
                 </div>
 
