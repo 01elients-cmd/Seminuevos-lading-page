@@ -529,11 +529,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Skip full catalog query on single vehicle detail page for maximum speed
         }
         try {
-            // Load vehicles and site_settings concurrently in PARALLEL for maximum speed
-            const [vDataRes, sDataRes] = await Promise.all([
+            // Load vehicles, site_settings, AND promotions concurrently in PARALLEL for maximum speed
+            const [vDataRes, sDataRes, promoRes] = await Promise.all([
                 supabaseClient.from('vehicles').select('*').eq('status', 'active'),
-                supabaseClient.from('site_settings').select('*')
+                supabaseClient.from('site_settings').select('*'),
+                supabaseClient.from('promotions').select('*').eq('status', 'active').order('sort_order')
             ]);
+
+            // Render promotions immediately when data arrives
+            if (promoRes && promoRes.data) {
+                renderPromotions(promoRes.data);
+            }
 
             const vDataRaw = vDataRes.data;
             if (vDataRaw && vDataRaw.length > 0) {
@@ -739,6 +745,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 heroSlider.slides[0].classList.add('active');
             }
         }, 150);
+    }
+
+    // ===== PROMOTIONS RENDERER =====
+    function renderPromotions(promos) {
+        const grid = document.getElementById('promotionsGrid');
+        if (!grid) return;
+
+        if (!promos || promos.length === 0) {
+            grid.innerHTML = `
+                <div class="promo-empty">
+                    <i class="fas fa-tags"></i>
+                    <p>Sin promociones activas por el momento. <br>¡Vuelve pronto!</p>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = promos.map((p, idx) => {
+            const color = p.bg_color || '#275CEA';
+            const isFeatured = p.is_featured && idx === 0;
+            const ctaHref = p.cta_url || '#contacto';
+            const isWhatsApp = ctaHref.startsWith('wa.me') || ctaHref.includes('whatsapp');
+            const ctaLink = isWhatsApp
+                ? `https://wa.me/${window.WHATSAPP_NUMBER}?text=${encodeURIComponent(p.cta_url || 'Hola, quiero información sobre esta promoción.')}`
+                : ctaHref;
+
+            // Expiry badge
+            let expiresBadge = '';
+            if (p.expires_at) {
+                const daysLeft = Math.ceil((new Date(p.expires_at) - Date.now()) / 86400000);
+                if (daysLeft > 0 && daysLeft <= 30) {
+                    expiresBadge = `<div class="promo-expires"><span class="blink"></span>VENCE EN ${daysLeft} DÍA${daysLeft !== 1 ? 'S' : ''}</div>`;
+                }
+            }
+
+            // Image or gradient placeholder
+            const imageHtml = p.image_url
+                ? `<div class="promo-card-image">
+                        <img src="${p.image_url}" alt="${p.title}" loading="lazy">
+                        ${p.badge_text ? `<div class="promo-badge" style="background:${color};">${p.badge_text}</div>` : ''}
+                        ${p.discount_text ? `<div class="promo-discount">${p.discount_text}</div>` : ''}
+                        ${expiresBadge}
+                   </div>`
+                : `<div class="promo-card-image-placeholder" style="--promo-color:${color}; ${isFeatured ? 'min-height:240px;' : 'height:185px;'}">
+                        <i class="fas fa-tags"></i>
+                        ${p.badge_text ? `<div class="promo-badge" style="background:${color}; position:absolute; top:14px; left:14px;">${p.badge_text}</div>` : ''}
+                        ${p.discount_text ? `<div class="promo-discount">${p.discount_text}</div>` : ''}
+                        ${expiresBadge}
+                   </div>`;
+
+            return `
+            <article class="promo-card${isFeatured ? ' featured' : ''}" style="--promo-color:${color};" role="article">
+                <div class="promo-card-accent"></div>
+                ${imageHtml}
+                <div class="promo-card-body">
+                    ${p.subtitle ? `<div class="promo-card-subtitle">${p.subtitle}</div>` : ''}
+                    <h3 class="promo-card-title">${p.title}</h3>
+                    ${p.description ? `<p class="promo-card-desc">${p.description}</p>` : ''}
+                    <a href="${ctaLink}" class="promo-card-cta" ${isWhatsApp ? 'target="_blank"' : ''}>
+                        ${isWhatsApp ? '<i class="fab fa-whatsapp"></i>' : '<i class="fas fa-arrow-right"></i>'}
+                        ${p.cta_text || 'Ver Oferta'}
+                    </a>
+                </div>
+            </article>`;
+        }).join('');
     }
 
     initSupabaseData();
