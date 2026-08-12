@@ -1237,6 +1237,105 @@
             background: var(--border-accent);
             color: #fff;
         }
+
+        /* PROMOTIONS CARDS & MODAL */
+        .admin-promo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .admin-promo-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-promo-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .admin-promo-card-header {
+            height: 140px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: var(--bg3);
+        }
+
+        .admin-promo-card-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .admin-promo-status-badge {
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-promo-status-badge.active {
+            background: rgba(37, 211, 102, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(37, 211, 102, 0.4);
+        }
+
+        .admin-promo-status-badge.inactive {
+            background: rgba(255, 82, 82, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(255, 82, 82, 0.4);
+        }
+
+        .admin-promo-card-body {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .admin-promo-card-title {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .admin-promo-card-meta {
+            font-size: 0.82rem;
+            color: var(--text2);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .admin-promo-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 12px;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -3907,73 +4006,82 @@
 
             const expiresVal = promo.expires_at ? promo.expires_at.substring(0,10) : '';
 
+            // Remove existing modal if any
+            document.getElementById('promoModal')?.remove();
+
             const modalHtml = `
-            <div id="promoModal" style="position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);">
-                <div style="background:var(--surface-container);border:1px solid var(--ghost-border-gold);border-radius:var(--radius-xl);padding:36px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-                        <h2 style="font-family:var(--font-display);font-size:1.1rem;">${id ? 'Editar' : 'Nueva'} Promoción</h2>
-                        <button onclick="document.getElementById('promoModal').remove()" style="background:none;border:none;color:var(--on-surface-variant);cursor:pointer;font-size:1.3rem;"><i class="fas fa-times"></i></button>
+            <div class="modal-overlay active" id="promoModal">
+                <div class="modal" style="max-width: 680px;">
+                    <div class="modal-header">
+                        <h2 style="font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-tags" style="color: var(--accent);"></i>
+                            ${id ? 'Editar' : 'Nueva'} Promoción
+                        </h2>
+                        <button class="modal-close" onclick="document.getElementById('promoModal').remove()"><i class="fas fa-times"></i></button>
                     </div>
-                    <div class="promo-form-grid">
-                        <div class="form-group">
-                            <input type="text" id="pf_title" value="${promo.title || ''}" placeholder="Título principal" required>
-                            <label>Título *</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="pf_subtitle" value="${promo.subtitle || ''}" placeholder="Subtítulo descriptivo">
-                            <label>Subtítulo</label>
-                        </div>
-                        <div class="form-group" style="grid-column:1/-1;">
-                            <textarea id="pf_description" rows="3" placeholder="Descripción de la oferta...">${promo.description || ''}</textarea>
-                            <label>Descripción</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="pf_badge_text" value="${promo.badge_text || ''}" placeholder="OFERTA ESPECIAL">
-                            <label>Texto del Badge</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="pf_discount_text" value="${promo.discount_text || ''}" placeholder="$2,000 OFF">
-                            <label>Chip de Descuento</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="pf_cta_text" value="${promo.cta_text || 'Ver Oferta'}" placeholder="Ver Oferta">
-                            <label>Texto del Botón</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="pf_cta_url" value="${promo.cta_url || ''}" placeholder="/catalogo o #contacto">
-                            <label>URL del Botón</label>
-                        </div>
-                        <div class="form-group" style="grid-column:1/-1;">
-                            <input type="url" id="pf_image_url" value="${promo.image_url || ''}" placeholder="https://...imagen.jpg">
-                            <label>URL de Imagen (opcional)</label>
-                        </div>
-                        <div class="form-group">
-                            <div style="display:flex;align-items:center;gap:12px;padding-top:8px;">
-                                <input type="color" id="pf_bg_color" value="${promo.bg_color || '#275CEA'}" style="width:48px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;">
-                                <label style="position:static;font-size:0.85rem;color:var(--on-surface-variant);">Color de Acento</label>
+                    <div class="modal-body">
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label class="form-label">Título Principal *</label>
+                                <input type="text" class="form-input" id="pf_title" value="${promo.title || ''}" placeholder="Ej: Gran Remate de Verano" required>
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">Subtítulo Descriptivo</label>
+                                <input type="text" class="form-input" id="pf_subtitle" value="${promo.subtitle || ''}" placeholder="Ej: Hasta $2,000 de descuento en vehículos importados">
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">Descripción de la Oferta</label>
+                                <textarea class="form-textarea" id="pf_description" placeholder="Describe los detalles de esta oferta u oportunidad...">${promo.description || ''}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Texto del Badge</label>
+                                <input type="text" class="form-input" id="pf_badge_text" value="${promo.badge_text || ''}" placeholder="Ej: OFERTA ESPECIAL">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Chip de Descuento</label>
+                                <input type="text" class="form-input" id="pf_discount_text" value="${promo.discount_text || ''}" placeholder="Ej: $2,000 OFF">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Texto del Botón</label>
+                                <input type="text" class="form-input" id="pf_cta_text" value="${promo.cta_text || 'Ver Oferta'}" placeholder="Ej: Ver Oferta">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">URL del Botón</label>
+                                <input type="text" class="form-input" id="pf_cta_url" value="${promo.cta_url || ''}" placeholder="Ej: /catalogo">
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">URL de Imagen (opcional)</label>
+                                <input type="url" class="form-input" id="pf_image_url" value="${promo.image_url || ''}" placeholder="https://...imagen.jpg">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Color de Acento</label>
+                                <div style="display:flex; align-items:center; gap:12px; background:var(--bg3); padding:8px 14px; border:1px solid var(--border); border-radius:var(--radius);">
+                                    <input type="color" id="pf_bg_color" value="${promo.bg_color || '#275CEA'}" onchange="document.getElementById('colorHexText').textContent = this.value" style="width:40px; height:32px; border:none; background:none; cursor:pointer; border-radius:6px;">
+                                    <span style="font-size:0.85rem; color:var(--text2); font-weight:600;" id="colorHexText">${promo.bg_color || '#275CEA'}</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha de Vencimiento</label>
+                                <input type="date" class="form-input" id="pf_expires_at" value="${expiresVal}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Orden de Aparición</label>
+                                <input type="number" class="form-input" id="pf_sort_order" value="${promo.sort_order || 0}" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" id="pf_status">
+                                    <option value="active" ${promo.status === 'active' ? 'selected' : ''}>Activa</option>
+                                    <option value="inactive" ${promo.status === 'inactive' ? 'selected' : ''}>Inactiva</option>
+                                </select>
+                            </div>
+                            <div class="form-group full" style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+                                <input type="checkbox" id="pf_is_featured" ${promo.is_featured ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--accent); cursor:pointer;">
+                                <label for="pf_is_featured" class="form-label" style="margin-bottom:0; cursor:pointer;">Destacar (ancho completo en la página)</label>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <input type="date" id="pf_expires_at" value="${expiresVal}">
-                            <label>Fecha de Vencimiento</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="number" id="pf_sort_order" value="${promo.sort_order || 0}" min="0">
-                            <label>Orden de Aparición</label>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:10px;padding-top:4px;">
-                            <input type="checkbox" id="pf_is_featured" ${promo.is_featured ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;">
-                            <label for="pf_is_featured" style="position:static;font-size:0.9rem;cursor:pointer;">Destacar (ancho completo)</label>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:10px;padding-top:4px;">
-                            <select id="pf_status" style="padding:10px 14px;background:var(--surface-container-high);border:1px solid var(--ghost-border);border-radius:var(--radius-md);color:var(--on-surface);font-size:0.9rem;">
-                                <option value="active" ${promo.status === 'active' ? 'selected' : ''}>Activa</option>
-                                <option value="inactive" ${promo.status === 'inactive' ? 'selected' : ''}>Inactiva</option>
-                            </select>
-                            <label style="position:static;font-size:0.85rem;color:var(--on-surface-variant);">Estado</label>
-                        </div>
                     </div>
-                    <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end;">
+                    <div class="modal-footer">
                         <button class="btn btn-ghost" onclick="document.getElementById('promoModal').remove()">Cancelar</button>
                         <button class="btn btn-primary" onclick="savePromo()"><i class="fas fa-save"></i> Guardar Promoción</button>
                     </div>
