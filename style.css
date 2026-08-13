@@ -4605,19 +4605,19 @@ img.mastertech-seal {
 }
 
 .promo-card:not(.featured) .promo-card-image {
-    height: 185px;
+    height: 240px;
 }
 
 .promo-card.featured .promo-card-image {
-    width: 360px;
-    min-height: 240px;
+    width: 380px;
+    min-height: 260px;
     flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
     .promo-card.featured .promo-card-image {
         width: 100%;
-        height: 200px;
+        height: 220px;
     }
 }
 
@@ -4625,11 +4625,12 @@ img.mastertech-seal {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
     transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .promo-card:hover .promo-card-image img {
-    transform: scale(1.07);
+    transform: scale(1.06);
 }
 
 /* Gradient overlay on image */
@@ -4637,14 +4638,14 @@ img.mastertech-seal {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.65) 100%);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 40%, rgba(0,0,0,0.75) 100%);
     pointer-events: none;
 }
 
 /* No-image placeholder */
 .promo-card-image-placeholder {
     width: 100%;
-    height: 185px;
+    height: 240px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4655,7 +4656,7 @@ img.mastertech-seal {
 
 .promo-card.featured .promo-card-image-placeholder {
     height: 100%;
-    min-height: 240px;
+    min-height: 260px;
 }
 
 /* Badge on image */
@@ -4668,12 +4669,13 @@ img.mastertech-seal {
     color: #fff;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     letter-spacing: 1px;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: var(--radius-full);
     text-transform: uppercase;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 /* Discount chip on image */
@@ -4682,17 +4684,18 @@ img.mastertech-seal {
     bottom: 14px;
     right: 14px;
     z-index: 3;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.18);
     color: #fff;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.95rem;
-    padding: 6px 14px;
+    font-size: 1rem;
+    padding: 6px 16px;
     border-radius: var(--radius-full);
     white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
 /* Expiry countdown badge */
@@ -4737,7 +4740,7 @@ img.mastertech-seal {
 
 .promo-card-title {
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 700;
     line-height: 1.3;
     color: var(--on-surface);
@@ -4761,27 +4764,36 @@ img.mastertech-seal {
 .promo-card-cta {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 22px;
+    gap: 10px;
+    padding: 12px 24px;
     border-radius: var(--radius-full);
-    background: var(--promo-color, var(--primary));
+    background: linear-gradient(135deg, var(--promo-color, #275CEA) 0%, #1545c8 100%);
     color: #fff;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     letter-spacing: 0.5px;
     text-decoration: none;
     transition: var(--transition);
     align-self: flex-start;
-    margin-top: 6px;
-    border: none;
+    margin-top: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
     cursor: pointer;
+    box-shadow: 0 4px 15px rgba(39, 92, 234, 0.25);
 }
 
 .promo-card-cta:hover {
-    filter: brightness(1.2);
-    transform: scale(1.04);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 92, 234, 0.45);
+}
+
+.promo-card-cta i {
+    transition: transform 0.3s ease;
+}
+
+.promo-card-cta:hover i {
+    transform: translateX(4px);
 }
 
 /* Skeleton loader for promotions */
@@ -4840,19 +4852,21 @@ img.mastertech-seal {
 }
 
 .admin-promo-card-header {
-    height: 120px;
+    height: 195px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
     color: rgba(255,255,255,0.2);
+    overflow: hidden;
 }
 
 .admin-promo-card-header img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
     position: absolute;
     inset: 0;
 }
