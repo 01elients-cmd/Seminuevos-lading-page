@@ -806,8 +806,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return defaultPromotions;
     }
 
+    function updatePromotionsHeader() {
+        const tagEl = document.querySelector('.promotions-section .section-tag');
+        const titleEl = document.querySelector('.promotions-section .section-title');
+        const subEl = document.querySelector('.promotions-section .section-subtitle');
+
+        const customTag = localStorage.getItem('sn_promo_tag') || (window.SITE_SETTINGS && window.SITE_SETTINGS.promo_tag);
+        const customTitle = localStorage.getItem('sn_promo_title') || (window.SITE_SETTINGS && window.SITE_SETTINGS.promo_title);
+        const customSubtitle = localStorage.getItem('sn_promo_subtitle') || (window.SITE_SETTINGS && window.SITE_SETTINGS.promo_subtitle);
+
+        if (customTag && tagEl) {
+            tagEl.innerHTML = `<i class="fas fa-tags"></i> ${customTag}`;
+        }
+        if (customTitle && titleEl) {
+            const parts = customTitle.trim().split(' ');
+            if (parts.length > 1) {
+                const last = parts.pop();
+                titleEl.innerHTML = `${parts.join(' ')} <span class="text-accent">${last}</span>`;
+            } else {
+                titleEl.textContent = customTitle;
+            }
+        }
+        if (customSubtitle && subEl) {
+            subEl.textContent = customSubtitle;
+        }
+    }
+
     // ===== PROMOTIONS RENDERER =====
     function renderPromotions(promos) {
+        updatePromotionsHeader();
         const grid = document.getElementById('promotionsGrid');
         if (!grid) return;
 

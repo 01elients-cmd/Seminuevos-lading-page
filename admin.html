@@ -1461,7 +1461,35 @@
             <div class="tab-content" id="tab-promotions">
                 <div class="page-header">
                     <h1 class="page-title">Gestión de <span>Promociones</span></h1>
-                    <button class="btn btn-primary" id="addPromoBtn" onclick="openPromoModal()"><i class="fas fa-plus"></i> Nueva Promoción</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-ghost" onclick="togglePromoHeaderConfig()"><i class="fas fa-heading"></i> Editar Encabezado</button>
+                        <button class="btn btn-primary" id="addPromoBtn" onclick="openPromoModal()"><i class="fas fa-plus"></i> Nueva Promoción</button>
+                    </div>
+                </div>
+
+                <!-- Header Config Box -->
+                <div id="promoHeaderConfigBox" style="display:none; background: var(--bg2); border: 1px solid var(--border-accent); padding: 22px; border-radius: var(--radius); margin-bottom: 24px;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--accent); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-heading"></i> Personalizar Encabezado de Promociones (Página Principal)
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Texto del Badge (Pill pequeño)</label>
+                            <input type="text" class="form-input" id="cfg_promo_tag" placeholder="Ej: PROMOCIONES ACTIVAS">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Título Principal de la Sección</label>
+                            <input type="text" class="form-input" id="cfg_promo_title" placeholder="Ej: Ofertas Exclusivas">
+                        </div>
+                        <div class="form-group full">
+                            <label class="form-label">Subtítulo / Descripción Descriptiva</label>
+                            <input type="text" class="form-input" id="cfg_promo_subtitle" placeholder="Ej: Aprovecha nuestras promociones por tiempo limitado. Descuentos reales, entrega garantizada.">
+                        </div>
+                    </div>
+                    <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button class="btn btn-ghost btn-sm" onclick="togglePromoHeaderConfig()">Cancelar</button>
+                        <button class="btn btn-primary btn-sm" onclick="savePromoHeaderConfig()"><i class="fas fa-save"></i> Guardar Textos</button>
+                    </div>
                 </div>
 
                 <div class="admin-promo-grid" id="adminPromoGrid">
@@ -3947,7 +3975,39 @@
             }
         }
 
-        checkAuth().then(ok => { if (ok) loadDashboard(); });
+        // ===== PROMOTIONS HEADER CONFIG =====
+        function togglePromoHeaderConfig() {
+            const box = document.getElementById('promoHeaderConfigBox');
+            if (!box) return;
+            const isVisible = box.style.display !== 'none';
+            box.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                document.getElementById('cfg_promo_tag').value = localStorage.getItem('sn_promo_tag') || 'PROMOCIONES ACTIVAS';
+                document.getElementById('cfg_promo_title').value = localStorage.getItem('sn_promo_title') || 'Ofertas Exclusivas';
+                document.getElementById('cfg_promo_subtitle').value = localStorage.getItem('sn_promo_subtitle') || 'Aprovecha nuestras promociones por tiempo limitado. Descuentos reales, entrega garantizada.';
+            }
+        }
+
+        async function savePromoHeaderConfig() {
+            const tag = document.getElementById('cfg_promo_tag').value.trim() || 'PROMOCIONES ACTIVAS';
+            const title = document.getElementById('cfg_promo_title').value.trim() || 'Ofertas Exclusivas';
+            const subtitle = document.getElementById('cfg_promo_subtitle').value.trim() || 'Aprovecha nuestras promociones por tiempo limitado. Descuentos reales, entrega garantizada.';
+
+            localStorage.setItem('sn_promo_tag', tag);
+            localStorage.setItem('sn_promo_title', title);
+            localStorage.setItem('sn_promo_subtitle', subtitle);
+
+            try {
+                await supabaseClient.from('site_settings').upsert([
+                    { key: 'promo_tag', value: JSON.stringify(tag) },
+                    { key: 'promo_title', value: JSON.stringify(title) },
+                    { key: 'promo_subtitle', value: JSON.stringify(subtitle) }
+                ]);
+            } catch(e) {}
+
+            showToast('Encabezado de promociones actualizado ✓', 'success');
+            document.getElementById('promoHeaderConfigBox').style.display = 'none';
+        }
 
         // ===== PROMOTIONS CRUD =====
         let editingPromoId = null;
