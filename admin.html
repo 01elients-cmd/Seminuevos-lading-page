@@ -4220,7 +4220,16 @@ CREATE POLICY "Admin all promotions" ON promotions FOR ALL USING (auth.role() = 
                 ({ error } = await supabaseClient.from('promotions').insert([payload]));
             }
 
-            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+            if (error) {
+                if (error.message && (error.message.includes('table') || error.message.includes('schema') || error.message.includes('promotions'))) {
+                    showToast("La tabla 'promotions' no existe aún en Supabase. Copia el script SQL mostrado abajo para activarla.", 'warning');
+                    document.getElementById('promoModal')?.remove();
+                    loadAdminPromos();
+                    return;
+                }
+                showToast('Error: ' + error.message, 'error');
+                return;
+            }
             showToast(editingPromoId ? 'Promoción actualizada ✓' : 'Promoción creada ✓', 'success');
             document.getElementById('promoModal')?.remove();
             loadAdminPromos();
