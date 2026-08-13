@@ -580,7 +580,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (e) {
                         map[s.key] = s.value;
                     }
-                // Render Promotions from site_settings or fallback (Zero 404 console errors)
+                });
+                
+                // Render Promotions from site_settings or fallback (after map is populated)
                 if (map.promotions_list) {
                     let pList = map.promotions_list;
                     if (typeof pList === 'string') {
@@ -809,6 +811,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (active.length > 0) return active;
             }
         } catch(e) {}
+
+        const allActiveVehicles = [...appVehiclesSeminuevos, ...appVehicles0km, ...appVehiclesPorPedido];
+        if (allActiveVehicles && allActiveVehicles.length > 0) {
+            const top = allActiveVehicles.slice(0, 3);
+            return top.map((v, i) => ({
+                id: 'auto-promo-' + (v.id || i),
+                title: v.title,
+                subtitle: `${v.year || 2024} · ${v.price || 'Consultar'} · Motor ${v.engine || 'V6'}`,
+                description: v.description ? (v.description.substring(0, 120) + '...') : `Vehículo ${v.title} disponible con entrega en Venezuela.`,
+                badge_text: v.badge || 'OFERTA ESPECIAL',
+                discount_text: v.price || '$2,000 OFF',
+                cta_text: 'Ver Vehículo',
+                cta_url: `vehiculo.html?id=${v.id}`,
+                image_url: (v.images && v.images.length > 0) ? v.images[0] : (v.image || ''),
+                bg_color: i === 0 ? '#275CEA' : (i === 1 ? '#1a45b8' : '#0f3a9e'),
+                is_featured: i === 0,
+                status: 'active'
+            }));
+        }
+
         return defaultPromotions;
     }
 
