@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 supabaseClient.from('site_settings').select('*')
             ]);
 
-            let staticSemi = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos : [];
+            let staticSemi = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos.map(v => ({ ...v, catalog: 'seminuevos', origin: 'nacional', availability: 'entrega_inmediata' })) : [];
             let static0km = (typeof vehicles0km !== 'undefined') ? vehicles0km : [];
             let staticPorPedido = static0km.filter(v => v.condition !== '0km');
             let staticZeroKm = static0km.filter(v => v.condition === '0km');
@@ -546,25 +546,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dbSemi = combinedRaw.filter(v => {
                 const c = (v.catalog || '').toLowerCase().trim();
-                if (c) return c === 'seminuevos' || c === 'seminuevo' || c === 'stock_local';
-                return v.availability === 'entrega_inmediata';
+                if (c === 'seminuevos' || c === 'seminuevo' || c === 'stock_local') return true;
+                return v.availability === 'entrega_inmediata' || v.origin === 'nacional';
             });
 
             const dbPorPedido = combinedRaw.filter(v => {
                 const c = (v.catalog || '').toLowerCase().trim();
-                if (c) return c === 'importados' || c === 'importado' || c === 'por_pedido' || c === 'pedido';
+                if (c === 'importados' || c === 'importado' || c === 'por_pedido' || c === 'pedido') return true;
                 return v.availability === 'por_pedido' || v.origin === 'importado';
             });
 
             const db0km = combinedRaw.filter(v => {
                 const c = (v.catalog || '').toLowerCase().trim();
-                if (c) return c === '0km';
+                if (c === '0km') return true;
                 return v.condition === '0km';
             });
 
-            appVehiclesSeminuevos = [...dbSemi, ...staticSemi];
-            appVehiclesPorPedido = [...dbPorPedido, ...staticPorPedido];
-            appVehicles0km = [...db0km, ...staticZeroKm];
+            // Combine DB & Static vehicles without duplicating
+            const mergeByTitle = (dbArr, staticArr) => {
+                const map = new Map();
+                [...dbArr, ...staticArr].forEach(item => {
+                    const key = (item.title || '').toLowerCase().trim();
+                    if (key && !map.has(key)) map.set(key, item);
+                });
+                return Array.from(map.values());
+            };
+
+            appVehiclesSeminuevos = mergeByTitle(dbSemi, staticSemi);
+            appVehiclesPorPedido = mergeByTitle(dbPorPedido, staticPorPedido);
+            appVehicles0km = mergeByTitle(db0km, staticZeroKm);
 
             // Render all grids with data
             renderAllPanels();
