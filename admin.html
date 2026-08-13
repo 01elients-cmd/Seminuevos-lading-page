@@ -2203,13 +2203,9 @@
             const { data, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
             if (error) { showToast('Error cargando vehículos: ' + error.message, 'error'); return; }
             
-            // Clean up dummy orphan records from database
-            const dummyIds = (data || []).filter(v => !v.title || v.title.includes('Vehículo') || v.title.includes('Vehiculo')).map(v => v.id);
-            if (dummyIds.length > 0) {
-                supabaseClient.from('vehicles').delete().in('id', dummyIds).then(() => {});
-            }
-
-            vehicles = (data || []).filter(v => v.title && !v.title.includes('Vehículo') && !v.title.includes('Vehiculo'));
+            let localVehs = [];
+            try { localVehs = JSON.parse(localStorage.getItem('sn_vehicles') || '[]'); } catch(e) {}
+            vehicles = [...(data || []), ...localVehs].filter(v => v.title);
             renderStats();
             renderTable();
         }

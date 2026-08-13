@@ -535,11 +535,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 supabaseClient.from('site_settings').select('*')
             ]);
 
-            const vDataRaw = vDataRes.data;
-            if (vDataRaw && vDataRaw.length > 0) {
-                const vData = vDataRaw
+            let localVehs = [];
+            try { localVehs = JSON.parse(localStorage.getItem('sn_vehicles') || '[]'); } catch(e) {}
+            const combinedRaw = [...(vDataRes.data || []), ...localVehs];
+
+            if (combinedRaw && combinedRaw.length > 0) {
+                const vData = combinedRaw
                     .map(v => ({ ...v, bodyType: v.bodyType || v.body_type }))
-                    .filter(v => v.title && !v.title.toLowerCase().includes('vehículo') && !v.title.toLowerCase().includes('vehiculo'));
+                    .filter(v => v.title);
                 
                 appVehiclesSeminuevos = vData.filter(v => {
                     const c = (v.catalog || '').toLowerCase().trim();
@@ -550,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 appVehiclesPorPedido = vData.filter(v => {
                     const c = (v.catalog || '').toLowerCase().trim();
                     if (c) return c === 'importados' || c === 'importado' || c === 'por_pedido' || c === 'pedido';
-                    return v.availability === 'por_pedido';
+                    return v.availability === 'por_pedido' || v.origin === 'importado';
                 });
 
                 appVehicles0km = vData.filter(v => {
