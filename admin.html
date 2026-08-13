@@ -3952,6 +3952,27 @@
         // ===== PROMOTIONS CRUD =====
         let editingPromoId = null;
 
+        const promoSqlText = `CREATE TABLE IF NOT EXISTS promotions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    title text NOT NULL,
+    subtitle text,
+    description text,
+    badge_text text DEFAULT 'OFERTA',
+    discount_text text,
+    cta_text text DEFAULT 'Ver Oferta',
+    cta_url text,
+    image_url text,
+    bg_color text DEFAULT '#275CEA',
+    is_featured boolean DEFAULT false,
+    status text DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+    expires_at timestamptz,
+    created_at timestamptz DEFAULT now(),
+    sort_order int DEFAULT 0
+);
+ALTER TABLE promotions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read promotions" ON promotions FOR SELECT USING (true);
+CREATE POLICY "Admin all promotions" ON promotions FOR ALL USING (auth.role() = 'authenticated');`;
+
         async function loadAdminPromos() {
             const { data, error } = await supabaseClient
                 .from('promotions')
@@ -3961,8 +3982,38 @@
             const grid = document.getElementById('adminPromoGrid');
             if (!grid) return;
 
-            if (error || !data || data.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--on-surface-variant);">
+            if (error) {
+                if (error.message && (error.message.includes('table') || error.message.includes('schema') || error.message.includes('promotions'))) {
+                    grid.innerHTML = `
+                        <div class="info-banner" style="grid-column: 1/-1; background: rgba(255, 82, 82, 0.08); border: 1px solid var(--danger); flex-direction: column; align-items: flex-start; gap: 14px; padding: 22px;">
+                            <div style="display:flex; align-items:center; gap:10px; color: var(--danger); font-weight: 700; font-size: 1.05rem;">
+                                <i class="fas fa-database"></i> La tabla 'promotions' aún no existe en Supabase
+                            </div>
+                            <p style="color: var(--text2); font-size: 0.9rem; margin-bottom: 0;">
+                                Para activar el módulo de Promociones en tu base de datos Supabase, abre el <strong>SQL Editor</strong> y ejecuta el siguiente script:
+                            </p>
+                            <div style="width: 100%; position: relative; margin-top: 6px;">
+                                <textarea id="sqlPromoScript" readonly style="width: 100%; height: 180px; background: #000; color: #2ecc71; font-family: monospace; font-size: 0.8rem; padding: 14px; border-radius: var(--radius); border: 1px solid var(--border); outline: none; line-height: 1.5;">${promoSqlText}</textarea>
+                                <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('sqlPromoScript').value); showToast('Script SQL copiado al portapapeles ✓', 'success');" style="position: absolute; top: 10px; right: 10px;">
+                                    <i class="fas fa-copy"></i> Copiar SQL
+                                </button>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: center; margin-top: 8px;">
+                                <a href="https://supabase.com/dashboard/project/gfvmugsbizmvlziljxir/sql/new" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none;">
+                                    <i class="fas fa-external-link-alt"></i> Abrir Supabase SQL Editor
+                                </a>
+                                <button class="btn btn-ghost btn-sm" onclick="loadAdminPromos()">
+                                    <i class="fas fa-sync-alt"></i> Ya lo ejecuté, reintentar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+            }
+
+            if (!data || data.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text2);">
                     <i class="fas fa-tags" style="font-size:2rem; opacity:0.3; display:block; margin-bottom:10px;"></i>
                     <p>No hay promociones creadas. Haz clic en <strong>Nueva Promoción</strong> para agregar una.</p>
                 </div>`;
