@@ -536,9 +536,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 supabaseClient.from('promotions').select('*').eq('status', 'active').order('sort_order')
             ]);
 
-            // Render promotions immediately when data arrives
-            if (promoRes && promoRes.data) {
+            // Render promotions immediately when data arrives (or fallback if empty/error)
+            if (promoRes && promoRes.data && promoRes.data.length > 0) {
                 renderPromotions(promoRes.data);
+            } else {
+                renderPromotions(getActivePromotionsFromStorageOrFallback());
             }
 
             const vDataRaw = vDataRes.data;
@@ -747,18 +749,70 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 150);
     }
 
+    const defaultPromotions = [
+        {
+            id: 'default-1',
+            title: 'Toyota 4Runner 2021 SR5',
+            subtitle: '2021 · $38,990 · Motor 4.0L V6',
+            description: 'Vehículo en excelentes condiciones. Financiamiento exclusivo disponible en Margarita.',
+            badge_text: 'OFERTA DESTACADA',
+            discount_text: '$2,000 OFF',
+            cta_text: 'Ver Oferta',
+            cta_url: '/catalogo',
+            image_url: 'images/gallery/toyota-4runner-2021-sr5/1.jpg',
+            bg_color: '#275CEA',
+            is_featured: true,
+            status: 'active'
+        },
+        {
+            id: 'default-2',
+            title: 'Honda HR-V 2024 Sport',
+            subtitle: '2024 · $23,100 · 0 KM',
+            description: 'Trae tu vehículo importado directamente con entrega en 45 días y garantía MasterTech.',
+            badge_text: 'ENTREGA RÁPIDA',
+            discount_text: 'Bono $1,000',
+            cta_text: 'Cotizar Ahora',
+            cta_url: '#contacto',
+            image_url: 'images/gallery/honda-hrv-2024-sport/1.jpg',
+            bg_color: '#1a45b8',
+            is_featured: false,
+            status: 'active'
+        },
+        {
+            id: 'default-3',
+            title: 'Revisión Técnica MasterTech',
+            subtitle: 'Soporte y Garantía Oficial',
+            description: 'Revisión completa de 50 puntos para asegurar tu vehículo seminuevo.',
+            badge_text: 'SERVICIO GRATIS',
+            discount_text: 'Valor: $150',
+            cta_text: 'Agendar Cita',
+            cta_url: '#contacto',
+            image_url: 'CERTIFICADO---MASTERTECH.png',
+            bg_color: '#0f3a9e',
+            is_featured: false,
+            status: 'active'
+        }
+    ];
+
+    function getActivePromotionsFromStorageOrFallback() {
+        try {
+            const raw = localStorage.getItem('sn_promotions');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                const active = parsed.filter(p => p.status === 'active');
+                if (active.length > 0) return active;
+            }
+        } catch(e) {}
+        return defaultPromotions;
+    }
+
     // ===== PROMOTIONS RENDERER =====
     function renderPromotions(promos) {
         const grid = document.getElementById('promotionsGrid');
         if (!grid) return;
 
         if (!promos || promos.length === 0) {
-            grid.innerHTML = `
-                <div class="promo-empty">
-                    <i class="fas fa-tags"></i>
-                    <p>Sin promociones activas por el momento. <br>¡Vuelve pronto!</p>
-                </div>`;
-            return;
+            promos = getActivePromotionsFromStorageOrFallback();
         }
 
         grid.innerHTML = promos.map((p, idx) => {
