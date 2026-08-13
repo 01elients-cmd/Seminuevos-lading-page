@@ -4009,7 +4009,7 @@
             document.getElementById('promoHeaderConfigBox').style.display = 'none';
         }
 
-        // ===== PROMOTIONS CRUD =====
+        // ===== PROMOTIONS CRUD (ZERO 404 CONSOLE ERRORS) =====
         let editingPromoId = null;
 
         const promoSqlText = `CREATE TABLE IF NOT EXISTS promotions (
@@ -4022,7 +4022,12 @@
     cta_text text DEFAULT 'Ver Oferta',
     cta_url text,
     image_url text,
-DEFAULT 0
+    bg_color text DEFAULT '#275CEA',
+    is_featured boolean DEFAULT false,
+    status text DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+    expires_at timestamptz,
+    created_at timestamptz DEFAULT now(),
+    sort_order int DEFAULT 0
 );
 ALTER TABLE promotions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read promotions" ON promotions FOR SELECT USING (true);
@@ -4036,50 +4041,42 @@ CREATE POLICY "Admin all promotions" ON promotions FOR ALL USING (auth.role() = 
             localStorage.setItem('sn_promotions', JSON.stringify(promos));
         }
 
+        async function fetchPromosFromSupabaseSettings() {
+            try {
+                const { data } = await supabaseClient.from('site_settings').select('value').eq('key', 'promotions_list').maybeSingle();
+                if (data && data.value) {
+                    try { return typeof data.value === 'string' ? JSON.parse(data.value) : data.value; } catch(e) { return []; }
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        async function syncPromosToSupabaseSettings(promos) {
+            try {
+                await supabaseClient.from('site_settings').upsert([
+                    { key: 'promotions_list', value: JSON.stringify(promos) }
+                ]);
+            } catch(e) {}
+        }
+
         async function loadAdminPromos() {
             const grid = document.getElementById('adminPromoGrid');
             if (!grid) return;
 
-            let data = null;
-            let error = null;
-            let isUsingLocalStorage = false;
-
-            try {
-                const res = await supabaseClient
-                    .from('promotions')
-                    .select('*')
-                    .order('sort_order');
-                data = res.data;
-                error = res.error;
-            } catch(e) {
-                error = e;
-            }
-
-            if (error || !data) {
-                isUsingLocalStorage = true;
+            let data = await fetchPromosFromSupabaseSettings();
+            if (!data || data.length === 0) {
                 data = getLocalPromos();
             }
 
-            let sqlNoticeHtml = isUsingLocalStorage ? `
-                <div class="info-banner" style="grid-column: 1/-1; background: rgba(39, 92, 234, 0.08); border: 1px solid var(--border-accent); display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 20px; border-radius: var(--radius); margin-bottom: 20px;">
-                    <div style="font-size: 0.85rem; color: var(--text2);">
-                        <strong style="color: var(--accent);"><i class="fas fa-bolt"></i> Modo Automático Activo:</strong> Las promociones se están guardando y gestionando sin errores.
-                    </div>
-                    <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(\`${promoSqlText}\`); showToast('Script SQL copiado al portapapeles ✓', 'success');">
-                        <i class="fas fa-copy"></i> Copiar Script SQL (opcional)
-                    </button>
-                </div>
-            ` : '';
-
             if (!data || data.length === 0) {
-                grid.innerHTML = sqlNoticeHtml + `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text2);">
+                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text2);">
                     <i class="fas fa-tags" style="font-size:2rem; opacity:0.3; display:block; margin-bottom:10px;"></i>
                     <p>No hay promociones creadas. Haz clic en <strong>Nueva Promoción</strong> para agregar una.</p>
                 </div>`;
                 return;
             }
 
-            grid.innerHTML = sqlNoticeHtml + data.map(p => `
+            grid.innerHTML = data.map(p => `
                 <div class="admin-promo-card">
                     <div class="admin-promo-card-header" style="background:${p.bg_color || '#275CEA'}22;">
                         ${p.image_url ? `<img src="${p.image_url}" alt="${p.title}">` : `<i class="fas fa-tags" style="font-size:2rem;opacity:0.3;"></i>`}
@@ -4147,16 +4144,9 @@ CREATE POLICY "Admin all promotions" ON promotions FOR ALL USING (auth.role() = 
             }
 
             if (id) {
-                try {
-                    const { data } = await supabaseClient.from('promotions').select('*').eq('id', id).single();
-                    if (data) promo = data;
-                } catch(e) {}
-
-                if (!promo.title) {
-                    const localPromos = getLocalPromos();
-                    const found = localPromos.find(p => String(p.id) === String(id));
-                    if (found) promo = found;
-                }
+                const allPromos = (await fetchPromosFromSupabaseSettings()) || getLocalPromos();
+                const found = allPromos.find(p => String(p.id) === String(id));
+                if (found) promo = found;
             }
 
             const expiresVal = promo.expires_at ? promo.expires_at.substring(0,10) : '';
@@ -4282,34 +4272,23 @@ CREATE POLICY "Admin all promotions" ON promotions FOR ALL USING (auth.role() = 
 
             if (!payload.title) { showToast('El título es obligatorio', 'error'); return; }
 
-            let success = false;
-            try {
-                if (editingPromoId && !editingPromoId.startsWith('promo-')) {
-                    const { error } = await supabaseClient.from('promotions').update(payload).eq('id', editingPromoId);
-                    if (!error) success = true;
-                } else if (!editingPromoId) {
-                    const { error } = await supabaseClient.from('promotions').insert([payload]);
-                    if (!error) success = true;
-                }
-            } catch(e) {}
-
-            if (!success) {
-                let localPromos = getLocalPromos();
-                if (editingPromoId) {
-                    const idx = localPromos.findIndex(p => String(p.id) === String(editingPromoId));
-                    if (idx !== -1) {
-                        localPromos[idx] = { ...localPromos[idx], ...payload };
-                    } else {
-                        payload.id = editingPromoId;
-                        localPromos.push(payload);
-                    }
+            let localPromos = (await fetchPromosFromSupabaseSettings()) || getLocalPromos();
+            if (editingPromoId) {
+                const idx = localPromos.findIndex(p => String(p.id) === String(editingPromoId));
+                if (idx !== -1) {
+                    localPromos[idx] = { ...localPromos[idx], ...payload };
                 } else {
-                    payload.id = 'promo-' + Date.now();
-                    payload.created_at = new Date().toISOString();
+                    payload.id = editingPromoId;
                     localPromos.push(payload);
                 }
-                saveLocalPromos(localPromos);
+            } else {
+                payload.id = 'promo-' + Date.now();
+                payload.created_at = new Date().toISOString();
+                localPromos.push(payload);
             }
+
+            saveLocalPromos(localPromos);
+            await syncPromosToSupabaseSettings(localPromos);
 
             showToast(editingPromoId ? 'Promoción actualizada ✓' : 'Promoción creada ✓', 'success');
             document.getElementById('promoModal')?.remove();
@@ -4318,13 +4297,10 @@ CREATE POLICY "Admin all promotions" ON promotions FOR ALL USING (auth.role() = 
 
         async function deletePromo(id) {
             if (!confirm('¿Eliminar esta promoción?')) return;
-            try {
-                await supabaseClient.from('promotions').delete().eq('id', id);
-            } catch(e) {}
-
-            let localPromos = getLocalPromos();
+            let localPromos = (await fetchPromosFromSupabaseSettings()) || getLocalPromos();
             localPromos = localPromos.filter(p => String(p.id) !== String(id));
             saveLocalPromos(localPromos);
+            await syncPromosToSupabaseSettings(localPromos);
 
             showToast('Promoción eliminada', 'success');
             loadAdminPromos();
@@ -4332,15 +4308,12 @@ CREATE POLICY "Admin all promotions" ON promotions FOR ALL USING (auth.role() = 
 
         async function togglePromoStatus(id, currentStatus) {
             const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            try {
-                await supabaseClient.from('promotions').update({ status: newStatus }).eq('id', id);
-            } catch(e) {}
-
-            let localPromos = getLocalPromos();
+            let localPromos = (await fetchPromosFromSupabaseSettings()) || getLocalPromos();
             const idx = localPromos.findIndex(p => String(p.id) === String(id));
             if (idx !== -1) {
                 localPromos[idx].status = newStatus;
                 saveLocalPromos(localPromos);
+                await syncPromosToSupabaseSettings(localPromos);
             }
 
             showToast(`Promoción ${newStatus === 'active' ? 'activada' : 'desactivada'}`, 'success');

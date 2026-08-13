@@ -529,19 +529,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Skip full catalog query on single vehicle detail page for maximum speed
         }
         try {
-            // Load vehicles, site_settings, AND promotions concurrently in PARALLEL for maximum speed
-            const [vDataRes, sDataRes, promoRes] = await Promise.all([
+            // Load vehicles and site_settings concurrently in PARALLEL (Zero 404 console errors)
+            const [vDataRes, sDataRes] = await Promise.all([
                 supabaseClient.from('vehicles').select('*').eq('status', 'active'),
-                supabaseClient.from('site_settings').select('*'),
-                supabaseClient.from('promotions').select('*').eq('status', 'active').order('sort_order')
+                supabaseClient.from('site_settings').select('*')
             ]);
-
-            // Render promotions immediately when data arrives (or fallback if empty/error)
-            if (promoRes && promoRes.data && promoRes.data.length > 0) {
-                renderPromotions(promoRes.data);
-            } else {
-                renderPromotions(getActivePromotionsFromStorageOrFallback());
-            }
 
             const vDataRaw = vDataRes.data;
             if (vDataRaw && vDataRaw.length > 0) {
@@ -588,8 +580,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (e) {
                         map[s.key] = s.value;
                     }
-                });
-                
+                // Render Promotions from site_settings or fallback (Zero 404 console errors)
+                if (map.promotions_list) {
+                    let pList = map.promotions_list;
+                    if (typeof pList === 'string') {
+                        try { pList = JSON.parse(pList); } catch(e) {}
+                    }
+                    if (Array.isArray(pList) && pList.length > 0) {
+                        const activeList = pList.filter(p => p.status === 'active');
+                        renderPromotions(activeList.length > 0 ? activeList : getActivePromotionsFromStorageOrFallback());
+                    } else {
+                        renderPromotions(getActivePromotionsFromStorageOrFallback());
+                    }
+                } else {
+                    renderPromotions(getActivePromotionsFromStorageOrFallback());
+                }
+
                 if (map.whatsapp_number) {
                     // Normalize number (remove +, spaces, etc.) for WhatsApp links
                     window.WHATSAPP_NUMBER = String(map.whatsapp_number).replace(/[^0-9]/g, '');
