@@ -535,40 +535,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 supabaseClient.from('site_settings').select('*')
             ]);
 
+            let staticSemi = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos : [];
+            let static0km = (typeof vehicles0km !== 'undefined') ? vehicles0km : [];
+            let staticPorPedido = static0km.filter(v => v.condition !== '0km');
+            let staticZeroKm = static0km.filter(v => v.condition === '0km');
+
             let localVehs = [];
             try { localVehs = JSON.parse(localStorage.getItem('sn_vehicles') || '[]'); } catch(e) {}
             const combinedRaw = [...(vDataRes.data || []), ...localVehs];
 
-            if (combinedRaw && combinedRaw.length > 0) {
-                const vData = combinedRaw
-                    .map(v => ({ ...v, bodyType: v.bodyType || v.body_type }))
-                    .filter(v => v.title);
-                
-                appVehiclesSeminuevos = vData.filter(v => {
-                    const c = (v.catalog || '').toLowerCase().trim();
-                    if (c) return c === 'seminuevos' || c === 'seminuevo' || c === 'stock_local';
-                    return v.availability === 'entrega_inmediata';
-                });
+            const dbSemi = combinedRaw.filter(v => {
+                const c = (v.catalog || '').toLowerCase().trim();
+                if (c) return c === 'seminuevos' || c === 'seminuevo' || c === 'stock_local';
+                return v.availability === 'entrega_inmediata';
+            });
 
-                appVehiclesPorPedido = vData.filter(v => {
-                    const c = (v.catalog || '').toLowerCase().trim();
-                    if (c) return c === 'importados' || c === 'importado' || c === 'por_pedido' || c === 'pedido';
-                    return v.availability === 'por_pedido' || v.origin === 'importado';
-                });
+            const dbPorPedido = combinedRaw.filter(v => {
+                const c = (v.catalog || '').toLowerCase().trim();
+                if (c) return c === 'importados' || c === 'importado' || c === 'por_pedido' || c === 'pedido';
+                return v.availability === 'por_pedido' || v.origin === 'importado';
+            });
 
-                appVehicles0km = vData.filter(v => {
-                    const c = (v.catalog || '').toLowerCase().trim();
-                    if (c) return c === '0km';
-                    return v.condition === '0km';
-                });
-            } else {
-                // Fallback to data.js if db is empty
-                if (typeof vehiclesSeminuevos !== 'undefined') appVehiclesSeminuevos = vehiclesSeminuevos;
-                if (typeof vehicles0km !== 'undefined') {
-                    appVehiclesPorPedido = vehicles0km.filter(v => v.condition !== '0km');
-                    appVehicles0km = vehicles0km.filter(v => v.condition === '0km');
-                }
-            }
+            const db0km = combinedRaw.filter(v => {
+                const c = (v.catalog || '').toLowerCase().trim();
+                if (c) return c === '0km';
+                return v.condition === '0km';
+            });
+
+            appVehiclesSeminuevos = [...dbSemi, ...staticSemi];
+            appVehiclesPorPedido = [...dbPorPedido, ...staticPorPedido];
+            appVehicles0km = [...db0km, ...staticZeroKm];
 
             // Render all grids with data
             renderAllPanels();

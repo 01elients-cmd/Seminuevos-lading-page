@@ -2203,9 +2203,18 @@
             const { data, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
             if (error) { showToast('Error cargando vehículos: ' + error.message, 'error'); return; }
             
+            let staticSemi = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos : [];
+            let static0km = (typeof vehicles0km !== 'undefined') ? vehicles0km : [];
+            let staticVehs = [...staticSemi, ...static0km];
+
             let localVehs = [];
             try { localVehs = JSON.parse(localStorage.getItem('sn_vehicles') || '[]'); } catch(e) {}
-            vehicles = [...(data || []), ...localVehs].filter(v => v.title);
+            
+            const dbVehs = data || [];
+            vehicles = [...dbVehs, ...localVehs];
+            if (vehicles.length === 0) {
+                vehicles = staticVehs;
+            }
             renderStats();
             renderTable();
         }
