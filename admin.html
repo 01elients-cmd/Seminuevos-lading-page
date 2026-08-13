@@ -2203,19 +2203,17 @@
             const { data, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
             if (error) { showToast('Error cargando vehículos: ' + error.message, 'error'); return; }
             
-            let staticSemi = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos.map(v => ({ ...v, catalog: 'seminuevos', origin: 'nacional', availability: 'entrega_inmediata' })) : [];
-            let static0km = (typeof vehicles0km !== 'undefined') ? vehicles0km.map(v => ({ ...v, catalog: v.catalog || (v.condition === '0km' ? '0km' : 'importados') })) : [];
-            let staticVehs = [...staticSemi, ...static0km];
-
+            const allStatic = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos : [];
             let localVehs = [];
             try { localVehs = JSON.parse(localStorage.getItem('sn_vehicles') || '[]'); } catch(e) {}
             
             const dbVehs = data || [];
             const titleMap = new Map();
-            [...dbVehs, ...localVehs, ...staticVehs].forEach(v => {
+            [...dbVehs, ...localVehs, ...allStatic].forEach(v => {
                 const key = (v.title || '').toLowerCase().trim();
                 if (key && !titleMap.has(key)) {
-                    titleMap.set(key, { ...v, catalog: v.catalog || 'seminuevos', status: v.status || 'active' });
+                    const catalog = v.catalog || (v.availability === 'entrega_inmediata' ? 'seminuevos' : (v.condition === '0km' ? '0km' : 'importados'));
+                    titleMap.set(key, { ...v, catalog: catalog, status: v.status || 'active' });
                 }
             });
             vehicles = Array.from(titleMap.values());

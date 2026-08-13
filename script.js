@@ -535,10 +535,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 supabaseClient.from('site_settings').select('*')
             ]);
 
-            let staticSemi = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos.map(v => ({ ...v, catalog: 'seminuevos', origin: 'nacional', availability: 'entrega_inmediata' })) : [];
-            let static0km = (typeof vehicles0km !== 'undefined') ? vehicles0km : [];
-            let staticPorPedido = static0km.filter(v => v.condition !== '0km');
-            let staticZeroKm = static0km.filter(v => v.condition === '0km');
+            const allStatic = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos : [];
+            
+            const staticSemi = allStatic.filter(v => {
+                const c = (v.catalog || '').toLowerCase();
+                return c === 'seminuevos' || c === 'stock_local' || v.availability === 'entrega_inmediata' || v.origin === 'nacional';
+            });
+
+            const staticPorPedido = allStatic.filter(v => {
+                const c = (v.catalog || '').toLowerCase();
+                return c === 'importados' || c === 'por_pedido' || v.availability === 'por_pedido' || v.origin === 'importado';
+            });
+
+            const staticZeroKm = allStatic.filter(v => {
+                const c = (v.catalog || '').toLowerCase();
+                return c === '0km' || v.condition === '0km';
+            });
 
             let localVehs = [];
             try { localVehs = JSON.parse(localStorage.getItem('sn_vehicles') || '[]'); } catch(e) {}
