@@ -574,12 +574,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return v.condition === '0km';
             });
 
+            let deleted = [];
+            try { deleted = JSON.parse(localStorage.getItem('sn_deleted_vehicles') || '[]'); } catch(e) {}
+
             // Combine DB & Static vehicles without duplicating
             const mergeByTitle = (dbArr, staticArr) => {
                 const map = new Map();
                 [...dbArr, ...staticArr].forEach(item => {
                     const key = (item.title || '').toLowerCase().trim();
-                    if (key && !map.has(key)) map.set(key, item);
+                    const idKey = String(item.id || '');
+                    if (key && !deleted.includes(key) && !deleted.includes(idKey) && !map.has(key)) map.set(key, item);
                 });
                 return Array.from(map.values());
             };

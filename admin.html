@@ -2206,12 +2206,15 @@
             const allStatic = (typeof vehiclesSeminuevos !== 'undefined') ? vehiclesSeminuevos : [];
             let localVehs = [];
             try { localVehs = JSON.parse(localStorage.getItem('sn_vehicles') || '[]'); } catch(e) {}
+            let deleted = [];
+            try { deleted = JSON.parse(localStorage.getItem('sn_deleted_vehicles') || '[]'); } catch(e) {}
             
             const dbVehs = data || [];
             const titleMap = new Map();
             [...dbVehs, ...localVehs, ...allStatic].forEach(v => {
                 const key = (v.title || '').toLowerCase().trim();
-                if (key && !titleMap.has(key)) {
+                const idKey = String(v.id || '');
+                if (key && !deleted.includes(key) && !deleted.includes(idKey) && !titleMap.has(key)) {
                     const catalog = v.catalog || (v.availability === 'entrega_inmediata' ? 'seminuevos' : (v.condition === '0km' ? '0km' : 'importados'));
                     titleMap.set(key, { ...v, catalog: catalog, status: v.status || 'active' });
                 }
@@ -2568,12 +2571,17 @@
 
             showToast('Eliminando vehículos...', 'info');
             const idsToDelete = Array.from(selectedVehicles);
-            const { error } = await supabaseClient.from('vehicles').delete().in('id', idsToDelete);
+            await supabaseClient.from('vehicles').delete().in('id', idsToDelete);
 
-            if (error) {
-                showToast('Error: ' + error.message, 'error');
-                return;
-            }
+            let deleted = [];
+            try { deleted = JSON.parse(localStorage.getItem('sn_deleted_vehicles') || '[]'); } catch(e) {}
+
+            idsToDelete.forEach(id => {
+                const v = vehicles.find(item => item.id === id);
+                if (v && v.title) deleted.push(v.title.toLowerCase().trim());
+                deleted.push(String(id));
+            });
+            localStorage.setItem('sn_deleted_vehicles', JSON.stringify(deleted));
 
             showToast(`${idsToDelete.length} vehículo(s) eliminado(s)`, 'success');
             logSecurityEvent('VEHICLE_DELETE_BULK', 'warning', `${idsToDelete.length} vehículos eliminados en lote.`);
@@ -2584,8 +2592,14 @@
         async function deleteVehicle(id) {
             if (!confirm('¿Eliminar este vehículo?')) return;
             const v = vehicles.find(v => v.id === id);
-            const { error } = await supabaseClient.from('vehicles').delete().eq('id', id);
-            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+            await supabaseClient.from('vehicles').delete().eq('id', id);
+
+            let deleted = [];
+            try { deleted = JSON.parse(localStorage.getItem('sn_deleted_vehicles') || '[]'); } catch(e) {}
+            if (v && v.title) deleted.push(v.title.toLowerCase().trim());
+            if (id) deleted.push(String(id));
+            localStorage.setItem('sn_deleted_vehicles', JSON.stringify(deleted));
+
             showToast('Vehículo eliminado', 'success');
             if (v) logSecurityEvent('VEHICLE_DELETE', 'warning', `Vehículo eliminado: ${v.title} (${id})`);
             await loadVehicles();
