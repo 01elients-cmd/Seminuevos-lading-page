@@ -220,6 +220,99 @@ const vehiclesSeminuevos = [
             "images/gallery/toyota-corolla-cross-le-4x4-awd-2022/21.jpg"
         ],
         description: "Toyota Corolla Cross LE 4x4 AWD 2022. Motor 2.0L, automático. Placa nacional. 21,000 km. Ubicación Porlamar. Nivel de daño medio frontal derecho. Válvula EGR ya eliminada. Entrega inmediata."
+    },
+    {
+        id: 7,
+        title: "Toyota 4Runner TRD Off-Road 4x4 2024",
+        price: "$44,990",
+        year: 2024,
+        km: "18,500 KM",
+        engine: "4.0L V6",
+        transmission: "Automático",
+        fuel: "Gasolina",
+        bodyType: "suv",
+        origin: "nacional",
+        condition: "seminuevo",
+        availability: "entrega_inmediata",
+        catalog: "seminuevos",
+        badge: "ENTREGA INMEDIATA",
+        images: [
+            "https://vis.iaai.com/resizer?imageKeys=45943723~IAAI&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45943723~IAAI~S1&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45943723~IAAI~S2&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45943723~IAAI~S3&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45943723~IAAI~S4&width=1024&height=768"
+        ],
+        description: "Toyota 4Runner TRD Off-Road 2024 4x4. Motor 4.0L V6 de 270HP, caja automática de 5 velocidades, sistema CRAWL Control y Multi-Terrain Select. Ubicación Porlamar, Isla de Margarita. Entrega inmediata."
+    },
+    {
+        id: 8,
+        title: "Toyota Camry SE Nightshade 2024",
+        price: "$29,500",
+        year: 2024,
+        km: "14,200 KM",
+        engine: "2.5L I4 203HP",
+        transmission: "Automático",
+        fuel: "Gasolina",
+        bodyType: "sedan",
+        origin: "nacional",
+        condition: "seminuevo",
+        availability: "entrega_inmediata",
+        catalog: "seminuevos",
+        badge: "STOCK LOCAL",
+        images: [
+            "https://vis.iaai.com/resizer?imageKeys=45830637~IAAI&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45830637~IAAI~S1&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45830637~IAAI~S2&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45830637~IAAI~S3&width=1024&height=768"
+        ],
+        description: "Toyota Camry SE Nightshade 2024. Motor 2.5L I-4 de 203HP, transmisión automática de 8 velocidades, rines de 19 pulgadas en negro mate, asientos de piel mixta. Ubicación Porlamar. Entrega inmediata."
+    },
+    {
+        id: 9,
+        title: "Ford Bronco Big Bend 4x4 2024",
+        price: "$38,500",
+        year: 2024,
+        km: "16,800 KM",
+        engine: "2.3L EcoBoost 275HP",
+        transmission: "Automático",
+        fuel: "Gasolina",
+        bodyType: "suv",
+        origin: "nacional",
+        condition: "seminuevo",
+        availability: "entrega_inmediata",
+        catalog: "seminuevos",
+        badge: "4X4 OFF-ROAD",
+        images: [
+            "https://vis.iaai.com/resizer?imageKeys=45752709~IAAI&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45752709~IAAI~S1&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45752709~IAAI~S2&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45752709~IAAI~S3&width=1024&height=768"
+        ],
+        description: "Ford Bronco Big Bend 4x4 2024. Motor 2.3L EcoBoost Turbo de 275HP, tracción 4x4 con G.O.A.T. Modes, techo duro desmontable, sistema SYNC 4 con pantalla táctil de 12''. Entrega inmediata en Porlamar."
+    },
+    {
+        id: 10,
+        title: "Suzuki Jimny GLX 4x4 AllGrip 2024",
+        price: "$27,900",
+        year: 2024,
+        km: "9,500 KM",
+        engine: "1.5L VVT 102HP",
+        transmission: "Automático",
+        fuel: "Gasolina",
+        bodyType: "suv",
+        origin: "nacional",
+        condition: "seminuevo",
+        availability: "entrega_inmediata",
+        catalog: "seminuevos",
+        badge: "ENTREGA INMEDIATA",
+        images: [
+            "https://vis.iaai.com/resizer?imageKeys=45640491~IAAI&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45640491~IAAI~S1&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45640491~IAAI~S2&width=1024&height=768",
+            "https://vis.iaai.com/resizer?imageKeys=45640491~IAAI~S3&width=1024&height=768"
+        ],
+        description: "Suzuki Jimny GLX 4x4 AllGrip Pro 2024. Motor 1.5L VVT, caja reductora 4L, faros LED, climatizador automático, pantalla táctil con Apple CarPlay y Android Auto. Ubicación Porlamar, Margarita. Entrega inmediata."
     }
 ];
 
