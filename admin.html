@@ -3995,9 +3995,44 @@
                 </div>`).join('');
         }
 
+        function onPromoVehicleSelected(vehicleId) {
+            if (!vehicleId) return;
+            const v = (vehicles || []).find(item => String(item.id) === String(vehicleId));
+            if (!v) return;
+
+            if (v.title) document.getElementById('pf_title').value = v.title;
+            if (v.year || v.price) {
+                const subParts = [];
+                if (v.year) subParts.push(v.year);
+                if (v.price) subParts.push(v.price);
+                if (v.engine) subParts.push('Motor ' + v.engine);
+                document.getElementById('pf_subtitle').value = subParts.join(' · ');
+            }
+            if (v.description) document.getElementById('pf_description').value = v.description;
+            
+            // Set image URL
+            const mainImg = (v.images && v.images.length > 0) ? v.images[0] : (v.image || '');
+            if (mainImg) document.getElementById('pf_image_url').value = mainImg;
+
+            // Set CTA link to vehicle
+            document.getElementById('pf_cta_url').value = `vehiculo.html?id=${v.id}`;
+            document.getElementById('pf_cta_text').value = 'Ver Vehículo';
+
+            if (v.badge) document.getElementById('pf_badge_text').value = v.badge;
+            if (v.price) document.getElementById('pf_discount_text').value = v.price;
+
+            showToast(`Cargados datos de: ${v.title}`, 'success');
+        }
+
         async function openPromoModal(id = null) {
             editingPromoId = id;
             let promo = { title:'', subtitle:'', description:'', badge_text:'OFERTA', discount_text:'', cta_text:'Ver Oferta', cta_url:'/catalogo', image_url:'', bg_color:'#275CEA', is_featured:false, status:'active', sort_order:0, expires_at:'' };
+
+            // Ensure vehicles are loaded so selector has list
+            if (!vehicles || vehicles.length === 0) {
+                const { data } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
+                if (data) vehicles = data.filter(v => v.title && !v.title.includes('Vehículo'));
+            }
 
             if (id) {
                 const { data } = await supabaseClient.from('promotions').select('*').eq('id', id).single();
@@ -4008,6 +4043,10 @@
 
             // Remove existing modal if any
             document.getElementById('promoModal')?.remove();
+
+            const vehicleOptions = (vehicles || []).map(v => 
+                `<option value="${v.id}">${v.title} (${v.year}) - ${v.price}</option>`
+            ).join('');
 
             const modalHtml = `
             <div class="modal-overlay active" id="promoModal">
@@ -4021,6 +4060,19 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-grid">
+                            <div class="form-group full" style="background: rgba(39, 92, 234, 0.08); border: 1px solid var(--border-accent); padding: 14px; border-radius: var(--radius);">
+                                <label class="form-label" style="color: var(--accent); font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-magic"></i> Autocompletar desde Vehículo Registrado
+                                </label>
+                                <select class="form-select" id="pf_vehicle_select" onchange="onPromoVehicleSelected(this.value)" style="margin-top: 6px;">
+                                    <option value="">-- Selecciona un vehículo de tu inventario --</option>
+                                    ${vehicleOptions}
+                                </select>
+                                <small style="color: var(--text3); font-size: 0.75rem; margin-top: 6px; display: block;">
+                                    <i class="fas fa-info-circle"></i> Seleccionar un vehículo llenará automáticamente el título, imagen, descripción y enlace del botón.
+                                </small>
+                            </div>
+
                             <div class="form-group full">
                                 <label class="form-label">Título Principal *</label>
                                 <input type="text" class="form-input" id="pf_title" value="${promo.title || ''}" placeholder="Ej: Gran Remate de Verano" required>
