@@ -3,6 +3,12 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import * as cheerio from 'cheerio';
 
 export default async function handler(req, res) {
+    // CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return res.status(200).end();
+
     // IMAGE PROXY MODE
     if (req.method === 'GET' && req.query.proxy) {
         try {
@@ -42,12 +48,126 @@ export default async function handler(req, res) {
         const { url, html: providedHtml, proxyKey: providedKey, trustHtml } = req.body;
         if (!url) return res.status(400).json({ message: 'URL required' });
 
+        // =====================================================
+        // IAAI: Use official JSON API - no scraping, no blocks
+        // =====================================================
+        if (url.includes('iaai.com') && !providedHtml) {
+            // Extract lot ID from URL: /VehicleDetail/46128028-US or /vehicle/46128028
+            const lotMatch = url.match(/VehicleDetail\/(\d+)|vehicle\/(\d+)|\/(\d{7,9})(?:-[A-Z]+)?(?:\/|$|\?)/i);
+            const lotId = lotMatch ? (lotMatch[1] || lotMatch[2] || lotMatch[3]) : null;
+
+            if (lotId) {
+                try {
+                    // IAAI has a public JSON API that doesn't require authentication
+                    const apiUrl = `https://www.iaai.com/api/auction/item/${lotId}`;
+                    const apiUrlFallback = `https://www.iaai.com/Home/GetVehicleBasicDetails?stockNumber=${lotId}`;
+
+                    let vehicleJson = null;
+
+                    // Try primary API endpoint
+                    try {
+                        const apiRes = await fetch(apiUrl, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Referer': 'https://www.iaai.com/',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            signal: AbortSignal.timeout(10000)
+                        });
+                        if (apiRes.ok) {
+                            const text = await apiRes.text();
+                            try { vehicleJson = JSON.parse(text); } catch(e) {}
+                        }
+                    } catch(e) {}
+
+                    // Try fallback API endpoint
+                    if (!vehicleJson) {
+                        try {
+                            const fb = await fetch(apiUrlFallback, {
+                                headers: {
+                                    'Accept': 'application/json, text/javascript, */*; q=0.01',
+                                    'Referer': `https://www.iaai.com/VehicleDetail/${lotId}`,
+                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                signal: AbortSignal.timeout(10000)
+                            });
+                            if (fb.ok) {
+                                const text = await fb.text();
+                                try { vehicleJson = JSON.parse(text); } catch(e) {}
+                            }
+                        } catch(e) {}
+                    }
+
+                    // Try another common IAAI JSON endpoint
+                    if (!vehicleJson) {
+                        try {
+                            const fb2 = await fetch(`https://www.iaai.com/api/lot/${lotId}`, {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                                    'Referer': 'https://www.iaai.com/'
+                                },
+                                signal: AbortSignal.timeout(10000)
+                            });
+                            if (fb2.ok) {
+                                const text = await fb2.text();
+                                try { vehicleJson = JSON.parse(text); } catch(e) {}
+                            }
+                        } catch(e) {}
+                    }
+
+                    if (vehicleJson) {
+                        const rawData = scanForData(vehicleJson);
+
+                        // Build image URLs from lot ID — IAAI CDN pattern
+                        const cleanImages = [];
+                        for (let i = 1; i <= 15; i++) {
+                            cleanImages.push(`https://vis.iaai.com/resizer?imageKeys=${lotId}~IAA~S${i}&width=1024&height=768`);
+                        }
+
+                        const fullTitle = `${rawData.year || ''} ${rawData.make || ''} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' ');
+                        const normTrans = normalizeTransmission(rawData.transmission);
+                        const normFuelType = normalizeFuel(rawData.fuel);
+                        const normBody = normalizeBodyType(rawData.bodyType, fullTitle);
+                        const normEng = extractEngine(rawData.engine, fullTitle, '');
+                        const formattedDamage = formatDamage(rawData.damage);
+                        const formattedLocation = rawData.location || 'EE. UU. (IAAI)';
+
+                        return res.json({
+                            success: true,
+                            data: {
+                                title: fullTitle || `Vehículo IAAI #${lotId}`,
+                                year: rawData.year,
+                                price: rawData.price || 'Consultar',
+                                km: rawData.km || '0 KM',
+                                engine: normEng,
+                                transmission: normTrans,
+                                bodyType: normBody,
+                                fuel: normFuelType,
+                                vin: rawData.vin || 'N/A',
+                                damage: formattedDamage,
+                                location: formattedLocation,
+                                images: cleanImages,
+                                description: `📋 FICHA TÉCNICA:\n• Vehículo: ${fullTitle}\n• Motor: ${normEng}\n• Transmisión: ${normTrans}\n• Recorrido: ${rawData.km || 'N/A'}\n• Condición: ${formattedDamage}\n• Origen: ${formattedLocation}\n• VIN: ${rawData.vin || 'N/A'}\n\n[ADMIN-LINK]: ${url}`
+                            }
+                        });
+                    }
+                } catch(apiErr) {
+                    console.log('IAAI JSON API failed, falling back to HTML scrape:', apiErr.message);
+                }
+            }
+        }
+
+        // =====================================================
+        // HTML SCRAPE FALLBACK (for manual HTML or Copart)
+        // =====================================================
         const html = providedHtml || await (async () => {
             const isIAAI = url.includes('iaai.com');
             const isCopart = url.includes('copart.com');
             
             if (providedKey) {
-                // Detection for common blocks
                 const isBlocked = (t) => 
                     !t ||
                     t.includes('Pardon Our Interruption') || 
@@ -61,19 +181,10 @@ export default async function handler(req, res) {
                     t.length < 500;
 
                 let text = '';
-                let success = false;
-                
-                // Prioritize residential proxies for IAAI due to aggressive Imperva blocking
-                const useResidential = isIAAI;
                 
                 for (let i = 0; i < 3; i++) {
                     const session = Math.random().toString(36).substring(2, 12);
-                    
-                    let proxyUser = 'auto';
-                    if (useResidential || i === 2) {
-                        proxyUser = 'groups-RESIDENTIAL';
-                    }
-                    
+                    let proxyUser = isIAAI ? 'groups-RESIDENTIAL' : 'auto';
                     const proxyUrl = `http://${proxyUser},session-${session}:${providedKey}@proxy.apify.com:8000`;
                     const agent = new HttpsProxyAgent(proxyUrl);
                     
@@ -81,27 +192,19 @@ export default async function handler(req, res) {
                         const r = await fetch(url, {
                             agent,
                             headers: { 
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
                                 'Accept-Language': 'es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7',
-                                'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-                                'Sec-Ch-Ua-Mobile': '?0',
-                                'Sec-Ch-Ua-Platform': '"Windows"',
                                 'Sec-Fetch-Dest': 'document',
                                 'Sec-Fetch-Mode': 'navigate',
                                 'Sec-Fetch-Site': 'none',
-                                'Sec-Fetch-User': '?1',
-                                'Upgrade-Insecure-Requests': '1',
-                                'Cache-Control': 'max-age=0'
+                                'Upgrade-Insecure-Requests': '1'
                             },
                             signal: AbortSignal.timeout(15000)
                         });
                         text = await r.text();
-                        if (!isBlocked(text)) {
-                            success = true;
-                            break;
-                        }
-                        console.log(`Intento ${i+1} bloqueado por el sitio.`);
+                        if (!isBlocked(text)) break;
+                        console.log(`Intento ${i+1} bloqueado.`);
                     } catch (err) {
                         console.log(`Intento ${i+1} falló:`, err.message);
                     }
@@ -114,9 +217,9 @@ export default async function handler(req, res) {
             }
         })();
 
-        if (!html) throw new Error('Cargando página vacía. Verifica el link o proxy.');
-        if (html.includes('Proxy Authentication Required')) throw new Error('Contraseña del Proxy de Apify inválida o sin permisos.');
-        if (html.includes('ran out of credits') || html.includes('usage limit')) throw new Error('Te has quedado sin uso disponible en Apify o límite excedido.');
+        if (!html) throw new Error('Página vacía. Verifica el link o proxy.');
+        if (html.includes('Proxy Authentication Required')) throw new Error('Contraseña del Proxy inválida.');
+        if (html.includes('ran out of credits') || html.includes('usage limit')) throw new Error('Sin créditos disponibles en Apify.');
 
         let result;
         if (url.includes('copart.com')) {
