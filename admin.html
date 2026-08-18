@@ -1894,13 +1894,9 @@
                         <strong>Exportar:</strong> Genera un backup en formato data.js.<br><br>
                         <strong>Categorías:</strong> El sistema ahora es dinámico. Puedes usar Sedán, SUV, Pickup, Crew Cab, Wagon, etc. El catálogo se actualizará automáticamente con estas opciones.<br>
                         <strong>Catálogos:</strong> seminuevos (Stock Local), importados (Por Pedido), 0km<br>
-                        <strong>Badges:</strong> ENTREGA INMEDIATA, POR PEDIDO, PREMIUM, 🔥 EN OFERTA<br><br>
-                        <strong>Tip del Experto:</strong> Para <strong>IAAI</strong> y <strong>Copart</strong>, usa
-                        el
-                        <strong>Bookmarklet</strong> (arrastra el botón de abajo a tus marcadores). Esto te permite
-                        importar incluso si el sitio bloquea al servidor.
-                        <a href="javascript:(function(){const d={url:window.location.href,title:document.title,html:document.body.innerHTML};const adminUrl=window.location.origin+'/admin.html?import='+encodeURIComponent(JSON.stringify(d));window.open(adminUrl,'_blank');})();"
-                            class="bookmarklet-btn"><i class="fas fa-rocket"></i> Importar a SemiNuvo</a>
+                        <strong>Bookmarklet IAAI/Copart</strong> — Arrastra el botón a tu barra de marcadores. Luego ve al vehículo en IAAI o Copart y haz clic en él para importar los datos directamente sin necesidad de proxy.
+                        <a href="javascript:(function(){try{var adminOrigin='https://seminuevos-lading-page.vercel.app';var url=window.location.href;function getImg(lotId){var imgs=[];for(var i=1;i<=15;i++){imgs.push('https://vis.iaai.com/resizer?imageKeys='+lotId+'~IAA~S'+i+'&width=1024&height=768');}return imgs;}function scanObj(obj,d){if(!obj||typeof obj!=='object')return d;var keys=Object.keys(obj);function g(k){var f=keys.find(function(x){return x.toLowerCase()===k.toLowerCase();});return f?obj[f]:null;}var year=g('Year')||g('lcy')||g('modelYear');if(year&&!d.year)d.year=String(year);var make=g('Make')||g('mkn')||g('brand');if(make&&!d.make)d.make=String(make);var model=g('Model')||g('lm')||g('modelName');if(model&&!d.model)d.model=String(model);var series=g('Series')||g('srs')||g('trim');if(series&&!d.series)d.series=String(series);var vin=g('VIN')||g('fv')||g('vin');if(vin&&!d.vin)d.vin=String(vin);var odo=g('ODOValue')||g('orr')||g('odometer')||g('mileage');if(odo&&!d.km)d.km=String(odo)+' mi';var eng=g('engineDescription')||g('engineDesc')||g('engine');if(eng&&!d.engine)d.engine=String(eng);var trans=g('transmissionDescription')||g('Transmission')||g('tsmn');if(trans&&!d.trans)d.trans=String(trans);var body=g('bodyStyleDescription')||g('BodyStyle')||g('bs');if(body&&!d.body)d.body=String(body);var fuel=g('fuelTypeDescription')||g('FuelType')||g('ft');if(fuel&&!d.fuel)d.fuel=String(fuel);var clr=g('Color')||g('clr')||g('exteriorColor');if(clr&&!d.color)d.color=String(clr);var loc=g('SellingBranch')||g('BranchName')||g('Location');if(loc&&!d.location)d.location=String(loc);var dmg=g('PrimaryDamageDescription')||g('PrimaryDamage')||g('dd');if(dmg&&!d.damage)d.damage=String(dmg);var bnp=g('buyNowPrice')||g('bnp');var bid=g('highBidAmount')||g('curm')||g('currentBid');if(bnp&&!d.price)d.price='$'+parseInt(bnp).toLocaleString();else if(bid&&!d.price)d.price='$'+parseInt(bid).toLocaleString();for(var k in obj){if(obj[k]&&typeof obj[k]==='object'&&k!=='ancestors'&&k!=='images'){scanObj(obj[k],d);}}return d;}var raw={};try{var nd=window.__NEXT_DATA__;if(nd)raw=scanObj(nd,raw);}catch(e){}try{var ps=window.__PRELOADED_STATE__;if(ps)raw=scanObj(ps,raw);}catch(e){}var lotMatch=url.match(/VehicleDetail\/(\d+)|vehicle\/(\d+)|\/(\d{7,9})(?:-[A-Z]+)?(?:\/|$|\?)/i);var lotId=lotMatch?(lotMatch[1]||lotMatch[2]||lotMatch[3]):null;var payload={url:url,lotId:lotId,year:raw.year,make:raw.make,model:raw.model,series:raw.series,vin:raw.vin,km:raw.km,engine:raw.engine,transmission:raw.trans,bodyType:raw.body,fuel:raw.fuel,color:raw.color,location:raw.location,damage:raw.damage,price:raw.price,images:lotId?getImg(lotId):[]};var title=(raw.year||'')+' '+(raw.make||'')+' '+(raw.model||'')+' '+(raw.series||'');payload.title=title.trim().replace(/\s+/g,' ')||'Vehículo IAAI';sessionStorage.setItem('sn_bm_import',JSON.stringify(payload));window.open(adminOrigin+'/admin.html#bm_import','_blank');}catch(e){alert('Error en bookmarklet: '+e.message);}})();"
+                            class="bookmarklet-btn"><i class="fas fa-rocket"></i> ⚡ Importar a SemiNuvo</a>
                     </p>
                 </div>
             </div>
@@ -2114,6 +2110,58 @@
             authScreen.style.display = 'none';
             adminPanel.style.display = 'flex';
             document.getElementById('userName').textContent = user.email?.split('@')[0] || 'Admin';
+            // Bookmarklet import handler
+            setTimeout(() => checkBookmarkletImport(), 800);
+        }
+
+        async function checkBookmarkletImport() {
+            const raw = sessionStorage.getItem('sn_bm_import');
+            if (!raw) return;
+            sessionStorage.removeItem('sn_bm_import');
+            try {
+                const d = JSON.parse(raw);
+                if (!d || !d.make) { showToast('Bookmarklet: No se encontraron datos del vehículo', 'warning'); return; }
+
+                // Switch to Importar section and open modal
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('showAddVehicle')?.click();
+
+                await new Promise(r => setTimeout(r, 400));
+
+                const normT = (t) => { if(!t) return 'Automático'; const s=String(t).toLowerCase(); return (s.includes('manual')||s.includes('stick')||s.includes('m/t'))?'Manual':'Automático'; };
+                const normF = (f) => { if(!f) return 'Gasolina'; const s=String(f).toLowerCase(); if(s.includes('diesel')||s.includes('petrol')) return 'Diésel'; if(s.includes('hibrid')||s.includes('hybrid')) return 'Híbrido'; if(s.includes('electr')||s.includes('ev')) return 'Eléctrico'; return 'Gasolina'; };
+
+                const title = d.title || `${d.year||''} ${d.make||''} ${d.model||''} ${d.series||''}`.trim();
+                document.getElementById('vTitle').value = title;
+                document.getElementById('vPrice').value = d.price || 'Consultar';
+                document.getElementById('vYear').value = d.year || '';
+                document.getElementById('vKm').value = d.km || '0 KM';
+                document.getElementById('vEngine').value = d.engine || '';
+                const transEl = document.getElementById('vTransmission');
+                if (transEl) transEl.value = normT(d.transmission);
+                const fuelEl = document.getElementById('vFuel');
+                if (fuelEl) fuelEl.value = normF(d.fuel);
+                const catalogEl = document.getElementById('vCatalog');
+                if (catalogEl) catalogEl.value = 'importados';
+                const availEl = document.getElementById('vAvailability');
+                if (availEl) availEl.value = 'por_pedido';
+                document.getElementById('vVin') && (document.getElementById('vVin').value = d.vin || '');
+
+                const desc = `📋 FICHA TÉCNICA:\n• Vehículo: ${title}\n• Motor: ${d.engine||'N/A'}\n• Transmisión: ${normT(d.transmission)}\n• Recorrido: ${d.km||'N/A'}\n• Condición: ${d.damage||'N/A'}\n• Origen: ${d.location||'EE. UU. (IAAI)'}\n• VIN: ${d.vin||'N/A'}\n\n🚗 Importado bajo pedido.\n\n[ADMIN-LINK]: ${d.url||''}`;
+                document.getElementById('vDescription') && (document.getElementById('vDescription').value = desc);
+
+                // Load images
+                if (d.images && d.images.length > 0) {
+                    uploadedImages = [];
+                    d.images.slice(0, 15).forEach(src => uploadedImages.push({ src, edited: null }));
+                    if (typeof renderImagePreviews === 'function') renderImagePreviews();
+                }
+
+                showToast(`✅ Bookmarklet: ${title} importado correctamente`, 'success');
+            } catch(e) {
+                showToast('Error al procesar datos del bookmarklet: ' + e.message, 'error');
+            }
         }
 
         document.getElementById('authLogin').addEventListener('click', async () => {
