@@ -49,114 +49,126 @@ export default async function handler(req, res) {
         if (!url) return res.status(400).json({ message: 'URL required' });
 
         // =====================================================
-        // IAAI: Use official JSON API - no scraping, no blocks
+        // IAAI: Use dedicated Apify actor (easyapi~iaai-vehicle-detail-scraper)
+        // This actor bypasses IAAI anti-bot natively. Requires Apify token.
         // =====================================================
-        if (url.includes('iaai.com') && !providedHtml) {
-            // Extract lot ID from URL: /VehicleDetail/46128028-US or /vehicle/46128028
-            const lotMatch = url.match(/VehicleDetail\/(\d+)|vehicle\/(\d+)|\/(\d{7,9})(?:-[A-Z]+)?(?:\/|$|\?)/i);
+        if (url.includes('iaai.com') && !providedHtml && providedKey) {
+            const lotMatch = url.match(/VehicleDetail\/(\d+)|vehicle\/(\d+)|\/([\d]{7,9})(?:-[A-Z]+)?(?:\/|$|\?)/i);
             const lotId = lotMatch ? (lotMatch[1] || lotMatch[2] || lotMatch[3]) : null;
 
-            if (lotId) {
-                try {
-                    // IAAI has a public JSON API that doesn't require authentication
-                    const apiUrl = `https://www.iaai.com/api/auction/item/${lotId}`;
-                    const apiUrlFallback = `https://www.iaai.com/Home/GetVehicleBasicDetails?stockNumber=${lotId}`;
-
-                    let vehicleJson = null;
-
-                    // Try primary API endpoint
-                    try {
-                        const apiRes = await fetch(apiUrl, {
-                            headers: {
-                                'Accept': 'application/json',
-                                'Referer': 'https://www.iaai.com/',
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            signal: AbortSignal.timeout(10000)
-                        });
-                        if (apiRes.ok) {
-                            const text = await apiRes.text();
-                            try { vehicleJson = JSON.parse(text); } catch(e) {}
-                        }
-                    } catch(e) {}
-
-                    // Try fallback API endpoint
-                    if (!vehicleJson) {
-                        try {
-                            const fb = await fetch(apiUrlFallback, {
-                                headers: {
-                                    'Accept': 'application/json, text/javascript, */*; q=0.01',
-                                    'Referer': `https://www.iaai.com/VehicleDetail/${lotId}`,
-                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                },
-                                signal: AbortSignal.timeout(10000)
-                            });
-                            if (fb.ok) {
-                                const text = await fb.text();
-                                try { vehicleJson = JSON.parse(text); } catch(e) {}
-                            }
-                        } catch(e) {}
+            try {
+                // Use run-sync-get-dataset-items for a single synchronous call
+                // Timeout: 120s (IAAI scraper is usually fast, ~10-30s)
+                const apifyRes = await fetch(
+                    `https://api.apify.com/v2/actors/yyMRiF5a4sHPCV0q9/run-sync-get-dataset-items?token=${encodeURIComponent(providedKey)}&timeout=120&memory=512`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            detailUrls: [url],
+                            proxyConfiguration: { useApifyProxy: false }
+                        }),
+                        signal: AbortSignal.timeout(130000)
                     }
+                );
 
-                    // Try another common IAAI JSON endpoint
-                    if (!vehicleJson) {
-                        try {
-                            const fb2 = await fetch(`https://www.iaai.com/api/lot/${lotId}`, {
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                                    'Referer': 'https://www.iaai.com/'
-                                },
-                                signal: AbortSignal.timeout(10000)
-                            });
-                            if (fb2.ok) {
-                                const text = await fb2.text();
-                                try { vehicleJson = JSON.parse(text); } catch(e) {}
+                if (apifyRes.ok) {
+                    const items = await apifyRes.json();
+                    const item = Array.isArray(items) ? items[0] : items;
+
+                    if (item && (item.year || item.make || item.title)) {
+                        // Normalize all fields from the actor's output
+                        const rawData = scanForData(item);
+
+                        // Image URLs: actor may provide them, else build from lot ID
+                        let cleanImages = [];
+                        if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+                            cleanImages = item.images.slice(0, 15);
+                        } else if (item.imageUrls && Array.isArray(item.imageUrls)) {
+                            cleanImages = item.imageUrls.slice(0, 15);
+                        } else if (lotId) {
+                            for (let i = 1; i <= 15; i++) {
+                                cleanImages.push(`https://vis.iaai.com/resizer?imageKeys=${lotId}~IAA~S${i}&width=1024&height=768`);
                             }
-                        } catch(e) {}
-                    }
-
-                    if (vehicleJson) {
-                        const rawData = scanForData(vehicleJson);
-
-                        // Build image URLs from lot ID — IAAI CDN pattern
-                        const cleanImages = [];
-                        for (let i = 1; i <= 15; i++) {
-                            cleanImages.push(`https://vis.iaai.com/resizer?imageKeys=${lotId}~IAA~S${i}&width=1024&height=768`);
                         }
 
-                        const fullTitle = `${rawData.year || ''} ${rawData.make || ''} ${rawData.model || ''} ${rawData.series || ''}`.trim().replace(/\s+/g, ' ');
-                        const normTrans = normalizeTransmission(rawData.transmission);
-                        const normFuelType = normalizeFuel(rawData.fuel);
-                        const normBody = normalizeBodyType(rawData.bodyType, fullTitle);
-                        const normEng = extractEngine(rawData.engine, fullTitle, '');
-                        const formattedDamage = formatDamage(rawData.damage);
-                        const formattedLocation = rawData.location || 'EE. UU. (IAAI)';
+                        const year = item.year || rawData.year || '';
+                        const make = item.make || item.brand || rawData.make || '';
+                        const model = item.model || rawData.model || '';
+                        const series = item.series || item.trim || item.series || rawData.series || '';
+                        const vin = item.vin || item.vinNumber || rawData.vin || 'N/A';
+                        const km = item.odometer || item.mileage || item.km || rawData.km || '0 KM';
+                        const engine = item.engine || item.engineDescription || rawData.engine || '';
+                        const transmission = item.transmission || rawData.transmission || '';
+                        const bodyType = item.bodyStyle || item.bodyType || rawData.bodyType || '';
+                        const fuel = item.fuelType || rawData.fuel || '';
+                        const color = item.color || item.exteriorColor || rawData.color || '';
+                        const location = item.location || item.sellingBranch || rawData.location || 'EE. UU. (IAAI)';
+                        const damage = item.damage || item.primaryDamage || rawData.damage || '';
+                        const price = item.price || item.buyNowPrice || item.currentBid || rawData.price || 'Consultar';
+
+                        const fullTitle = item.title || `${year} ${make} ${model} ${series}`.trim().replace(/\s+/g, ' ');
+                        const normTrans = normalizeTransmission(transmission);
+                        const normFuelType = normalizeFuel(fuel);
+                        const normBody = normalizeBodyType(bodyType, fullTitle);
+                        const normEng = extractEngine(engine, fullTitle, '');
+                        const formattedDamage = formatDamage(damage);
 
                         return res.json({
                             success: true,
                             data: {
                                 title: fullTitle || `Vehículo IAAI #${lotId}`,
-                                year: rawData.year,
-                                price: rawData.price || 'Consultar',
-                                km: rawData.km || '0 KM',
+                                year,
+                                price: typeof price === 'number' ? `$${price.toLocaleString()}` : String(price || 'Consultar'),
+                                km: String(km),
                                 engine: normEng,
                                 transmission: normTrans,
                                 bodyType: normBody,
                                 fuel: normFuelType,
-                                vin: rawData.vin || 'N/A',
+                                vin,
                                 damage: formattedDamage,
-                                location: formattedLocation,
+                                location,
                                 images: cleanImages,
-                                description: `📋 FICHA TÉCNICA:\n• Vehículo: ${fullTitle}\n• Motor: ${normEng}\n• Transmisión: ${normTrans}\n• Recorrido: ${rawData.km || 'N/A'}\n• Condición: ${formattedDamage}\n• Origen: ${formattedLocation}\n• VIN: ${rawData.vin || 'N/A'}\n\n[ADMIN-LINK]: ${url}`
+                                description: `📋 FICHA TÉCNICA:\n• Vehículo: ${fullTitle}\n• Motor: ${normEng}\n• Transmisión: ${normTrans}\n• Recorrido: ${km}\n• Condición: ${formattedDamage}\n• Origen: ${location}\n• Color: ${color || 'N/A'}\n• VIN: ${vin}\n\n🚗 Importado bajo pedido. Contáctanos para cotizar.\n\n[ADMIN-LINK]: ${url}`
                             }
                         });
                     }
-                } catch(apiErr) {
-                    console.log('IAAI JSON API failed, falling back to HTML scrape:', apiErr.message);
+                } else {
+                    const errText = await apifyRes.text().catch(() => '');
+                    console.log(`Apify IAAI actor HTTP ${apifyRes.status}:`, errText.substring(0, 200));
+                    if (apifyRes.status === 402) {
+                        throw new Error('Sin créditos en Apify. Recarga tu saldo en apify.com.');
+                    }
+                    if (apifyRes.status === 401 || apifyRes.status === 403) {
+                        throw new Error('API Key de Apify inválida o sin permisos para este actor.');
+                    }
                 }
+            } catch (apifyErr) {
+                if (apifyErr.name === 'TimeoutError' || apifyErr.message?.includes('timeout')) {
+                    throw new Error('El actor de IAAI tardó demasiado. Intenta de nuevo o usa Modo Manual.');
+                }
+                console.log('easyapi~iaai actor error:', apifyErr.message);
+                // Re-throw if it's a meaningful error (credits, auth)
+                if (apifyErr.message.includes('créditos') || apifyErr.message.includes('inválida')) {
+                    return res.status(200).json({ success: false, message: apifyErr.message });
+                }
+            }
+        }
+
+        // IAAI without Apify key: build lot-ID image URLs and return minimal data
+        if (url.includes('iaai.com') && !providedHtml && !providedKey) {
+            const lotMatch = url.match(/VehicleDetail\/(\d+)|vehicle\/(\d+)|\/([\d]{7,9})(?:-[A-Z]+)?(?:\/|$|\?)/i);
+            const lotId = lotMatch ? (lotMatch[1] || lotMatch[2] || lotMatch[3]) : null;
+            if (lotId) {
+                const cleanImages = [];
+                for (let i = 1; i <= 15; i++) {
+                    cleanImages.push(`https://vis.iaai.com/resizer?imageKeys=${lotId}~IAA~S${i}&width=1024&height=768`);
+                }
+                return res.status(200).json({
+                    success: false,
+                    message: `Para importar desde IAAI necesitas tu API Key de Apify (actor: easyapi~iaai-vehicle-detail-scraper). Configúrala en Ajustes del Admin. Alternativamente usa el Bookmarklet o el Modo Manual.`,
+                    partialData: { images: cleanImages, url }
+                });
             }
         }
 
