@@ -49,7 +49,7 @@ export default async function handler(req, res) {
         if (!url) return res.status(400).json({ message: 'URL required' });
 
         // =====================================================
-        // IAAI: Use dedicated Apify actor (easyapi~iaai-vehicle-detail-scraper)
+        // IAAI: Use dedicated Apify actor (yyMRiF5a4sHPCV0q9) (easyapi~iaai-vehicle-detail-scraper)
         // This actor bypasses IAAI anti-bot natively. Requires Apify token.
         // =====================================================
         if (url.includes('iaai.com') && !providedHtml && providedKey) {
